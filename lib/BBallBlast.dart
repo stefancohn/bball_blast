@@ -74,8 +74,12 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     //launch method to spawn new scene
     timer = Timer(0.5, onTick: () => spawnNewScene());
 
-    debugMode=true;
+    add(ScreenHitbox());
 
+    print("TOP LEFT: ${camera.visibleWorldRect.topLeft}");
+    print("BOTTOM LEFT: ${camera.visibleWorldRect.bottomRight}");
+
+    debugMode=true;
     super.onLoad();
   }
 
@@ -144,9 +148,9 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     ball.body.setType(BodyType.dynamic);
     impulse = Vector2(dragBehindBall.dx, dragBehindBall.dy) * linearImpulseStrengthMult;
     ball.body.applyLinearImpulse(impulse);
-    print("SHOT STRENGTH: ${Vector2(dragBehindBall.dx, dragBehindBall.dy) * linearImpulseStrengthMult}");
-    print("VEL: ${ball.body.linearVelocity}");
-    print("BALL MASS: ${ball.body.mass}");
+    //print("SHOT STRENGTH: ${Vector2(dragBehindBall.dx, dragBehindBall.dy) * linearImpulseStrengthMult}");
+    //print("VEL: ${ball.body.linearVelocity}");
+    //print("BALL MASS: ${ball.body.mass}");
 
     //reset necessary vars 
     isDragging=false;
