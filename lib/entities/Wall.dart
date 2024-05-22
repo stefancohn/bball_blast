@@ -10,6 +10,7 @@ class Wall extends BodyComponent {
           FixtureDef(
             PolygonShape()..setAsBoxXY(width, height),
             friction: 0.3,
+            restitution: 0.5
           )
       ]
   );

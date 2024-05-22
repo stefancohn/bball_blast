@@ -3,7 +3,7 @@ import 'package:flame_forge2d/flame_forge2d.dart';
 class HoopHitbox extends BodyComponent {
   HoopHitbox(Vector2 position) : super(
     renderBody: false,
-    priority: -1,
+    priority: 0,
     bodyDef: BodyDef()
       ..position = position
       ..type = BodyType.static,

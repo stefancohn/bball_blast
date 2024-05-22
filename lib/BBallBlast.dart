@@ -16,6 +16,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   late Ball ball; 
   late Hoop hoop;
   late Sprite ballImg;
+  late Sprite hoopImg;
   double linearImpulseStrengthMult = 12.5;
   late Vector2 impulse;
 
@@ -33,7 +34,8 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
 
   //ball score and spawn vars
   bool ballScored = false;
-  late Timer timer;
+  late Timer scoredOpsTimer;
+  bool spawnRight = true;
 
 
 
@@ -57,7 +59,8 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
 
     //make ballSprite and ball
     ballImg = await loadSprite('ball.png');
-    ball = Ball(this, Vector2(startPosX, startPosY), ballImg);
+    //_randomBallPos();
+    ball = Ball(this, Vector2(startPosX, startPosY), 3, ballImg);
 
     //add leftWall and rightWall, and ceiling
     Wall wallLeft = Wall(Vector2(camera.visibleWorldRect.topLeft.dx-1, camera.visibleWorldRect.topLeft.dy), 1.0, gameHeight);
@@ -65,19 +68,17 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     Wall ceiling = Wall(Vector2(camera.visibleWorldRect.topLeft.dx-1, camera.visibleWorldRect.topRight.dy-1), gameWidth, 1.0);
 
     //create hoopimg, hoop, and add it
-    Sprite hoopImg = await loadSprite('hoop.png');
-    hoop = Hoop(this, true, hoopImg);
+    hoopImg = await loadSprite('hoop.png');
+    hoop = Hoop(this, spawnRight, hoopImg);
 
     //add components to game  
     await world.addAll([Background(), ball, wallLeft, wallRight, ceiling, hoop]);
 
     //launch method to spawn new scene
-    timer = Timer(0.5, onTick: () => spawnNewScene());
+    scoredOpsTimer = Timer(0.5, onTick: () => spawnNewScene());
 
-    add(ScreenHitbox());
-
-    print("TOP LEFT: ${camera.visibleWorldRect.topLeft}");
-    print("BOTTOM LEFT: ${camera.visibleWorldRect.bottomRight}");
+    //print("TOP LEFT: ${camera.visibleWorldRect.topLeft}");
+    //print("BOTTOM LEFT: ${camera.visibleWorldRect.bottomRight}");
 
     debugMode=true;
     super.onLoad();
@@ -92,7 +93,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     super.update(dt);
 
     if (ballScored) {
-      timer.update(dt);
+      scoredOpsTimer.update(dt);
     }
 
   }
@@ -106,17 +107,28 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     //reset vars and timer
     isShot = false;
     ballScored = false;
-    timer.stop();
-    timer.start();
+    spawnRight = !spawnRight;
+    scoredOpsTimer.stop();
+    scoredOpsTimer.start();
 
     //remove ball and its children 
     ball.collider.removeFromParent();
     ball.removeFromParent();
+
+    //remove hoop and children
+    hoop.rightHb.removeFromParent();
+    hoop.leftHb.removeFromParent();
+    hoop.hoopCollDetect.removeFromParent();
+    hoop.removeFromParent();
     
-    //Create and add new ball
-    ball = Ball(this, Vector2(startPosX, startPosY), ballImg);
+    //Create and add new ball, hoop
+    ball = Ball(this, Vector2(startPosX, startPosY), 3, ballImg);
     await world.add(ball);
+    hoop = Hoop(this, spawnRight, hoopImg);
+    await world.add(hoop);
   }
+
+  //random ball spawn
 
 
 
@@ -148,9 +160,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     ball.body.setType(BodyType.dynamic);
     impulse = Vector2(dragBehindBall.dx, dragBehindBall.dy) * linearImpulseStrengthMult;
     ball.body.applyLinearImpulse(impulse);
-    //print("SHOT STRENGTH: ${Vector2(dragBehindBall.dx, dragBehindBall.dy) * linearImpulseStrengthMult}");
-    //print("VEL: ${ball.body.linearVelocity}");
-    //print("BALL MASS: ${ball.body.mass}");
+    print("BALL MASS: ${ball.body.mass}");
 
     //reset necessary vars 
     isDragging=false;

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:bball_blast/BBallBlast.dart';
 import 'package:bball_blast/config.dart';
-import 'package:bball_blast/entities/Hoop.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
@@ -13,6 +12,7 @@ class Ball extends BodyComponent {
   final BBallBlast game;
   @override
   final Vector2 position;
+  double radius;
 
   //collider wrapper
   late Collider collider; 
@@ -26,7 +26,7 @@ class Ball extends BodyComponent {
   int steps = 180;
 
 
-  Ball(this.game, this.position, Sprite sprite) : super (
+  Ball(this.game, this.position, this.radius, Sprite sprite) : super (
     renderBody: false,
     priority: 1,
 
@@ -37,7 +37,7 @@ class Ball extends BodyComponent {
       ..linearDamping = 0,
 
     fixtureDefs: [
-      FixtureDef(CircleShape()..radius = 6/2)
+      FixtureDef(CircleShape()..radius = radius)
         ..restitution = 0.3
         ..density = 1
         //..friction = 0.5
@@ -47,7 +47,7 @@ class Ball extends BodyComponent {
     children: [
       SpriteComponent(
         sprite: sprite,
-        size: Vector2 (7, 7),
+        size: Vector2 (6, 6),
         anchor: Anchor.center,
       )
     ],
@@ -140,15 +140,15 @@ class Collider extends CircleComponent with CollisionCallbacks {
   final Ball ball;
   final BBallBlast game;
   Collider(this.game, this.ball) : super(
-    priority: -1,
-    radius: 3
+    priority: 0,
+    radius: ball.radius,
   ){
     add(CircleHitbox());
   }
 
   @override
   void update(double dt) {
-    position = Vector2(ball.body.position.x, ball.body.position.y); 
+    super.position = Vector2(ball.getSuperPosition().x - ball.radius, ball.getSuperPosition().y - ball.radius);
     super.update(dt);
   }
 
