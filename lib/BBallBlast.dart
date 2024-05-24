@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:bball_blast/Background.dart';
 import 'package:bball_blast/entities/Hoop.dart';
 import 'package:bball_blast/entities/Wall.dart';
@@ -19,10 +20,10 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   late Sprite hoopImg;
   double linearImpulseStrengthMult = 12.5;
   late Vector2 impulse;
+  late List<Vector2> points;
+  Random rand = Random();
 
   //positional vars
-  double startPosX = 00;
-  double startPosY = 00;
   late Vector2 startPos;
 
   //Vars for determining how ball should be thrown
@@ -52,7 +53,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   @override
   FutureOr<void> onLoad() async {
     //set startPos of ball
-    startPos = Vector2(startPosX, startPosY);
+    startPos = _randomBallPos();
 
     //load images into cache
     await images.loadAllImages();
@@ -60,7 +61,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     //make ballSprite and ball
     ballImg = await loadSprite('ball.png');
     //_randomBallPos();
-    ball = Ball(this, Vector2(startPosX, startPosY), 3, ballImg);
+    ball = Ball(this, startPos, 3, ballImg);
 
     //add leftWall and rightWall, and ceiling
     Wall wallLeft = Wall(Vector2(camera.visibleWorldRect.topLeft.dx-1, camera.visibleWorldRect.topLeft.dy), 1.0, gameHeight);
@@ -92,6 +93,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   void update(double dt) {
     super.update(dt);
 
+    //if ball gets scored start scored operations timer 
     if (ballScored) {
       scoredOpsTimer.update(dt);
     }
@@ -122,16 +124,61 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     hoop.removeFromParent();
     
     //Create and add new ball, hoop
-    ball = Ball(this, Vector2(startPosX, startPosY), 3, ballImg);
+    startPos = _randomBallPos();
+    ball = Ball(this, startPos, 3, ballImg);
     await world.add(ball);
     hoop = Hoop(this, spawnRight, hoopImg);
     await world.add(hoop);
   }
 
   //random ball spawn
+  Vector2 _randomBallPos() {
+    double randomY = (rand.nextDouble() * 65) - 25;
+    if (spawnRight) {
+      double randomX = -10 + rand.nextDouble() * -15;
+      return Vector2(randomX,randomY);
+    } else {
+      double randomX = (rand.nextDouble() * 15) + 10;
+      return Vector2(randomX,randomY);
+    }
+  }
 
 
 
+
+  //----------------------DRAWING----------------------------
+    @override
+  void render(Canvas canvas){
+    super.render(canvas);
+    if (isDragging) {
+      //we multiply the input by that number as it's the ratio that converts pixel to velocity
+      Vector2 initialVelocity = Vector2(dragBehindBall.dx, dragBehindBall.dy) * linearImpulseStrengthMult * Ball.velocityRatio;
+      //initialVelocity = _checkVelMax(initialVelocity);
+
+      //get points to draw projected trajectory
+      points = Ball.trajectoryPoints(initialVelocity, startPos, Ball.steps, (1/60)); //60 fps so our dt is 1/60
+
+      Paint paint = Paint()
+        ..color = const Color.fromRGBO(244, 67, 54, 1)
+        ..strokeWidth = 1
+        ..style = PaintingStyle.stroke;
+
+      for (int i = 0; i < points.length - 1; i++) {
+        //conversion to put accurately
+        Vector2 point1 = worldToScreen(points[i]);
+        Vector2 point2 = worldToScreen(points[i+1]);
+        canvas.drawLine(
+          Offset(point1.x, point1.y),
+          Offset(point2.x, point2.y),
+          paint,
+        );
+      }
+    }
+  }
+
+
+
+  
   //-----------------------INPUT HANDLING (DRAGS)-----------------------
   @override
   void onPanStart(DragStartInfo info) {
@@ -165,7 +212,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     //reset necessary vars 
     isDragging=false;
     isShot = true;
-    dragBehindBall = Offset(startPosX, startPosY);
+    //dragBehindBall = Offset(startPosX, startPosY);
   }
   
 } 

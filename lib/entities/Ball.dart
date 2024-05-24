@@ -1,11 +1,9 @@
 import 'dart:async';
-import 'dart:ui';
 import 'package:bball_blast/BBallBlast.dart';
 import 'package:bball_blast/config.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
-import 'package:flutter/material.dart';
 
 class Ball extends BodyComponent {
   @override
@@ -21,9 +19,9 @@ class Ball extends BodyComponent {
   late List<Vector2> points;
 
   //TODO: CHANGE WHEN YOU CHANGE BODY
-  late double velocityRatio = 1/28.274333882308138;
+  static double velocityRatio = 1/28.274333882308138;
   //how far trajectory projection should be
-  int steps = 180;
+  static int steps = 180;
 
 
   Ball(this.game, this.position, this.radius, Sprite sprite) : super (
@@ -61,35 +59,7 @@ class Ball extends BodyComponent {
     super.onLoad();
   }
 
-  @override
-  void render(Canvas canvas) {
-    super.render(canvas);
-
-    //draw projected trajectory with info given by drags 
-    if (game.isDragging) {
-      //we multiply the input by that number as it's the ratio that converts pixel to velocity
-      Vector2 initialVelocity = Vector2(game.dragBehindBall.dx, game.dragBehindBall.dy) * game.linearImpulseStrengthMult * velocityRatio;
-      //initialVelocity = _checkVelMax(initialVelocity);
-      //print(initialVelocity);
-      //get points to draw projected trajectory
-      points = trajectoryPoints(initialVelocity, Vector2(game.startPosX, game.startPosY), steps, (1/60)); //60 fps so our dt is 1/60
-
-      Paint paint = Paint()
-        ..color = const Color.fromRGBO(244, 67, 54, 1)
-        ..strokeWidth = 0.5
-        ..style = PaintingStyle.stroke;
-
-      for (int i = 0; i < points.length - 1; i++) {
-        canvas.drawLine(
-          Offset(points[i].x, points[i].y),
-          Offset(points[i + 1].x, points[i + 1].y),
-          paint,
-        );
-      }
-    }
-  }
-
-  List<Vector2> trajectoryPoints(Vector2 initialVelocity, Vector2 startPos, int steps, double timeStep) {
+  static List<Vector2> trajectoryPoints(Vector2 initialVelocity, Vector2 startPos, int steps, double timeStep) {
     List<Vector2> points = [];
 
     for(int i=0; i<steps+1; i++) {

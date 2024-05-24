@@ -1,3 +1,3 @@
-const double gameWidth = 720;
-const double gameHeight = 1280;
+double gameWidth = 720;
+double gameHeight = 1280;
 const double gravity = 85;
