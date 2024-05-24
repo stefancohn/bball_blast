@@ -87,17 +87,17 @@ class Ball extends BodyComponent {
   }
 
   //BOX2D Maxes out at 120 vel so we need this to ensure accurate trajectory
-  Vector2 _checkVelMax(Vector2 vel) {
-    if (vel.x > 120) {
-      vel.x=120;
-    } else if (vel.x < -120) {
-      vel.x=-120;
+  static Vector2 checkVelMax(Vector2 vel) {
+    if (vel.x > 121) {
+      vel.x=106;
+    } else if (vel.x < -121) {
+      vel.x=-106;
     } 
 
-    if (vel.y > 120) {
+    if (vel.y > 121) {
       vel.y=120;
-    } else if (vel.y < -120) {
-      vel.y=-120;
+    } else if (vel.y < -121) {
+      vel.y=-121;
     }
 
     return vel;

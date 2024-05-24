@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         body: Builder(
           builder: (context) {
-            // Get screen dimensions using MediaQuery
+            // Get screen dimensions using MediaQuery, if screenSize greater than stated, change it for camera sake
             final screenSize = MediaQuery.of(context).size;
             if (screenSize.width > gameWidth) {
               gameWidth = screenSize.width;
@@ -30,7 +30,6 @@ class MyApp extends StatelessWidget {
               gameHeight = screenSize.height;
             }
 
-            // Create an instance of BBallBlast with screen dimensions
             final game = BBallBlast();
 
             return GameWidget(

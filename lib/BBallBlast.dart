@@ -18,7 +18,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   late Hoop hoop;
   late Sprite ballImg;
   late Sprite hoopImg;
-  double linearImpulseStrengthMult = 12.5;
+  double linearImpulseStrengthMult = 10;
   late Vector2 impulse;
   late List<Vector2> points;
   Random rand = Random();
@@ -37,6 +37,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   bool ballScored = false;
   late Timer scoredOpsTimer;
   bool spawnRight = true;
+  int score = 0;
 
 
 
@@ -44,6 +45,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   BBallBlast(): super(
       gravity: Vector2(0,gravity),
       camera: CameraComponent.withFixedResolution(width: gameWidth, height: gameHeight),
+      zoom: 11,
   );
 
 
@@ -112,6 +114,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     spawnRight = !spawnRight;
     scoredOpsTimer.stop();
     scoredOpsTimer.start();
+    score++; //add to score
 
     //remove ball and its children 
     ball.collider.removeFromParent();
@@ -150,10 +153,13 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     @override
   void render(Canvas canvas){
     super.render(canvas);
+
+    //
+    //render the projected trajectory
     if (isDragging) {
       //we multiply the input by that number as it's the ratio that converts pixel to velocity
       Vector2 initialVelocity = Vector2(dragBehindBall.dx, dragBehindBall.dy) * linearImpulseStrengthMult * Ball.velocityRatio;
-      //initialVelocity = _checkVelMax(initialVelocity);
+      //initialVelocity = Ball.checkVelMax(initialVelocity);
 
       //get points to draw projected trajectory
       points = Ball.trajectoryPoints(initialVelocity, startPos, Ball.steps, (1/60)); //60 fps so our dt is 1/60
@@ -174,11 +180,14 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
         );
       }
     }
+
+    //score text
+    textPaint.render(canvas, "$score", worldToScreen(Vector2(0, camera.visibleWorldRect.top)));
   }
 
 
 
-  
+
   //-----------------------INPUT HANDLING (DRAGS)-----------------------
   @override
   void onPanStart(DragStartInfo info) {
@@ -207,12 +216,11 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     ball.body.setType(BodyType.dynamic);
     impulse = Vector2(dragBehindBall.dx, dragBehindBall.dy) * linearImpulseStrengthMult;
     ball.body.applyLinearImpulse(impulse);
-    print("BALL MASS: ${ball.body.mass}");
 
     //reset necessary vars 
     isDragging=false;
     isShot = true;
-    //dragBehindBall = Offset(startPosX, startPosY);
+    dragBehindBall = Offset.zero;
   }
   
 } 
