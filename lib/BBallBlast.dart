@@ -59,7 +59,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     router = RouterComponent(
       initialRoute: 'gameplay',
       routes: {
-        'gameplay': Route(BBallBlast.new),
+        'gameplay': Route(Background.new),
       }
     );
     //await world.add(router);
@@ -87,7 +87,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     await world.addAll([Background(), ball, wallLeft, wallRight, ceiling, hoop]);
 
     //launch method to spawn new scene
-    scoredOpsTimer = Timer(0.5, onTick: () => spawnNewScene());
+    scoredOpsTimer = Timer(0.5, onTick: () => _resetScene());
 
     //print("TOP LEFT: ${camera.visibleWorldRect.topLeft}");
     //print("BOTTOM LEFT: ${camera.visibleWorldRect.bottomRight}");
@@ -102,21 +102,21 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   //------UPDATE LOOP---------------
   @override
   void update(double dt) {
-    super.update(dt);
-
     //if ball gets scored start scored operations timer 
     if (ballScored) {
       scoredOpsTimer.update(dt);
     }
 
+    super.update(dt);
   }
+
 
 
 
 
   //------------OTHER METHODS-----------
   //reset our scene
-  void spawnNewScene() async {
+  void _resetScene() async {
     //reset vars and timer
     isShot = false;
     ballScored = false;
@@ -135,6 +135,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     hoop.hoopCollDetect.removeFromParent();
     hoop.removeFromParent();
     
+
     //Create and add new ball, hoop
     startPos = _randomBallPos();
     ball = Ball(this, startPos, 3, ballImg);
@@ -233,4 +234,3 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   }
   
 } 
-
