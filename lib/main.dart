@@ -16,6 +16,8 @@ void main() {
 
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -26,6 +28,7 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         body: Builder(
           builder: (context) {
+            
             // Get screen dimensions using MediaQuery, if screenSize greater than stated, change it for camera sake
             final screenSize = MediaQuery.of(context).size;
             if (screenSize.width > gameWidth) {

@@ -8,8 +8,9 @@ import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/extensions.dart';
+import 'package:flame/game.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Route;
 import 'package:bball_blast/config.dart';
 
 class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, HasCollisionDetection, CollisionCallbacks {
@@ -22,6 +23,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   late Vector2 impulse;
   late List<Vector2> points;
   Random rand = Random();
+  late RouterComponent router; 
 
   //positional vars
   late Vector2 startPos;
@@ -54,6 +56,13 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   //----------ONLOAD------------------
   @override
   FutureOr<void> onLoad() async {
+    router = RouterComponent(
+      initialRoute: 'gameplay',
+      routes: {
+        'gameplay': Route(BBallBlast.new),
+      }
+    );
+    //await world.add(router);
     //set startPos of ball
     startPos = _randomBallPos();
 
