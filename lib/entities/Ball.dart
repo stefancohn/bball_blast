@@ -9,7 +9,7 @@ class Ball extends BodyComponent {
   @override
   final BBallBlast game;
   @override
-  final Vector2 position;
+  Vector2 position;
   double radius;
 
   //collider wrapper

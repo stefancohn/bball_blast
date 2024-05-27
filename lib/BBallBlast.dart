@@ -60,10 +60,8 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   @override
   FutureOr<void> onLoad() async {
     //set startPos of ball
-    startPos = _randomBallPos();
 
-    //load images into cache
-    await images.loadAllImages();
+    startPos = randomBallPos();
 
     //make ballSprite and ball
     ballImg = await loadSprite('ball.png');
@@ -78,6 +76,9 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     //create hoopimg, hoop, and add it
     hoopImg = await loadSprite('hoop.png');
     hoop = Hoop(this, spawnRight, hoopImg);
+    
+
+
 
     //add components to game  
     await world.addAll([Background(), ball, wallLeft, wallRight, ceiling, hoop]);
@@ -99,13 +100,14 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   @override
   void update(double dt) {
     super.update(dt);
+
     //updates for current scene
     switch (currentScene){
       case "game":
         //if ball gets scored start scored operations timer 
-      if (ballScored) {
-        scoredOpsTimer.update(dt);
-      }
+        if (ballScored) {
+          scoredOpsTimer.update(dt);
+        }
     }
 
   }
@@ -137,7 +139,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     
 
     //Create and add new ball, hoop
-    startPos = _randomBallPos();
+    startPos = randomBallPos();
     ball = Ball(this, startPos, 3, ballImg);
     await world.add(ball);
     hoop = Hoop(this, spawnRight, hoopImg);
@@ -145,7 +147,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   }
 
   //random ball spawn
-  Vector2 _randomBallPos() {
+  Vector2 randomBallPos() {
     double randomY = (rand.nextDouble() * 65) - 25;
     if (spawnRight) {
       double randomX = -10 + rand.nextDouble() * -15;
@@ -167,7 +169,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     
     switch(currentScene){
       case "game":
-        //
+
         //render the projected trajectory
         if (isDragging) {
           //we multiply the input by that number as it's the ratio that converts pixel to velocity
