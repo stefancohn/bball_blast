@@ -98,6 +98,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   //------UPDATE LOOP---------------
   @override
   void update(double dt) {
+    super.update(dt);
     //updates for current scene
     switch (currentScene){
       case "game":
@@ -107,7 +108,6 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
       }
     }
 
-    super.update(dt);
   }
 
 
@@ -163,35 +163,40 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   @override
   void render(Canvas canvas){
     super.render(canvas);
-    //
-    //render the projected trajectory
-    if (isDragging) {
-      //we multiply the input by that number as it's the ratio that converts pixel to velocity
-      Vector2 initialVelocity = Vector2(dragBehindBall.dx, dragBehindBall.dy) * linearImpulseStrengthMult * Ball.velocityRatio;
-      //initialVelocity = Ball.checkVelMax(initialVelocity);
 
-      //get points to draw projected trajectory
-      points = Ball.trajectoryPoints(initialVelocity, startPos, Ball.steps, (1/60)); //60 fps so our dt is 1/60
+    
+    switch(currentScene){
+      case "game":
+        //
+        //render the projected trajectory
+        if (isDragging) {
+          //we multiply the input by that number as it's the ratio that converts pixel to velocity
+          Vector2 initialVelocity = Vector2(dragBehindBall.dx, dragBehindBall.dy) * linearImpulseStrengthMult * Ball.velocityRatio;
+          //initialVelocity = Ball.checkVelMax(initialVelocity);
 
-      Paint paint = Paint()
-        ..color = const Color.fromRGBO(244, 67, 54, 1)
-        ..strokeWidth = 1
-        ..style = PaintingStyle.stroke;
+          //get points to draw projected trajectory
+          points = Ball.trajectoryPoints(initialVelocity, startPos, Ball.steps, (1/60)); //60 fps so our dt is 1/60
 
-      for (int i = 0; i < points.length - 1; i++) {
-        //conversion to put accurately
-        Vector2 point1 = worldToScreen(points[i]);
-        Vector2 point2 = worldToScreen(points[i+1]);
-        canvas.drawLine(
-          Offset(point1.x, point1.y),
-          Offset(point2.x, point2.y),
-          paint,
-        );
-      }
+          Paint paint = Paint()
+            ..color = const Color.fromRGBO(244, 67, 54, 1)
+            ..strokeWidth = 1
+            ..style = PaintingStyle.stroke;
+
+          for (int i = 0; i < points.length - 1; i++) {
+            //conversion to put accurately
+            Vector2 point1 = worldToScreen(points[i]);
+            Vector2 point2 = worldToScreen(points[i+1]);
+            canvas.drawLine(
+              Offset(point1.x, point1.y),
+              Offset(point2.x, point2.y),
+              paint,
+            );
+          }
+        }
+
+        //score text
+        textPaint.render(canvas, "$score", worldToScreen(Vector2(0, camera.visibleWorldRect.top)));
     }
-
-    //score text
-    textPaint.render(canvas, "$score", worldToScreen(Vector2(0, camera.visibleWorldRect.top)));
   }
 
 
