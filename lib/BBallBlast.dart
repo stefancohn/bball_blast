@@ -4,6 +4,7 @@ import 'package:bball_blast/Background.dart';
 import 'package:bball_blast/entities/Hoop.dart';
 import 'package:bball_blast/entities/Wall.dart';
 import 'package:bball_blast/entities/ball.dart';
+import 'package:bball_blast/scenes/MainMenu.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
@@ -23,7 +24,6 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   late Vector2 impulse;
   late List<Vector2> points;
   Random rand = Random();
-  late RouterComponent router; 
 
   //positional vars
   late Vector2 startPos;
@@ -41,6 +41,9 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   bool spawnRight = true;
   int score = 0;
 
+  //statemanagement
+  bool gameplaying = false; 
+
 
 
   //--------CONSTRUCTOR-------------
@@ -56,13 +59,6 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   //----------ONLOAD------------------
   @override
   FutureOr<void> onLoad() async {
-    router = RouterComponent(
-      initialRoute: 'gameplay',
-      routes: {
-        'gameplay': Route(Background.new),
-      }
-    );
-    //await world.add(router);
     //set startPos of ball
     startPos = _randomBallPos();
 
@@ -102,9 +98,13 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   //------UPDATE LOOP---------------
   @override
   void update(double dt) {
-    //if ball gets scored start scored operations timer 
-    if (ballScored) {
-      scoredOpsTimer.update(dt);
+    //updates for current scene
+    switch (currentScene){
+      case "game":
+        //if ball gets scored start scored operations timer 
+      if (ballScored) {
+        scoredOpsTimer.update(dt);
+      }
     }
 
     super.update(dt);
@@ -160,10 +160,9 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
 
 
   //----------------------DRAWING----------------------------
-    @override
+  @override
   void render(Canvas canvas){
     super.render(canvas);
-
     //
     //render the projected trajectory
     if (isDragging) {

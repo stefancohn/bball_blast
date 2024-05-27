@@ -10,3 +10,4 @@ TextPaint textPaint = TextPaint(
     fontFamily: 'Arial',
   ),
 );
+String currentScene = "game";
