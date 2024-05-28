@@ -5,7 +5,7 @@ import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 
-class Ball extends BodyComponent {
+class Ball extends BodyComponent with HasGameRef<Forge2DGame> {
   @override
   final BBallBlast game;
   @override
@@ -125,7 +125,7 @@ class Collider extends CircleComponent with CollisionCallbacks {
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other){
     if (other is RectangleComponent) {
-      game.ballScored = true;
+      BBallBlast.gameplay.ballScored = true;
     } else {
       print(other);
     }

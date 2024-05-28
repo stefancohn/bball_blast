@@ -1,48 +1,24 @@
 import 'dart:async';
-import 'dart:math';
-import 'package:bball_blast/Background.dart';
-import 'package:bball_blast/entities/Hoop.dart';
-import 'package:bball_blast/entities/Wall.dart';
-import 'package:bball_blast/entities/ball.dart';
+import 'package:bball_blast/scenes/GameOver.dart';
 import 'package:bball_blast/scenes/MainMenu.dart';
+import 'package:bball_blast/scenes/gameplay.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/extensions.dart';
-import 'package:flame/game.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flutter/material.dart' hide Route;
 import 'package:bball_blast/config.dart';
 
 class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, HasCollisionDetection, CollisionCallbacks {
-  //vars we need to be visible thoughout entire file------------------------
-  late Ball ball; 
-  late Hoop hoop;
-  late Sprite ballImg;
-  late Sprite hoopImg;
-  double linearImpulseStrengthMult = 10;
-  late Vector2 impulse;
-  late List<Vector2> points;
-  Random rand = Random();
-
-  //positional vars
-  late Vector2 startPos;
-
-  //Vars for determining how ball should be thrown
-  late Offset startOfDrag;
-  late Offset currentDragPos;
-  late Offset dragBehindBall = Offset.zero;
-  bool isDragging = false;
-  bool isShot = false;
-
-  //ball score and spawn vars
-  bool ballScored = false;
-  late Timer scoredOpsTimer;
-  bool spawnRight = true;
-  int score = 0;
+  //scenes
+  static Gameplay gameplay = Gameplay();
+  static MainMenu mainMenu = MainMenu();
+  static Gameover gameover = Gameover();
 
   //statemanagement
   bool gameplaying = false; 
+
 
 
 
@@ -59,184 +35,81 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   //----------ONLOAD------------------
   @override
   FutureOr<void> onLoad() async {
-    //set startPos of ball
-
-    startPos = randomBallPos();
-
-    //make ballSprite and ball
-    ballImg = await loadSprite('ball.png');
-    //_randomBallPos();
-    ball = Ball(this, startPos, 3, ballImg);
-
-    //add leftWall and rightWall, and ceiling
-    Wall wallLeft = Wall(Vector2(camera.visibleWorldRect.topLeft.dx-1, camera.visibleWorldRect.topLeft.dy), 1.0, gameHeight);
-    Wall wallRight = Wall(Vector2(camera.visibleWorldRect.topRight.dx+1, camera.visibleWorldRect.topRight.dy), 1.0, gameHeight);
-    Wall ceiling = Wall(Vector2(camera.visibleWorldRect.topLeft.dx-1, camera.visibleWorldRect.topRight.dy-1), gameWidth, 1.0);
-
-    //create hoopimg, hoop, and add it
-    hoopImg = await loadSprite('hoop.png');
-    hoop = Hoop(this, spawnRight, hoopImg);
+    add(mainMenu);
     
 
-
-
-    //add components to game  
-    await world.addAll([Background(), ball, wallLeft, wallRight, ceiling, hoop]);
-
-    //launch method to spawn new scene
-    scoredOpsTimer = Timer(0.5, onTick: () => _resetScene());
-
-    //print("TOP LEFT: ${camera.visibleWorldRect.topLeft}");
-    //print("BOTTOM LEFT: ${camera.visibleWorldRect.bottomRight}");
-
-    debugMode=true;
+    debugMode = true;
     super.onLoad();
   }
 
 
+  //-------------------OTHER METHODS-------------------------
+  ///////////
+  //////////
 
-
-  //------UPDATE LOOP---------------
-  @override
-  void update(double dt) {
-    super.update(dt);
-
-    //updates for current scene
-    switch (currentScene){
-      case "game":
-        //if ball gets scored start scored operations timer 
-        if (ballScored) {
-          scoredOpsTimer.update(dt);
-        }
-    }
-
+  //when switching scenes, need to reset world so we have this to 
+  //remove all child componenents FROM WORLD
+  //the WORLD is EVERYTHING THAT INTERACTS WITHIN A GAME
+  //IF NOT, JUST ADD TO COMPONENT LIKE UI ELEMENTS
+  void resetWorld() {
+    // ignore: avoid_function_literals_in_foreach_calls
+    world.children.forEach((child) => child.removeFromParent());
   }
 
-
-
-
-
-  //------------OTHER METHODS-----------
-  //reset our scene
-  void _resetScene() async {
-    //reset vars and timer
-    isShot = false;
-    ballScored = false;
-    spawnRight = !spawnRight;
-    scoredOpsTimer.stop();
-    scoredOpsTimer.start();
-    score++; //add to score
-
-    //remove ball and its children 
-    ball.collider.removeFromParent();
-    ball.removeFromParent();
-
-    //remove hoop and children
-    hoop.rightHb.removeFromParent();
-    hoop.leftHb.removeFromParent();
-    hoop.hoopCollDetect.removeFromParent();
-    hoop.removeFromParent();
-    
-
-    //Create and add new ball, hoop
-    startPos = randomBallPos();
-    ball = Ball(this, startPos, 3, ballImg);
-    await world.add(ball);
-    hoop = Hoop(this, spawnRight, hoopImg);
-    await world.add(hoop);
+  //Remove Scene from game (takes off ui components and such) 
+  void removeScene() async {
+    removeAll(children);
   }
 
-  //random ball spawn
-  Vector2 randomBallPos() {
-    double randomY = (rand.nextDouble() * 65) - 25;
-    if (spawnRight) {
-      double randomX = -10 + rand.nextDouble() * -15;
-      return Vector2(randomX,randomY);
-    } else {
-      double randomX = (rand.nextDouble() * 15) + 10;
-      return Vector2(randomX,randomY);
-    }
+  void loadGameScene() async {
+    await game.add(gameplay);
+    gameplaying = true;
+    removeScene();
   }
 
-
-
-
-  //----------------------DRAWING----------------------------
-  @override
-  void render(Canvas canvas){
-    super.render(canvas);
-
-    
-    switch(currentScene){
-      case "game":
-
-        //render the projected trajectory
-        if (isDragging) {
-          //we multiply the input by that number as it's the ratio that converts pixel to velocity
-          Vector2 initialVelocity = Vector2(dragBehindBall.dx, dragBehindBall.dy) * linearImpulseStrengthMult * Ball.velocityRatio;
-          //initialVelocity = Ball.checkVelMax(initialVelocity);
-
-          //get points to draw projected trajectory
-          points = Ball.trajectoryPoints(initialVelocity, startPos, Ball.steps, (1/60)); //60 fps so our dt is 1/60
-
-          Paint paint = Paint()
-            ..color = const Color.fromRGBO(244, 67, 54, 1)
-            ..strokeWidth = 1
-            ..style = PaintingStyle.stroke;
-
-          for (int i = 0; i < points.length - 1; i++) {
-            //conversion to put accurately
-            Vector2 point1 = worldToScreen(points[i]);
-            Vector2 point2 = worldToScreen(points[i+1]);
-            canvas.drawLine(
-              Offset(point1.x, point1.y),
-              Offset(point2.x, point2.y),
-              paint,
-            );
-          }
-        }
-
-        //score text
-        textPaint.render(canvas, "$score", worldToScreen(Vector2(0, camera.visibleWorldRect.top)));
-    }
+  void loadGameoverScene() async {
+    await game.add(gameover);
+    gameplaying = false;
+    removeScene();
+    resetWorld();
   }
-
-
+  ///////////
+  ///////////
+  ///////////
 
 
   //-----------------------INPUT HANDLING (DRAGS)-----------------------
   @override
   void onPanStart(DragStartInfo info) {
     //when user drags screen, store whre it happened and let program know dragging=true
-    if (!isShot){
-      startOfDrag = Offset(info.eventPosition.global.x, info.eventPosition.global.y);
-      isDragging = true;
+    if (!gameplay.isShot){
+      gameplay.startOfDrag = Offset(info.eventPosition.global.x, info.eventPosition.global.y);
+      gameplay.isDragging = true;
     }
   }
 
   @override 
   void onPanUpdate(DragUpdateInfo info) {
-    if (!isShot){
+    if (!gameplay.isShot){
       //we get the dragPos, then we get the distance of the drag relative to starting point 
       //then apply it to our "dragBehindBall" which is given to trajectory drawing 
-      currentDragPos = Offset(info.eventPosition.global.x, info.eventPosition.global.y);
-      double relX = startOfDrag.dx - currentDragPos.dx;
-      double relY = startOfDrag.dy - currentDragPos.dy;
-      dragBehindBall = Offset((relX), (relY));
+      gameplay.currentDragPos = Offset(info.eventPosition.global.x, info.eventPosition.global.y);
+      double relX = gameplay.startOfDrag.dx - gameplay.currentDragPos.dx;
+      double relY = gameplay.startOfDrag.dy - gameplay.currentDragPos.dy;
+      gameplay.dragBehindBall = Offset((relX), (relY));
     }
   }
 
   @override
   void onPanEnd(DragEndInfo info) {
     //make ball move when thrown
-    ball.body.setType(BodyType.dynamic);
-    impulse = Vector2(dragBehindBall.dx, dragBehindBall.dy) * linearImpulseStrengthMult;
-    ball.body.applyLinearImpulse(impulse);
+    gameplay.ball.body.setType(BodyType.dynamic);
+    gameplay.impulse = Vector2(gameplay.dragBehindBall.dx, gameplay.dragBehindBall.dy) * gameplay.linearImpulseStrengthMult;
+    gameplay.ball.body.applyLinearImpulse(gameplay.impulse);
 
     //reset necessary vars 
-    isDragging=false;
-    isShot = true;
-    dragBehindBall = Offset.zero;
+    gameplay.isDragging=false;
+    gameplay.isShot = true;
+    gameplay.dragBehindBall = Offset.zero;
   }
-  
 } 

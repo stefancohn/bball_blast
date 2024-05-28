@@ -7,11 +7,12 @@ import 'package:flutter/material.dart';
 
 
 class Background extends RectangleComponent with HasGameRef<Forge2DGame> {
-  Background()
+  //TODO: implement camera.backdrop? 
+  Background() 
     : super(
         paint: Paint()..color = const Color(0xfff2e8cf),
-        priority: 0,
-      );
+        priority: -1,
+    );
 
   @override
   FutureOr<void> onLoad() async {

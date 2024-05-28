@@ -6,9 +6,7 @@ import 'package:bball_blast/entities/HoopHitbox.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 
-class Hoop extends SpriteComponent with CollisionCallbacks {
-  @override
-  final BBallBlast game;
+class Hoop extends SpriteComponent with CollisionCallbacks, HasGameRef<BBallBlast> {
 
   bool spawnRight;
 
@@ -21,7 +19,7 @@ class Hoop extends SpriteComponent with CollisionCallbacks {
 
   Random rand = Random();
 
-  Hoop(this.game, this.spawnRight, Sprite sprite) : super(
+  Hoop(this.spawnRight, Sprite sprite) : super(
     sprite: sprite,
     size: Vector2.all(15),
     anchor: Anchor.center,
