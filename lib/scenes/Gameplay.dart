@@ -9,6 +9,7 @@ import 'package:bball_blast/entities/ball.dart';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
 import 'package:bball_blast/config.dart';
+import 'package:flame/input.dart';
 
 class Gameplay extends Component with HasGameRef<BBallBlast>{
   //vars we need to be visible thoughout entire file------------------------
@@ -20,6 +21,9 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   late Vector2 impulse;
   late List<Vector2> points;
   Random rand = Random();
+
+  //vars for pause functionality 
+  late ButtonComponent pauseButton;
 
   //positional vars
   late Vector2 startPos;
@@ -49,7 +53,6 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
 
     //make ballSprite and ball
     ballImg = await game.loadSprite('ball.png');
-    //_randomBallPos();
     ball = Ball(game, startPos, 3, ballImg);
 
     //add leftWall and rightWall, and ceiling
@@ -61,8 +64,17 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     hoopImg = await game.loadSprite('hoop.png');
     hoop = Hoop(spawnRight, hoopImg);
 
+    //pause button 
+    pauseButton = ButtonComponent(
+      position:game.worldToScreen(Vector2(game.camera.visibleWorldRect.topLeft.dx, game.camera.visibleWorldRect.topLeft.dy)),
+      button: PositionComponent(
+        size: Vector2(50,50),
+      ),
+      onPressed: ()=>game.loadGameScene(),
+    );
+
     //must add to game because children renders have prio over parent renders for sum reason
-    await game.add(Background());
+    await game.addAll([Background(), pauseButton]);
     //add components to world and game
     await game.world.addAll([ball, wallLeft, wallRight, ceiling, hoop]);
 
@@ -82,7 +94,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
 
   //------------OTHER METHODS-----------
   //reset our scene
-  void spawnNewScene() async {
+  spawnNewScene() async {
     //reset vars and timer
     isShot = false;
     ballScored = false;

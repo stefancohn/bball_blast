@@ -14,8 +14,7 @@ class MainMenu extends Component with HasGameRef<BBallBlast>{
   Future<void> onLoad() async {
     RoundedButton button1 = RoundedButton(
         text: 'Level 1',
-        action: () { game.add(BBallBlast.gameplay);
-                      game.remove(BBallBlast.mainMenu);},
+        action: () { game.loadGameScene();},
         color: const Color(0xffadde6c),
         borderColor: const Color.fromARGB(255, 121, 30, 126),
       );

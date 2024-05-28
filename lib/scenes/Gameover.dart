@@ -25,7 +25,7 @@ class Gameover extends PositionComponent with HasGameRef<BBallBlast>{
       button: PositionComponent(
         size: Vector2(20,20),
       ),
-      onPressed: ()=>print('bob'),
+      onPressed: ()=>game.loadGameScene(),
     );
 
     add(gameOverText);
