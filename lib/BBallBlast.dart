@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:bball_blast/scenes/GameOver.dart';
 import 'package:bball_blast/scenes/MainMenu.dart';
-import 'package:bball_blast/scenes/gameplay.dart';
+import 'package:bball_blast/scenes/Gameplay.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
@@ -10,7 +10,7 @@ import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:bball_blast/config.dart';
 
 
-class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, HasCollisionDetection, CollisionCallbacks {
+class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, HasCollisionDetection, CollisionCallbacks, HasTimeScale {
   //scenes
   static late Gameplay gameplay;
   static late MainMenu mainMenu;
@@ -45,9 +45,8 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   }
 
 
+
   //-------------------OTHER METHODS-------------------------
-  ///////////
-  //////////
 
   //when switching scenes, need to reset world so we have this to 
   //remove all child componenents FROM WORLD
@@ -100,8 +99,6 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     currentScene  = gameover;
   }
   ///////////
-  ///////////
-  ///////////
 
 
 
@@ -110,6 +107,9 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     super.update(dt);
     //print(gameplaying);
   }
+
+
+
   //-----------------------INPUT HANDLING (DRAGS)-----------------------
   @override
   void onPanStart(DragStartInfo info) {

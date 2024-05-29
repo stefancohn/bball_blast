@@ -6,6 +6,7 @@ import 'package:bball_blast/Background.dart';
 import 'package:bball_blast/entities/Hoop.dart';
 import 'package:bball_blast/entities/Wall.dart';
 import 'package:bball_blast/entities/ball.dart';
+import 'package:bball_blast/scenes/PauseOverlay.dart';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
 import 'package:bball_blast/config.dart';
@@ -24,6 +25,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
 
   //vars for pause functionality 
   late ButtonComponent pauseButton;
+  late PauseOverlay pauseOverlay; 
 
   //positional vars
   late Vector2 startPos;
@@ -64,23 +66,27 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     hoopImg = await game.loadSprite('hoop.png');
     hoop = Hoop(spawnRight, hoopImg);
 
+
     //pause button 
     pauseButton = ButtonComponent(
       position:game.worldToScreen(Vector2(game.camera.visibleWorldRect.topLeft.dx, game.camera.visibleWorldRect.topLeft.dy)),
       button: PositionComponent(
         size: Vector2(50,50),
       ),
-      onPressed: ()=>game.loadGameScene(),
+      onPressed: () { 
+        pauseOverlay = PauseOverlay(this); 
+        add(pauseOverlay);
+      },
     );
 
+
     //must add to game because children renders have prio over parent renders for sum reason
-    await game.addAll([Background(), pauseButton]);
-    //add components to world and game
+    await game.add(Background());
+    await addAll([pauseButton]); //add components to world and game
     await game.world.addAll([ball, wallLeft, wallRight, ceiling, hoop]);
 
-    //launch method to reset scene after score
+    //launch method to reset scene after user scores and after user dies !
     scoredOpsTimer = Timer(0.5, onTick: () => spawnNewScene());
-    //launch method to go to death scene once user dies
     gameoverOpsTimer = Timer(0.5, onTick: () => spawnGameoverScene());
 
     //print("TOP LEFT: ${camera.visibleWorldRect.topLeft}");
@@ -139,6 +145,12 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
       double randomX = (rand.nextDouble() * 15) + 10;
       return Vector2(randomX,randomY);
     }
+  }
+
+  //need this to remove pause overlay
+  void removePauseOverlay() {
+    remove(pauseOverlay);
+    game.timeScale = 1;
   }
 
   //----------------------DRAWING----------------------------
