@@ -3,11 +3,13 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:bball_blast/BBallBlast.dart';
 import 'package:bball_blast/Background.dart';
+import 'package:bball_blast/ParallaxBackground.dart';
 import 'package:bball_blast/entities/Hoop.dart';
 import 'package:bball_blast/entities/Wall.dart';
 import 'package:bball_blast/entities/ball.dart';
 import 'package:bball_blast/scenes/PauseOverlay.dart';
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flame/extensions.dart';
 import 'package:bball_blast/config.dart';
 import 'package:flame/input.dart';
@@ -89,7 +91,9 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
 
 
     //must add to game because children renders have prio over parent renders for sum reason
-    await game.add(Background());
+    //await game.add(Background());
+    ParallaxBackground bg = ParallaxBackground();
+    await game.add(bg);
     await addAll([pauseButton]); //add components to world and game
     await game.world.addAll([ball, wallLeft, wallRight, ceiling, hoop]);
 
