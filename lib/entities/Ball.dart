@@ -19,14 +19,14 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame> {
   late List<Vector2> points;
 
   //TODO: CHANGE WHEN YOU CHANGE BODY
-  static double velocityRatio = 1/28.274333882308138;
+  static double velocityRatio = 1/78.53981633974483;
   //how far trajectory projection should be
   static int steps = 180;
 
 
   Ball(this.game, this.position, this.radius, Sprite sprite) : super (
     renderBody: false,
-    priority: 1,
+    priority: 3,
 
     //start body as static then set as dynamic when it is shot
     bodyDef: BodyDef()
@@ -45,8 +45,9 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame> {
     children: [
       SpriteComponent(
         sprite: sprite,
-        size: Vector2 (6, 6),
+        size: Vector2.all(radius*2),
         anchor: Anchor.center,
+        priority: 3,
       )
     ],
 
@@ -56,6 +57,7 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame> {
   Future<void> onLoad() async {
     collider = Collider(game, this);
     await game.world.add(collider);
+    
     super.onLoad();
   }
 

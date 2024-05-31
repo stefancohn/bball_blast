@@ -28,7 +28,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   BBallBlast(): super(
       gravity: Vector2(0,gravity),
       camera: CameraComponent.withFixedResolution(width: gameWidth, height: gameHeight),
-      zoom: 11,
+      zoom: 10,
   );
 
 
@@ -102,13 +102,6 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
 
 
 
-  @override
-  void update(double dt) {
-    super.update(dt);
-    //print(gameplaying);
-  }
-
-
 
   //-----------------------INPUT HANDLING (DRAGS)-----------------------
   @override
@@ -143,6 +136,9 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
       gameplay.ball.body.setType(BodyType.dynamic);
       gameplay.impulse = Vector2(gameplay.dragBehindBall.dx, gameplay.dragBehindBall.dy) * gameplay.linearImpulseStrengthMult;
       gameplay.ball.body.applyLinearImpulse(gameplay.impulse);
+      gameplay.ball.body.applyAngularImpulse(gameplay.impulse.x * -1);
+      //print("BALL MASS: ${gameplay.ball.body.mass}");
+
 
       //reset necessary vars 
       gameplay.isDragging=false;

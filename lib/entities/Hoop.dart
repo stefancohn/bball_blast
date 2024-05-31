@@ -6,7 +6,7 @@ import 'package:bball_blast/entities/HoopHitbox.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 
-class Hoop extends SpriteComponent with CollisionCallbacks, HasGameRef<BBallBlast> {
+class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBlast> {
 
   bool spawnRight;
 
@@ -19,23 +19,40 @@ class Hoop extends SpriteComponent with CollisionCallbacks, HasGameRef<BBallBlas
 
   Random rand = Random();
 
-  Hoop(this.spawnRight, Sprite sprite) : super(
-    sprite: sprite,
-    size: Vector2.all(15),
-    anchor: Anchor.center,
-    priority: 1,
-  );
+  Sprite hoopUpperImg;
+  Sprite hoopLowerImg;
+  Hoop(this.spawnRight, this.hoopLowerImg, this.hoopUpperImg) : super(priority: 3);
 
   @override
   Future<void> onLoad() async {
+
     //set pos
     super.position = _randomPos();
 
+    SpriteComponent hoopLowerSprite = SpriteComponent(
+    sprite: hoopLowerImg,
+    size: Vector2(15, 3.75),
+    anchor: Anchor.center,
+    priority: 4,
+    position: Vector2(getSuperPosition().x,getSuperPosition().y)
+  );
+
+    SpriteComponent hoopUpperSprite = SpriteComponent(
+      sprite: hoopUpperImg,
+      size: Vector2(15, 3.75),
+      anchor: Anchor.center,
+      priority: 2,
+      position: Vector2(getSuperPosition().x,getSuperPosition().y-3.75)
+    );
+
+    //MUST ADD TO WORLD FOR PROPER BALL VISUAL EFFECT
+    game.world.addAll([hoopUpperSprite, hoopLowerSprite]);
+
     //add both physics boxes to each side of hoop
-    rightHb = HoopHitbox(Vector2(getSuperPosition().x + size.x/2, getSuperPosition().y));
+    rightHb = HoopHitbox(Vector2(getSuperPosition().x + (7), getSuperPosition().y-2));
     await game.world.add(rightHb);
 
-    leftHb = HoopHitbox(Vector2(getSuperPosition().x - size.x/2, rightHb.position.y));
+    leftHb = HoopHitbox(Vector2(getSuperPosition().x - (7), getSuperPosition().y-2));
     await game.world.add(leftHb);
 
     _addCollDetect(); 
@@ -57,8 +74,9 @@ class Hoop extends SpriteComponent with CollisionCallbacks, HasGameRef<BBallBlas
   void _addCollDetect() async {
     //create rect compoonent
     hoopCollDetect = RectangleComponent(
-      position: Vector2(leftHb.position.x+3, leftHb.position.y+3),
-      size: Vector2(5,1),
+      position: Vector2(getSuperPosition().x, getSuperPosition().y+1.4),
+      anchor: Anchor.center,
+      size: Vector2(6,0.5),
       paint: Paint()..color = const Color.fromARGB(255, 0, 0, 0),
     );
 

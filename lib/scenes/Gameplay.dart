@@ -16,9 +16,16 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   //vars we need to be visible thoughout entire file------------------------
   late Ball ball; 
   late Hoop hoop;
+
   late Sprite ballImg;
-  late Sprite hoopImg;
-  double linearImpulseStrengthMult = 10;
+  late Sprite hoopLowerImg;
+  late Sprite hoopUpperImg;
+  late Wall wallLeft;
+  late Wall wallRight;
+  late Wall ceiling;
+
+  double linearImpulseStrengthMult = 40;
+  double radius = 5;
   late Vector2 impulse;
   late List<Vector2> points;
   Random rand = Random();
@@ -54,17 +61,18 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     startPos = _randomBallPos();
 
     //make ballSprite and ball
-    ballImg = await game.loadSprite('ball.png');
-    ball = Ball(game, startPos, 3, ballImg);
+    ballImg = await game.loadSprite('basketball.png');
+    ball = Ball(game, startPos, radius, ballImg);
 
     //add leftWall and rightWall, and ceiling
-    Wall wallLeft = Wall(Vector2(game.camera.visibleWorldRect.topLeft.dx-1, game.camera.visibleWorldRect.topLeft.dy), 1.0, gameHeight);
-    Wall wallRight = Wall(Vector2(game.camera.visibleWorldRect.topRight.dx+1, game.camera.visibleWorldRect.topRight.dy), 1.0, gameHeight);
-    Wall ceiling = Wall(Vector2(game.camera.visibleWorldRect.topLeft.dx-1, game.camera.visibleWorldRect.topRight.dy-1), gameWidth, 1.0);
+    wallLeft = Wall(Vector2(game.camera.visibleWorldRect.topLeft.dx-1, game.camera.visibleWorldRect.topLeft.dy), 1.0, gameHeight);
+    wallRight = Wall(Vector2(game.camera.visibleWorldRect.topRight.dx+1, game.camera.visibleWorldRect.topRight.dy), 1.0, gameHeight);
+    ceiling = Wall(Vector2(game.camera.visibleWorldRect.topLeft.dx-1, game.camera.visibleWorldRect.topRight.dy-1), gameWidth, 1.0);
 
     //create hoopimg, hoop, and add it
-    hoopImg = await game.loadSprite('hoop.png');
-    hoop = Hoop(spawnRight, hoopImg);
+    hoopUpperImg = await game.loadSprite('hoopUpper.png'); //just to load in beforehand
+    hoopLowerImg = await game.loadSprite('hoopLower.png');
+    hoop = Hoop(spawnRight, hoopLowerImg, hoopUpperImg);
 
 
     //pause button 
@@ -89,8 +97,6 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     scoredOpsTimer = Timer(0.5, onTick: () => spawnNewScene());
     gameoverOpsTimer = Timer(0.5, onTick: () => spawnGameoverScene());
 
-    //print("TOP LEFT: ${camera.visibleWorldRect.topLeft}");
-    //print("BOTTOM LEFT: ${camera.visibleWorldRect.bottomRight}");
 
     debugMode=true;
     super.onLoad();
@@ -109,21 +115,18 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     scoredOpsTimer.start();
     score++; //add to score
 
-    //remove ball and its children 
-    ball.collider.removeFromParent();
-    ball.removeFromParent();
-
-    //remove hoop and children
-    hoop.rightHb.removeFromParent();
-    hoop.leftHb.removeFromParent();
-    hoop.hoopCollDetect.removeFromParent();
-    hoop.removeFromParent();
+    //reset world components
+    game.world.children.forEach((child) {
+      if (child is! Wall) {
+        game.world.remove(child);
+      }
+    });
     
     //Create and add new ball, hoop
     startPos = _randomBallPos();
-    ball = Ball(game, startPos, 3, ballImg);
+    ball = Ball(game, startPos, radius, ballImg);
     await game.world.add(ball);
-    hoop = Hoop(spawnRight, hoopImg);
+    hoop = Hoop(spawnRight, hoopLowerImg, hoopUpperImg);
     await game.world.add(hoop);
   }
 

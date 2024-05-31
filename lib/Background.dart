@@ -17,7 +17,7 @@ class Background extends RectangleComponent with HasGameRef<Forge2DGame> {
   @override
   FutureOr<void> onLoad() async {
     super.onLoad();
-    super.size = Vector2(gameWidth, gameHeight);
-    super.position = Vector2(game.camera.visibleWorldRect.topLeft.dx, game.camera.visibleWorldRect.topLeft.dy);
+    super.size = Vector2(gameWidth/2, gameHeight);
+    super.position = game.worldToScreen(Vector2(game.camera.visibleWorldRect.topLeft.dx, game.camera.visibleWorldRect.topLeft.dy));
   }
 }

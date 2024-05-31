@@ -13,3 +13,5 @@ TextPaint textPaint = TextPaint(
     color: BasicPalette.blue.color,
   ),
 );
+
+//30 brush stroke size
