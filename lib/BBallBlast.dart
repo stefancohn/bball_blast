@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:bball_blast/entities/Ball.dart';
 import 'package:bball_blast/scenes/GameOver.dart';
 import 'package:bball_blast/scenes/MainMenu.dart';
 import 'package:bball_blast/scenes/Gameplay.dart';
@@ -28,7 +29,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   BBallBlast(): super(
       gravity: Vector2(0,gravity),
       camera: CameraComponent.withFixedResolution(width: gameWidth, height: gameHeight),
-      zoom: 10,
+      zoom: 15.5,
   );
 
 
@@ -40,7 +41,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     await loadMainMenuScene();
     gamePlayingDelay = Timer(0.3, onTick: ()=> gameplaying = true);
 
-    debugMode = false;
+    debugMode = true;
     super.onLoad();
   }
 
@@ -125,6 +126,8 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
         double relX = gameplay.startOfDrag.dx - gameplay.currentDragPos.dx;
         double relY = gameplay.startOfDrag.dy - gameplay.currentDragPos.dy;
         gameplay.dragBehindBall = Offset((relX), (relY));
+        gameplay.impulse = Vector2(gameplay.dragBehindBall.dx, gameplay.dragBehindBall.dy) * gameplay.linearImpulseStrengthMult;
+        gameplay.impulse = Ball.checkVelMaxImpulse(gameplay.impulse);
       }
     }
   }
@@ -132,9 +135,9 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   @override
   void onPanEnd(DragEndInfo info) {
     if (gameplaying){
+      //make sure there is enough 'umff' for ball to be thrown 
       //make ball move when thrown
       gameplay.ball.body.setType(BodyType.dynamic);
-      gameplay.impulse = Vector2(gameplay.dragBehindBall.dx, gameplay.dragBehindBall.dy) * gameplay.linearImpulseStrengthMult;
       gameplay.ball.body.applyLinearImpulse(gameplay.impulse);
       gameplay.ball.body.applyAngularImpulse(gameplay.impulse.x * -1);
       //print("BALL MASS: ${gameplay.ball.body.mass}");

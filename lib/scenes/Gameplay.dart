@@ -24,10 +24,10 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   late Sprite hoopUpperImg;
   late Wall wallLeft;
   late Wall wallRight;
-  late Wall ceiling;
+  //late Wall ceiling;
 
-  double linearImpulseStrengthMult = 40;
-  double radius = 5;
+  double linearImpulseStrengthMult = 3;
+  double radius = 4;
   late Vector2 impulse;
   late List<Vector2> points;
   Random rand = Random();
@@ -69,7 +69,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     //add leftWall and rightWall, and ceiling
     wallLeft = Wall(Vector2(game.camera.visibleWorldRect.topLeft.dx-1, game.camera.visibleWorldRect.topLeft.dy), 1.0, gameHeight);
     wallRight = Wall(Vector2(game.camera.visibleWorldRect.topRight.dx+1, game.camera.visibleWorldRect.topRight.dy), 1.0, gameHeight);
-    ceiling = Wall(Vector2(game.camera.visibleWorldRect.topLeft.dx-1, game.camera.visibleWorldRect.topRight.dy-1), gameWidth, 1.0);
+    //ceiling = Wall(Vector2(game.camera.visibleWorldRect.topLeft.dx-1, game.camera.visibleWorldRect.topRight.dy-1), gameWidth, 1.0);
 
     //create hoopimg, hoop, and add it
     hoopUpperImg = await game.loadSprite('hoopUpper.png'); //just to load in beforehand
@@ -95,7 +95,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     ParallaxBackground bg = ParallaxBackground();
     await game.add(bg);
     await addAll([pauseButton]); //add components to world and game
-    await game.world.addAll([ball, wallLeft, wallRight, ceiling, hoop]);
+    await game.world.addAll([ball, wallLeft, wallRight, hoop]);
 
     //launch method to reset scene after user scores and after user dies !
     scoredOpsTimer = Timer(0.5, onTick: () => spawnNewScene());
@@ -144,12 +144,12 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
 
   //random ball spawn
   Vector2 _randomBallPos() {
-    double randomY = (rand.nextDouble() * 65) - 25;
+    double randomY = (rand.nextDouble() * 62) - 22;
     if (spawnRight) {
-      double randomX = -10 + rand.nextDouble() * -15;
+      double randomX = -16 + rand.nextDouble() * -3;
       return Vector2(randomX,randomY);
     } else {
-      double randomX = (rand.nextDouble() * 15) + 10;
+      double randomX = (rand.nextDouble() * 3) + 16;
       return Vector2(randomX,randomY);
     }
   }
@@ -171,7 +171,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     if (isDragging) {
       //we multiply the input by that number as it's the ratio that converts pixel to velocity
       Vector2 initialVelocity = Vector2(dragBehindBall.dx, dragBehindBall.dy) * linearImpulseStrengthMult * Ball.velocityRatio;
-      //initialVelocity = Ball.checkVelMax(initialVelocity);
+      initialVelocity = Ball.checkVelMax(initialVelocity);
 
       //get points to draw projected trajectory
       points = Ball.trajectoryPoints(initialVelocity, startPos, Ball.steps, (1/60)); //60 fps so our dt is 1/60
@@ -204,12 +204,15 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   @override
   void update(double dt) {
     super.update(dt);
+    //print("VEL: ${ball.body.linearVelocity}");
+
     //if ball gets scored start scored operations timer 
+    //ballScored var gets updated in Hoop class because that class contains hit box logic 
     if (ballScored) {
       scoredOpsTimer.update(dt);
     }
     //check if ball has missed AKA gone beyond the bottom of the world 
-    if (game.world.children.contains(ball) && ball.getSuperPosition().y > game.camera.visibleWorldRect.bottom + 5) {
+    if (game.world.children.contains(ball) && ball.getSuperPosition().y > game.camera.visibleWorldRect.bottom + 5 && !ballScored) {
       gameoverOpsTimer.update(dt);
     }
   }

@@ -19,7 +19,7 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame> {
   late List<Vector2> points;
 
   //TODO: CHANGE WHEN YOU CHANGE BODY
-  static double velocityRatio = 1/78.53981633974483;
+  static double velocityRatio = 1/5.026548245743669;
   //how far trajectory projection should be
   static int steps = 180;
 
@@ -37,7 +37,7 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame> {
     fixtureDefs: [
       FixtureDef(CircleShape()..radius = radius)
         ..restitution = 0.3
-        ..density = 1
+        ..density = 0.1
         //..friction = 0.5
     ],
 
@@ -90,18 +90,35 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame> {
 
   //BOX2D Maxes out at 120 vel so we need this to ensure accurate trajectory
   static Vector2 checkVelMax(Vector2 vel) {
-    if (vel.x > 121) {
-      vel.x=106;
-    } else if (vel.x < -121) {
-      vel.x=-106;
+    //check x in pos direction
+    if (vel.x > 120) {
+      vel.x=120;
+    } else if (vel.x < -120) {
+      vel.x=-120;
     } 
-
-    if (vel.y > 121) {
+    //check y
+    if (vel.y > 120) {
       vel.y=120;
-    } else if (vel.y < -121) {
-      vel.y=-121;
+    } else if (vel.y < -120) {
+      vel.y=-120;
     }
+    return vel;
+  }
 
+  //BOX2D Maxes out at 120 vel so we need to cap the max applicable linear impulse to 120!
+  static Vector2 checkVelMaxImpulse(Vector2 vel) {
+    //check x in pos direction
+    if (vel.x*Ball.velocityRatio > 120) {
+      vel.x=120/velocityRatio;
+    } else if (vel.x*Ball.velocityRatio < -120) {
+      vel.x=-120/velocityRatio;
+    } 
+    //check y
+    if (vel.y*Ball.velocityRatio > 120) {
+      vel.y=120/velocityRatio;
+    } else if (vel.y*Ball.velocityRatio < -120) {
+      vel.y=-120/velocityRatio;
+    }
     return vel;
   }
   

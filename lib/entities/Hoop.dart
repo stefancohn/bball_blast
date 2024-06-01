@@ -31,7 +31,7 @@ class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBl
 
     SpriteComponent hoopLowerSprite = SpriteComponent(
     sprite: hoopLowerImg,
-    size: Vector2(15, 3.75),
+    size: Vector2(11.5, 2.875),
     anchor: Anchor.center,
     priority: 4,
     position: Vector2(getSuperPosition().x,getSuperPosition().y)
@@ -39,20 +39,20 @@ class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBl
 
     SpriteComponent hoopUpperSprite = SpriteComponent(
       sprite: hoopUpperImg,
-      size: Vector2(15, 3.75),
+      size: Vector2(11.5, 2.875),
       anchor: Anchor.center,
       priority: 2,
-      position: Vector2(getSuperPosition().x,getSuperPosition().y-3.75)
+      position: Vector2(getSuperPosition().x,getSuperPosition().y-2.75)
     );
 
     //MUST ADD TO WORLD FOR PROPER BALL VISUAL EFFECT
     game.world.addAll([hoopUpperSprite, hoopLowerSprite]);
 
     //add both physics boxes to each side of hoop
-    rightHb = HoopHitbox(Vector2(getSuperPosition().x + (7), getSuperPosition().y-2));
+    rightHb = HoopHitbox(Vector2(getSuperPosition().x + (5.4), getSuperPosition().y-1.5));
     await game.world.add(rightHb);
 
-    leftHb = HoopHitbox(Vector2(getSuperPosition().x - (7), getSuperPosition().y-2));
+    leftHb = HoopHitbox(Vector2(getSuperPosition().x - (5.4), getSuperPosition().y-1.5));
     await game.world.add(leftHb);
 
     _addCollDetect(); 
@@ -61,12 +61,12 @@ class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBl
   }
  
   Vector2 _randomPos() {
-    double randomY = (rand.nextDouble() * 100) - 50;
+    double randomY = (rand.nextDouble() * 78) - 39;
     if (spawnRight) {
-      double randomX = 10 + rand.nextDouble() * 15;
+      double randomX = 3 + rand.nextDouble() * 8;
       return Vector2(randomX,randomY);
     } else {
-      double randomX = (rand.nextDouble() * -15) - 10;
+      double randomX = (rand.nextDouble() * -8) - 3;
       return Vector2(randomX,randomY);
     }
   }
