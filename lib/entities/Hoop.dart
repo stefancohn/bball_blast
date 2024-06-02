@@ -30,12 +30,12 @@ class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBl
     super.position = _randomPos();
 
     SpriteComponent hoopLowerSprite = SpriteComponent(
-    sprite: hoopLowerImg,
-    size: Vector2(11.5, 2.875),
-    anchor: Anchor.center,
-    priority: 4,
-    position: Vector2(getSuperPosition().x,getSuperPosition().y)
-  );
+      sprite: hoopLowerImg,
+      size: Vector2(11.5, 2.875),
+      anchor: Anchor.center,
+      priority: 4,
+      position: Vector2(getSuperPosition().x,getSuperPosition().y)
+    );
 
     SpriteComponent hoopUpperSprite = SpriteComponent(
       sprite: hoopUpperImg,
@@ -49,10 +49,10 @@ class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBl
     game.world.addAll([hoopUpperSprite, hoopLowerSprite]);
 
     //add both physics boxes to each side of hoop
-    rightHb = HoopHitbox(Vector2(getSuperPosition().x + (5.4), getSuperPosition().y-1.5));
+    rightHb = HoopHitbox(Vector2(getSuperPosition().x + (5.4), getSuperPosition().y-1.25));
     await game.world.add(rightHb);
 
-    leftHb = HoopHitbox(Vector2(getSuperPosition().x - (5.4), getSuperPosition().y-1.5));
+    leftHb = HoopHitbox(Vector2(getSuperPosition().x - (5.4), getSuperPosition().y-1.25));
     await game.world.add(leftHb);
 
     _addCollDetect(); 
@@ -77,7 +77,7 @@ class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBl
       position: Vector2(getSuperPosition().x, getSuperPosition().y+1.4),
       anchor: Anchor.center,
       size: Vector2(6,0.5),
-      paint: Paint()..color = const Color.fromARGB(255, 0, 0, 0),
+      paint: Paint()..color = const Color.fromARGB(0, 0, 0, 0),
     );
 
     //add collision

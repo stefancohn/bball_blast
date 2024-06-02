@@ -9,8 +9,8 @@ class HoopHitbox extends BodyComponent {
       ..type = BodyType.static,
 
     fixtureDefs: [
-      FixtureDef(CircleShape()..radius = 0.5)
-        ..restitution = 0.3
+      FixtureDef(CircleShape()..radius = 0.2)
+        ..restitution = 0.1
         ..density = 1
         //..friction = 0.5
     ],

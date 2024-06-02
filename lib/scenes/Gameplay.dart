@@ -28,7 +28,6 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
 
   double linearImpulseStrengthMult = 3;
   double radius = 4;
-  late Vector2 impulse;
   late List<Vector2> points;
   Random rand = Random();
 
@@ -63,7 +62,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     startPos = _randomBallPos();
 
     //make ballSprite and ball
-    ballImg = await game.loadSprite('basketball.png');
+    ballImg = await game.loadSprite('ball.png');
     ball = Ball(game, startPos, radius, ballImg);
 
     //add leftWall and rightWall, and ceiling
@@ -75,7 +74,6 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     hoopUpperImg = await game.loadSprite('hoopUpper.png'); //just to load in beforehand
     hoopLowerImg = await game.loadSprite('hoopLower.png');
     hoop = Hoop(spawnRight, hoopLowerImg, hoopUpperImg);
-
 
     //pause button 
     pauseButton = ButtonComponent(
@@ -101,7 +99,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     scoredOpsTimer = Timer(0.5, onTick: () => spawnNewScene());
     gameoverOpsTimer = Timer(0.5, onTick: () => spawnGameoverScene());
 
-
+    print(game.worldToScreen(Vector2(8,8)));
     debugMode=true;
     super.onLoad();
   }

@@ -14,12 +14,14 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame> {
 
   //collider wrapper
   late Collider collider; 
+  bool wentAboveRim = false; 
 
   //points to draw for trajectory
   late List<Vector2> points;
 
   //TODO: CHANGE WHEN YOU CHANGE BODY
   static double velocityRatio = 1/5.026548245743669;
+
   //how far trajectory projection should be
   static int steps = 180;
 
@@ -57,8 +59,21 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame> {
   Future<void> onLoad() async {
     collider = Collider(game, this);
     await game.world.add(collider);
-    
     super.onLoad();
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    
+    _checkBallAboveRim();
+  }
+
+  //need to ensure ball is above the hoop to ensure a user can't score underneath!!
+  void _checkBallAboveRim() {
+    if (getSuperPosition().y < BBallBlast.gameplay.hoop.hoopCollDetect.position.y - 2) {
+      wentAboveRim = true;
+    }
   }
 
   static List<Vector2> trajectoryPoints(Vector2 initialVelocity, Vector2 startPos, int steps, double timeStep) {
@@ -143,10 +158,11 @@ class Collider extends CircleComponent with CollisionCallbacks {
 
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other){
-    if (other is RectangleComponent) {
+    print(ball.wentAboveRim);
+    if (other is RectangleComponent && ball.wentAboveRim) {
       BBallBlast.gameplay.ballScored = true;
     } else {
-      print(other);
+      //print(other);
     }
     super.onCollision(intersectionPoints, other);
   }

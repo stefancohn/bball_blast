@@ -22,6 +22,10 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   late Component currentScene;
   late Timer gamePlayingDelay;
 
+  //helper vars
+  late Vector2 impulse;
+  double minStrength = 40;
+  late bool minForce;
 
 
 
@@ -126,27 +130,38 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
         double relX = gameplay.startOfDrag.dx - gameplay.currentDragPos.dx;
         double relY = gameplay.startOfDrag.dy - gameplay.currentDragPos.dy;
         gameplay.dragBehindBall = Offset((relX), (relY));
-        gameplay.impulse = Vector2(gameplay.dragBehindBall.dx, gameplay.dragBehindBall.dy) * gameplay.linearImpulseStrengthMult;
-        gameplay.impulse = Ball.checkVelMaxImpulse(gameplay.impulse);
+        impulse = Vector2(gameplay.dragBehindBall.dx, gameplay.dragBehindBall.dy) * gameplay.linearImpulseStrengthMult;
+        impulse = Ball.checkVelMaxImpulse(impulse);
       }
     }
   }
 
   @override
   void onPanEnd(DragEndInfo info) {
-    if (gameplaying){
+    minForce = enoughForce();
+    if (gameplaying && minForce){
       //make sure there is enough 'umff' for ball to be thrown 
       //make ball move when thrown
       gameplay.ball.body.setType(BodyType.dynamic);
-      gameplay.ball.body.applyLinearImpulse(gameplay.impulse);
-      gameplay.ball.body.applyAngularImpulse(gameplay.impulse.x * -1);
+      gameplay.ball.body.applyLinearImpulse(impulse);
+      gameplay.ball.body.applyAngularImpulse(impulse.x * -1);
       //print("BALL MASS: ${gameplay.ball.body.mass}");
 
 
-      //reset necessary vars 
+      //change necessary vars 
       gameplay.isDragging=false;
       gameplay.isShot = true;
       gameplay.dragBehindBall = Offset.zero;
     }
+  }
+
+  //method to make sure players don't accidently launch ball with no speed
+  bool enoughForce() {
+    if (impulse.x.abs() < minStrength && impulse.y.abs() < minStrength ) {
+      gameplay.dragBehindBall = Offset.zero;
+      gameplay.isDragging = false;
+      return false;
+    }
+    return true;
   }
 } 
