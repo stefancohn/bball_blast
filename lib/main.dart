@@ -31,14 +31,9 @@ class MyApp extends StatelessWidget {
             
             // Get screen dimensions using MediaQuery, if screenSize greater than stated, change it for camera sake
             final screenSize = MediaQuery.of(context).size;
-            /*
-            if (screenSize.width > gameWidth) {
-              gameWidth = screenSize.width;
-            }
-            if (screenSize.height > gameHeight) {
-              gameHeight = screenSize.height;
-            }
-            */
+            deviceWidth = screenSize.width;
+            deviceHeight = screenSize.height;
+            
 
             final game = BBallBlast();
 

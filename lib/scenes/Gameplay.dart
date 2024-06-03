@@ -2,17 +2,16 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
 import 'package:bball_blast/BBallBlast.dart';
-import 'package:bball_blast/Background.dart';
 import 'package:bball_blast/ParallaxBackground.dart';
 import 'package:bball_blast/entities/Hoop.dart';
 import 'package:bball_blast/entities/Wall.dart';
 import 'package:bball_blast/entities/ball.dart';
 import 'package:bball_blast/scenes/PauseOverlay.dart';
 import 'package:flame/components.dart';
-import 'package:flame/effects.dart';
 import 'package:flame/extensions.dart';
 import 'package:bball_blast/config.dart';
 import 'package:flame/input.dart';
+import 'package:flame_forge2d/flame_forge2d.dart';
 
 class Gameplay extends Component with HasGameRef<BBallBlast>{
   //vars we need to be visible thoughout entire file------------------------
@@ -95,11 +94,13 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     await addAll([pauseButton]); //add components to world and game
     await game.world.addAll([ball, wallLeft, wallRight, hoop]);
 
+    //Ball.velocityRatio = 1/ball.body.mass;
+    //ball.body.setType(BodyType.static);
+
     //launch method to reset scene after user scores and after user dies !
     scoredOpsTimer = Timer(0.5, onTick: () => spawnNewScene());
     gameoverOpsTimer = Timer(0.5, onTick: () => spawnGameoverScene());
 
-    print(game.worldToScreen(Vector2(8,8)));
     debugMode=true;
     super.onLoad();
   }
@@ -118,11 +119,11 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     score++; //add to score
 
     //reset world components
-    game.world.children.forEach((child) {
+    for (var child in game.world.children) {
       if (child is! Wall) {
         game.world.remove(child);
       }
-    });
+    }
     
     //Create and add new ball, hoop
     startPos = _randomBallPos();

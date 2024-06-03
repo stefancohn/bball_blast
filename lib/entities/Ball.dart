@@ -57,6 +57,7 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame> {
 
   @override
   Future<void> onLoad() async {
+
     collider = Collider(game, this);
     await game.world.add(collider);
     super.onLoad();
@@ -158,11 +159,10 @@ class Collider extends CircleComponent with CollisionCallbacks {
 
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other){
-    print(ball.wentAboveRim);
     if (other is RectangleComponent && ball.wentAboveRim) {
       BBallBlast.gameplay.ballScored = true;
     } else {
-      //print(other);
+      print(other);
     }
     super.onCollision(intersectionPoints, other);
   }

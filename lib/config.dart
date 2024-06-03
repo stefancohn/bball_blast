@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 
 double gameWidth = 720;
 double gameHeight = 1280;
+double deviceWidth = 0;
+double deviceHeight = 0;
+double gameScale =0;
 const double gravity = 95;
 
 TextPaint textPaint = TextPaint(
@@ -14,4 +17,4 @@ TextPaint textPaint = TextPaint(
   ),
 );
 
-//30 brush stroke size
+//30 brush stroke

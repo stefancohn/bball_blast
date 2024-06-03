@@ -3,6 +3,7 @@ import 'package:bball_blast/entities/Ball.dart';
 import 'package:bball_blast/scenes/GameOver.dart';
 import 'package:bball_blast/scenes/MainMenu.dart';
 import 'package:bball_blast/scenes/Gameplay.dart';
+import 'package:flame/camera.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
@@ -33,7 +34,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   BBallBlast(): super(
       gravity: Vector2(0,gravity),
       camera: CameraComponent.withFixedResolution(width: gameWidth, height: gameHeight),
-      zoom: 15.5,
+      zoom: 10,
   );
 
 
@@ -42,10 +43,11 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   //----------ONLOAD------------------
   @override
   FutureOr<void> onLoad() async {
+    game.camera.viewfinder.position.setAll(0);
     await loadMainMenuScene();
     gamePlayingDelay = Timer(0.3, onTick: ()=> gameplaying = true);
 
-    debugMode = true;
+    //debugMode = true;
     super.onLoad();
   }
 
@@ -64,11 +66,17 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
 
   //Remove Scene from game (takes off ui components and such) 
   void removeScene() async {
+    //remove game children
     children.forEach((child) {
       if (!(child is Forge2DWorld || child is CameraComponent)){
         child.removeFromParent();
       }
     });
+    
+    //remove backdrop
+    if (camera.backdrop.hasChildren){
+      camera.backdrop.children.first.removeFromParent();
+    }
   }
 
   //load main menu 
@@ -123,7 +131,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   @override 
   void onPanUpdate(DragUpdateInfo info) {
     if (gameplaying) {
-      if (!gameplay.isShot && gameplaying){
+      if (!gameplay.isShot){
         //we get the dragPos, then we get the distance of the drag relative to starting point 
         //then apply it to our "dragBehindBall" which is given to trajectory drawing 
         gameplay.currentDragPos = Offset(info.eventPosition.global.x, info.eventPosition.global.y);
@@ -139,10 +147,11 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   @override
   void onPanEnd(DragEndInfo info) {
     minForce = enoughForce();
-    if (gameplaying && minForce){
+    if (gameplaying && minForce && !gameplay.isShot){
       //make sure there is enough 'umff' for ball to be thrown 
       //make ball move when thrown
       gameplay.ball.body.setType(BodyType.dynamic);
+      Ball.velocityRatio = 1/gameplay.ball.body.mass;
       gameplay.ball.body.applyLinearImpulse(impulse);
       gameplay.ball.body.applyAngularImpulse(impulse.x * -1);
       //print("BALL MASS: ${gameplay.ball.body.mass}");
