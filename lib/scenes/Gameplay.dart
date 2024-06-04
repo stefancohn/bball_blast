@@ -63,6 +63,8 @@ ParallaxBackgroundConfig bgBrick = ParallaxBackgroundConfig(
   imageLayers: {'brickBackground.png' : Vector2(10,0)},
   baseVelocity: Vector2(2,0),
 );
+
+late ParallaxBackground bg;
 ////////////////////////////////////////////////////
 
 
@@ -71,6 +73,7 @@ ParallaxBackgroundConfig bgBrick = ParallaxBackgroundConfig(
   //----------ONLOAD------------------
   @override
   FutureOr<void> onLoad() async {
+    priority = 0;
     //set startPos of ball
     startPos = _randomBallPos();
 
@@ -102,8 +105,8 @@ ParallaxBackgroundConfig bgBrick = ParallaxBackgroundConfig(
 
 
 
-    ParallaxBackground bg = ParallaxBackground(bgBrick);
-    await game.add(bg);
+    bg = ParallaxBackground(bgBrick);
+    await add(bg);
     await addAll([pauseButton]); //add components to world and game
     await game.world.addAll([ball, wallLeft, wallRight, hoop]);
 
