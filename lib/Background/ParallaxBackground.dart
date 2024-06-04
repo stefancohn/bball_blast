@@ -10,25 +10,72 @@ import 'package:flame/parallax.dart';
 class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
   //components related to ensuring circle display
   late ParallaxComponent background;
-  late CircleComponent circle;
-  double radius = 100;
+  late ClipComponent circle;
 
-  Paint paint = Paint()
-      ..color = const Color.fromRGBO(255, 67, 54, 1)
-      ..strokeWidth = 5
-      ..style = PaintingStyle.stroke;
+  //calculations stuffs
+  double radius = 100;
+  double circleGrowthRate = 250;
+  late double posAdjustRate = (circleGrowthRate + (5))/2;
+
+  //positional vars
+  late Vector2 topLeft = game.camera.viewport.position;
+  late Vector2 screenSize = game.camera.viewport.size;
+  late Vector2 middlePos = game.camera.viewport.position + game.camera.viewport.size/2;
+  late Vector2 leftCenter = Vector2(game.camera.viewport.position.x, game.camera.viewport.position.y + game.camera.viewport.size.y/2);
 
   ParallaxBackgroundConfig config; 
 
   ParallaxBackground(this.config) : super(
-    priority: -1,
+    priority: -2,
   );
 
   @override
   Future<void> onLoad() async {
     super.onLoad();
 
+
+    ParallaxBackgroundConfig bgCf = ParallaxBackgroundConfig(
+      imageLayers: {'skyBackground/sky.png' : Vector2.all(0), 'skyBackground/clouds.png' : Vector2(3,-2),},
+      baseVelocity: Vector2(1,0),
+    );
+
     //create layers
+    final layers = _createLayers(config);
+    final layer2 = _createLayers(bgCf);
+
+    //make parallax component
+    background = ParallaxComponent(
+      parallax: Parallax(
+        await Future.wait(layers),
+        baseVelocity: config.baseVelocity,
+        size: game.camera.viewport.size,
+      ),
+    );
+
+    ParallaxComponent background2 = ParallaxComponent(
+      parallax: Parallax(
+        await Future.wait(layer2),
+        baseVelocity: bgCf.baseVelocity,
+        size: game.camera.viewport.size,
+      ),
+      position: game.camera.viewport.position,
+      priority: -2
+    );
+
+    circle = ClipComponent.rectangle(
+      position: topLeft,
+      size: Vector2.all(radius),
+      children: [background],
+      priority: -1
+    );
+
+    //must add to game instead of this component due to priority naunce
+    game.add(circle);
+    game.add(background2);
+  }
+
+  //create layers here
+  _createLayers(ParallaxBackgroundConfig config) {
     final layers = config.imageLayers.entries.map(
     (e) => game.loadParallaxLayer(
       ParallaxImageData(e.key),
@@ -36,38 +83,21 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
       fill: LayerFill.height),
     );
 
-    circle = CircleComponent(
-      radius: radius,
-      position: game.camera.viewport.position,
-      paint: Paint() ..color = Color.fromARGB(0, 100, 100, 100),
-    );
-
-    //make parallax component
-    background = ParallaxComponent(
-      priority: -2,
-      parallax: Parallax(
-        await Future.wait(layers),
-        baseVelocity: config.baseVelocity,
-        size: circle.size,
-      ),
-      position: game.worldToScreen(game.camera.visibleWorldRect.topLeft.toVector2()),
-    );
-
-    //must add to game instead of this component due to priority naunce
-    game.add(background);
-    game.add(circle);
+    return layers;
   }
 
   @override
-  void render(Canvas canvas) {
-    super.render(canvas);
-    
-    Path upperLeft = Path();
-    var circleRect = Rect.fromCircle(center: Offset(circle.position.x+radius, circle.position.y+radius), radius: radius);
-    upperLeft.arcTo(circleRect, pi, pi/2,true);
-    upperLeft.lineTo(background.position.x,background.position.y);
-    canvas.drawPath(upperLeft, paint);
+  void update(double dt) {
+    super.update(dt);
+
+    //if (circle.size.x >= game.camera.viewport.size.x) {
+      //rectangle.size.y += circleGrowthRate * dt;
+    //} else {
+      circle.size = Vector2(circle.size.x+dt*circleGrowthRate, circle.size.y + dt*circleGrowthRate);
+      //circle.position = Vector2(circle.position.x - dt*posAdjustRate, circle.position.y - dt*posAdjustRate);
+    //}
   }
+
 }
 
 /* HOW TO RESIZE!!!!
