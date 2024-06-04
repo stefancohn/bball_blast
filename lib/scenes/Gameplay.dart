@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
 import 'package:bball_blast/BBallBlast.dart';
-import 'package:bball_blast/ParallaxBackground.dart';
-import 'package:bball_blast/ParallaxBackgroundConfig.dart';
+import 'package:bball_blast/Background/ParallaxBackground.dart';
+import 'package:bball_blast/Background/ParallaxBackgroundConfig.dart';
 import 'package:bball_blast/entities/Hoop.dart';
 import 'package:bball_blast/entities/Wall.dart';
 import 'package:bball_blast/entities/ball.dart';
@@ -53,6 +53,19 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   int score = 0;
   bool died = false; 
 
+  //backgrounds
+  ParallaxBackgroundConfig bgCf = ParallaxBackgroundConfig(
+    imageLayers: {'skyBackground/sky.png' : Vector2.all(0), 'skyBackground/clouds.png' : Vector2(3,-2),},
+    baseVelocity: Vector2(1,0),
+  );
+
+ParallaxBackgroundConfig bgBrick = ParallaxBackgroundConfig(
+  imageLayers: {'brickBackground.png' : Vector2(10,0)},
+  baseVelocity: Vector2(2,0),
+);
+////////////////////////////////////////////////////
+
+
 
 
   //----------ONLOAD------------------
@@ -62,7 +75,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     startPos = _randomBallPos();
 
     //make ballSprite and ball
-    ballImg = await game.loadSprite('ball.png');
+    ballImg = await game.loadSprite('basketball.png');
     ball = Ball(game, startPos, radius, ballImg);
 
     //add leftWall and rightWall, and ceiling
@@ -88,14 +101,8 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     );
 
 
-    //must add to game because children renders have prio over parent renders for sum reason
-    //await game.add(Background());
-    ParallaxBackgroundConfig bgCf = ParallaxBackgroundConfig(
-      imageLayers: {'skyBackground/sky.png' : Vector2.all(0), 'skyBackground/clouds.png' : Vector2(3,-2),},
-      baseVelocity: Vector2(1,0),
-    );
 
-    ParallaxBackground bg = ParallaxBackground(bgCf);
+    ParallaxBackground bg = ParallaxBackground(bgBrick);
     await game.add(bg);
     await addAll([pauseButton]); //add components to world and game
     await game.world.addAll([ball, wallLeft, wallRight, hoop]);

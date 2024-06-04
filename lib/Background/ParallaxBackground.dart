@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:bball_blast/BBallBlast.dart';
-import 'package:bball_blast/ParallaxBackgroundConfig.dart';
+import 'package:bball_blast/Background/ParallaxBackgroundConfig.dart';
 import 'package:flame/components.dart';
 import 'package:flame/parallax.dart';
 
@@ -18,11 +18,13 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
     final layers = config.imageLayers.entries.map(
     (e) => game.loadParallaxLayer(
       ParallaxImageData(e.key),
-      velocityMultiplier: e.value,)
+      velocityMultiplier: e.value,
+      fill: LayerFill.height)
     );
 
     //make component
     background = ParallaxComponent(
+      priority: -1,
       parallax: Parallax(
         await Future.wait(layers),
         baseVelocity: config.baseVelocity,

@@ -96,7 +96,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     resetWorld();
 
     gameplay = Gameplay();
-    await game.add(gameplay);
+    await add(gameplay);
     gameplaying = true;
 
     currentScene = gameplay;
@@ -146,9 +146,10 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
 
   @override
   void onPanEnd(DragEndInfo info) {
+    //make sure there is enough 'umff' for ball to be thrown 
     minForce = enoughForce();
+    
     if (gameplaying && minForce && !gameplay.isShot){
-      //make sure there is enough 'umff' for ball to be thrown 
       //make ball move when thrown
       gameplay.ball.body.setType(BodyType.dynamic);
       Ball.velocityRatio = 1/gameplay.ball.body.mass;
