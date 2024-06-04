@@ -1,19 +1,25 @@
 import 'dart:async';
-
+import 'dart:ui';
 import 'package:bball_blast/BBallBlast.dart';
 import 'package:bball_blast/Background/ParallaxBackgroundConfig.dart';
 import 'package:flame/components.dart';
 import 'package:flame/parallax.dart';
 
-class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
+class ParallaxBackground extends CircleComponent with HasGameRef<BBallBlast>{
   late ParallaxComponent background;
 
   ParallaxBackgroundConfig config; 
-  ParallaxBackground(this.config) : super(priority: -1);
-  @override
-  FutureOr<void> onLoad() async {
-    super.onLoad();
+  ParallaxBackground(this.config) : super(
+    priority: -2,
+    radius: 100,
+    paint: Paint()..color = Color.fromARGB(200, 130, 118, 84),
 
+  );
+
+  @override
+  Future<void> onLoad() async {
+    super.onLoad();
+    position = game.camera.viewport.position;
     //create layers
     final layers = config.imageLayers.entries.map(
     (e) => game.loadParallaxLayer(
@@ -31,8 +37,9 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
       )
     );
 
-    game.camera.backdrop.add(background);
+    //game.camera.backdrop.add(background);
     //game.add(background);
+    add(background);
   }
 }
 
