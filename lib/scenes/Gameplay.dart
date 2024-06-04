@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:bball_blast/BBallBlast.dart';
 import 'package:bball_blast/ParallaxBackground.dart';
+import 'package:bball_blast/ParallaxBackgroundConfig.dart';
 import 'package:bball_blast/entities/Hoop.dart';
 import 'package:bball_blast/entities/Wall.dart';
 import 'package:bball_blast/entities/ball.dart';
@@ -89,7 +90,12 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
 
     //must add to game because children renders have prio over parent renders for sum reason
     //await game.add(Background());
-    ParallaxBackground bg = ParallaxBackground();
+    ParallaxBackgroundConfig bgCf = ParallaxBackgroundConfig(
+      imageLayers: {'skyBackground/sky.png' : Vector2.all(0), 'skyBackground/clouds.png' : Vector2(3,-2),},
+      baseVelocity: Vector2(1,0),
+    );
+
+    ParallaxBackground bg = ParallaxBackground(bgCf);
     await game.add(bg);
     await addAll([pauseButton]); //add components to world and game
     await game.world.addAll([ball, wallLeft, wallRight, hoop]);
@@ -143,7 +149,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
 
   //random ball spawn
   Vector2 _randomBallPos() {
-    double randomY = (rand.nextDouble() * 62) - 22;
+    double randomY = (rand.nextDouble() * 80) - 40;
     if (spawnRight) {
       double randomX = -16 + rand.nextDouble() * -3;
       return Vector2(randomX,randomY);

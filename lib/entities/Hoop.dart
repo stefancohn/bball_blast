@@ -61,12 +61,12 @@ class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBl
   }
  
   Vector2 _randomPos() {
-    double randomY = (rand.nextDouble() * 78) - 39;
+    double randomY = (rand.nextDouble() * 75) - 35;
     if (spawnRight) {
-      double randomX = 3 + rand.nextDouble() * 8;
+      double randomX = rand.nextDouble() * 12 + 6;
       return Vector2(randomX,randomY);
     } else {
-      double randomX = (rand.nextDouble() * -8) - 3;
+      double randomX = rand.nextDouble() * -12 - 6;
       return Vector2(randomX,randomY);
     }
   }

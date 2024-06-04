@@ -2,8 +2,8 @@ import 'package:flame/game.dart';
 import 'package:flame/palette.dart';
 import 'package:flutter/material.dart';
 
-double gameWidth = 720;
-double gameHeight = 1280;
+double gameWidth = 375;
+double gameHeight = 812;
 double deviceWidth = 0;
 double deviceHeight = 0;
 double gameScale =0;

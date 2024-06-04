@@ -1,14 +1,14 @@
 import 'package:flame/components.dart';
 
 class ParallaxBackgroundConfig {
-  List<String> filepaths;
-  List<Vector2> layerVelocities;
+  Map<String, Vector2> imageLayers; //includes velocity of each layer
+  Vector2 baseVelocity;
   double? position;
   double? size;
 
   ParallaxBackgroundConfig({
-    required this.filepaths,
-    required this.layerVelocities,
+    required this.imageLayers,
+    required this.baseVelocity,
     this.position,
     this.size,
   });

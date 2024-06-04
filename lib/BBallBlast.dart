@@ -34,7 +34,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   BBallBlast(): super(
       gravity: Vector2(0,gravity),
       camera: CameraComponent.withFixedResolution(width: gameWidth, height: gameHeight),
-      zoom: 10,
+      zoom: 8,
   );
 
 
