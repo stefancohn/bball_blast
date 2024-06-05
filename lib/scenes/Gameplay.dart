@@ -105,7 +105,7 @@ late ParallaxBackground bg;
 
 
 
-    bg = ParallaxBackground(bgBrick);
+    bg = ParallaxBackground();
     await add(bg);
     await addAll([pauseButton]); //add components to world and game
     await game.world.addAll([ball, wallLeft, wallRight, hoop]);

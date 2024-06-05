@@ -1,16 +1,15 @@
 import 'dart:async';
-import 'dart:math';
-import 'dart:ui';
 import 'package:bball_blast/BBallBlast.dart';
 import 'package:bball_blast/Background/ParallaxBackgroundConfig.dart';
 import 'package:flame/components.dart';
-import 'package:flame/extensions.dart';
 import 'package:flame/parallax.dart';
 
 class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
   //components related to ensuring circle display
   late ParallaxComponent bricksBackground;
-  late ParallaxComponent background2;
+  late ParallaxComponent skyBackground;
+  late ParallaxBackgroundConfig bricksConfig;
+  late ParallaxBackgroundConfig skyConfig; 
   late ClipComponent rectMask;
 
   //calculations stuffs
@@ -26,9 +25,7 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
   late double right = game.camera.viewport.size.x;
   late double bottom = game.camera.viewport.size.y;
 
-  ParallaxBackgroundConfig config; 
-
-  ParallaxBackground(this.config) : super(
+  ParallaxBackground() : super(
     priority: -2,
   );
 
@@ -36,57 +33,18 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
   Future<void> onLoad() async {
     super.onLoad();
 
-
-    ParallaxBackgroundConfig bgCf = ParallaxBackgroundConfig(
-      imageLayers: {'skyBackground/sky.png' : Vector2.all(0), 'skyBackground/clouds.png' : Vector2(3,-2),},
-      baseVelocity: Vector2(1,0),
-    );
-
-    //create layers
-    final layers = _createLayers(config);
-    final layer2 = _createLayers(bgCf);
-
-    //make parallax component
-    background = ParallaxComponent(
-      parallax: Parallax(
-        await Future.wait(layers),
-        baseVelocity: config.baseVelocity,
-        size: game.camera.viewport.size*(11/10),
-      ),
-    );
-
-    background2 = ParallaxComponent(
-      parallax: Parallax(
-        await Future.wait(layer2),
-        baseVelocity: bgCf.baseVelocity,
-        size: game.camera.viewport.size,
-      ),
-      position: game.camera.viewport.position,
-      priority: -2
-    );
+    await _loadParallaxSetup();
 
     rectMask = ClipComponent.rectangle(
       position: topLeft,
       size: Vector2.all(radius),
-      children: [background],
+      children: [bricksBackground],
       priority: -1
     );
 
     //must add to game instead of this component due to priority naunce
     game.add(rectMask);
-    game.add(background2);
-  }
-
-  //create layers here
-  _createLayers(ParallaxBackgroundConfig config) {
-    final layers = config.imageLayers.entries.map(
-    (e) => game.loadParallaxLayer(
-      ParallaxImageData(e.key),
-      velocityMultiplier: e.value,
-      fill: LayerFill.height),
-    );
-
-    return layers;
+    game.add(skyBackground);
   }
 
   @override
@@ -125,7 +83,54 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
     }
   }
 
-  //LOAD ALL CONFIGS AND IMAGES
+  //LOAD ALL CONFIGS AND PARALLAX COMPONENTs
+  Future<void> _loadParallaxSetup() async {
+
+    //CONFIGS
+    skyConfig = ParallaxBackgroundConfig(
+      imageLayers: {'skyBackground/sky.png' : Vector2.all(0), 'skyBackground/clouds.png' : Vector2(3,-2),},
+      baseVelocity: Vector2(1,0),
+    );
+
+    bricksConfig = ParallaxBackgroundConfig(
+      imageLayers: {'brickBackground.png' : Vector2(10,0)},
+      baseVelocity: Vector2(2,0),
+    );
+
+    //LAYERS
+    final skyLayers = _createLayers(skyConfig);
+    final bricksLayers = _createLayers(bricksConfig);
+
+    //BGs/parallaxComponents
+    skyBackground = ParallaxComponent(
+      parallax: Parallax(
+        await Future.wait(skyLayers),
+        baseVelocity: skyConfig.baseVelocity,
+        size: game.camera.viewport.size,
+      ),
+      position: game.camera.viewport.position,
+      priority: -2
+    );
+
+    bricksBackground = ParallaxComponent(
+      parallax: Parallax(
+        await Future.wait(bricksLayers),
+        baseVelocity: bricksConfig.baseVelocity,
+        size: game.camera.viewport.size*(11/10),
+      ),
+    );
+  }
+
+  //create layers here
+  _createLayers(ParallaxBackgroundConfig config) {
+    final layers = config.imageLayers.entries.map(
+    (e) => game.loadParallaxLayer(
+      ParallaxImageData(e.key),
+      velocityMultiplier: e.value,
+      fill: LayerFill.height),
+    );
+    return layers;
+  }
 }
 
 /* HOW TO RESIZE!!!!
