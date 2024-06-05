@@ -9,19 +9,22 @@ import 'package:flame/parallax.dart';
 
 class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
   //components related to ensuring circle display
-  late ParallaxComponent background;
-  late ClipComponent circle;
+  late ParallaxComponent bricksBackground;
+  late ParallaxComponent background2;
+  late ClipComponent rectMask;
 
   //calculations stuffs
   double radius = 100;
-  double circleGrowthRate = 250;
-  late double posAdjustRate = (circleGrowthRate + (5))/2;
+  double rectGrowthRate = 300;
+  late double posAdjustRate = (rectGrowthRate + (5))/2;
 
   //positional vars
   late Vector2 topLeft = game.camera.viewport.position;
   late Vector2 screenSize = game.camera.viewport.size;
   late Vector2 middlePos = game.camera.viewport.position + game.camera.viewport.size/2;
   late Vector2 leftCenter = Vector2(game.camera.viewport.position.x, game.camera.viewport.position.y + game.camera.viewport.size.y/2);
+  late double right = game.camera.viewport.size.x;
+  late double bottom = game.camera.viewport.size.y;
 
   ParallaxBackgroundConfig config; 
 
@@ -48,11 +51,11 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
       parallax: Parallax(
         await Future.wait(layers),
         baseVelocity: config.baseVelocity,
-        size: game.camera.viewport.size,
+        size: game.camera.viewport.size*(11/10),
       ),
     );
 
-    ParallaxComponent background2 = ParallaxComponent(
+    background2 = ParallaxComponent(
       parallax: Parallax(
         await Future.wait(layer2),
         baseVelocity: bgCf.baseVelocity,
@@ -62,7 +65,7 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
       priority: -2
     );
 
-    circle = ClipComponent.rectangle(
+    rectMask = ClipComponent.rectangle(
       position: topLeft,
       size: Vector2.all(radius),
       children: [background],
@@ -70,7 +73,7 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
     );
 
     //must add to game instead of this component due to priority naunce
-    game.add(circle);
+    game.add(rectMask);
     game.add(background2);
   }
 
@@ -90,14 +93,39 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
   void update(double dt) {
     super.update(dt);
 
-    //if (circle.size.x >= game.camera.viewport.size.x) {
-      //rectangle.size.y += circleGrowthRate * dt;
-    //} else {
-      circle.size = Vector2(circle.size.x+dt*circleGrowthRate, circle.size.y + dt*circleGrowthRate);
-      //circle.position = Vector2(circle.position.x - dt*posAdjustRate, circle.position.y - dt*posAdjustRate);
-    //}
+    _checkRectMaskExpansion(dt); //TODO: add bool to optimize this & further functionality 
   }
 
+
+  ///
+  ///OTHER METHODS
+  ///
+  
+  //check to see how rectangle should expand to properly fill world 
+  void _checkRectMaskExpansion(double dt) {
+    double rectMaskRight = rectMask.size.x + (rectMask.position.x - game.camera.viewport.position.x); 
+
+    //move rect to ensure it is properly in the left 
+    if (rectMask.position.x > topLeft.x) {
+      rectMask.position.x -= dt*rectGrowthRate;
+    }
+    //move rect to ensure it is properly on the top
+    if (rectMask.position.y > topLeft.y) {
+      rectMask.position.y -= dt*rectGrowthRate;
+    }
+    //check if rect has surpassed right side of world
+    if (rectMaskRight <= right) {
+      //if not increase height
+      rectMask.size.x += dt * rectGrowthRate;
+    } 
+    //check if rect has surpassed bottom
+    if (rectMask.size.y <= game.camera.viewport.size.y) {
+      //if not increase height
+      rectMask.size.y += dt * rectGrowthRate;
+    }
+  }
+
+  //LOAD ALL CONFIGS AND IMAGES
 }
 
 /* HOW TO RESIZE!!!!

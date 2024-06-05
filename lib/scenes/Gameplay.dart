@@ -117,7 +117,6 @@ late ParallaxBackground bg;
     scoredOpsTimer = Timer(0.5, onTick: () => spawnNewScene());
     gameoverOpsTimer = Timer(0.5, onTick: () => spawnGameoverScene());
 
-    debugMode=true;
     super.onLoad();
   }
 
