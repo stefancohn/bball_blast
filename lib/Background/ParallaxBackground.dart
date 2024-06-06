@@ -1,15 +1,11 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:bball_blast/BBallBlast.dart';
 import 'package:bball_blast/Background/ParallaxBackgroundConfig.dart';
 import 'package:flame/components.dart';
 import 'package:flame/parallax.dart';
 
 class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
-  //components related to ensuring circle display
-  late ParallaxComponent bricksBackground;
-  late ParallaxComponent skyBackground;
-  late ParallaxBackgroundConfig bricksConfig;
-  late ParallaxBackgroundConfig skyConfig; 
   late ClipComponent rectMask;
 
   //calculations stuffs
@@ -25,6 +21,8 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
   late double right = game.camera.viewport.size.x;
   late double bottom = game.camera.viewport.size.y;
 
+  Random rand = Random();
+
   ParallaxBackground() : super(
     priority: -2,
   );
@@ -33,18 +31,22 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
   Future<void> onLoad() async {
     super.onLoad();
 
-    await _loadParallaxSetup();
+    List<ParallaxComponent> backgroundList = await _loadParallaxSetup();
 
-    rectMask = ClipComponent.rectangle(
-      position: topLeft,
-      size: Vector2.all(radius),
-      children: [bricksBackground],
-      priority: -1
-    );
+    //get random background to set onLoad
+    int firstBgIndex = rand.nextInt(backgroundList.length);
+    ParallaxComponent firstBg = backgroundList[firstBgIndex];
+
+    //get random rectMask to set onLoad 
+    int maskBgIndex = rand.nextInt(backgroundList.length-1);
+    if (maskBgIndex == firstBgIndex) {
+      maskBgIndex++;
+    }
+    rectMask = _createRectMask(backgroundList, maskBgIndex);
 
     //must add to game instead of this component due to priority naunce
     game.add(rectMask);
-    game.add(skyBackground);
+    game.add(firstBg);
   }
 
   @override
@@ -84,15 +86,15 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
   }
 
   //LOAD ALL CONFIGS AND PARALLAX COMPONENTs
-  Future<void> _loadParallaxSetup() async {
+  Future<List<ParallaxComponent>> _loadParallaxSetup() async {
 
     //CONFIGS
-    skyConfig = ParallaxBackgroundConfig(
+    ParallaxBackgroundConfig skyConfig = ParallaxBackgroundConfig(
       imageLayers: {'skyBackground/sky.png' : Vector2.all(0), 'skyBackground/clouds.png' : Vector2(3,-2),},
       baseVelocity: Vector2(1,0),
     );
 
-    bricksConfig = ParallaxBackgroundConfig(
+    ParallaxBackgroundConfig bricksConfig = ParallaxBackgroundConfig(
       imageLayers: {'brickBackground.png' : Vector2(10,0)},
       baseVelocity: Vector2(2,0),
     );
@@ -102,7 +104,7 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
     final bricksLayers = _createLayers(bricksConfig);
 
     //BGs/parallaxComponents
-    skyBackground = ParallaxComponent(
+    ParallaxComponent skyBackground = ParallaxComponent(
       parallax: Parallax(
         await Future.wait(skyLayers),
         baseVelocity: skyConfig.baseVelocity,
@@ -112,13 +114,18 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
       priority: -2
     );
 
-    bricksBackground = ParallaxComponent(
+    ParallaxComponent bricksBackground = ParallaxComponent(
       parallax: Parallax(
         await Future.wait(bricksLayers),
         baseVelocity: bricksConfig.baseVelocity,
-        size: game.camera.viewport.size*(11/10),
+        size: game.camera.viewport.size,
       ),
+      priority: -2,
+      position: game.camera.viewport.position,
     );
+
+    List<ParallaxComponent> backgroundList = [skyBackground, bricksBackground];
+    return backgroundList;
   }
 
   //create layers here
@@ -130,6 +137,18 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
       fill: LayerFill.height),
     );
     return layers;
+  }
+
+  //load the rectangle mask
+  ClipComponent _createRectMask(List<ParallaxComponent> backgroundList, int idx) {
+    backgroundList[idx].position = Vector2.all(0);
+
+    return ClipComponent.rectangle(
+      position: topLeft,
+      size: Vector2.all(radius),
+      children: [backgroundList[idx]],
+      priority: -1
+    );
   }
 }
 
