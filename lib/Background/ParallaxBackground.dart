@@ -6,11 +6,15 @@ import 'package:flame/components.dart';
 import 'package:flame/parallax.dart';
 
 class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
-  late ClipComponent rectMask;
+  //components
+  ClipComponent? rectMask;
+  late ClipComponent currentMask;
+  late ParallaxComponent firstBg;
+  late List<ParallaxComponent> backgroundList;
 
   //calculations stuffs
-  double radius = 100;
-  double rectGrowthRate = 300;
+  double radius = 50;
+  double rectGrowthRate = 400;
   late double posAdjustRate = (rectGrowthRate + (5))/2;
 
   //positional vars
@@ -23,6 +27,8 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
 
   Random rand = Random();
 
+  late int currentBgIdx;
+
   ParallaxBackground() : super(
     priority: -2,
   );
@@ -31,29 +37,37 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
   Future<void> onLoad() async {
     super.onLoad();
 
-    List<ParallaxComponent> backgroundList = await _loadParallaxSetup();
+    backgroundList = await _loadParallaxSetup();
 
     //get random background to set onLoad
-    int firstBgIndex = rand.nextInt(backgroundList.length);
-    ParallaxComponent firstBg = backgroundList[firstBgIndex];
-
-    //get random rectMask to set onLoad 
-    int maskBgIndex = rand.nextInt(backgroundList.length-1);
-    if (maskBgIndex == firstBgIndex) {
-      maskBgIndex++;
-    }
-    rectMask = _createRectMask(backgroundList, maskBgIndex);
+    currentBgIdx = rand.nextInt(backgroundList.length);
+    firstBg = backgroundList[currentBgIdx];
 
     //must add to game instead of this component due to priority naunce
-    game.add(rectMask);
     game.add(firstBg);
   }
 
+  bool expansionCheckKill = false;
   @override
   void update(double dt) {
     super.update(dt);
+    
+    //null check b/c rectMask does not get set first
+    if (rectMask != null) {
+      //if we should stop expanding the rect mask
+      if(_stopRectMaskExpansion(dt)){
+        //Get rid of our first bg
+        if (firstBg.parent != null){
+          firstBg.removeFromParent();
+        } 
 
-    _checkRectMaskExpansion(dt); //TODO: add bool to optimize this & further functionality 
+        //make deep copy of rectMask as currentMask, remove rectMask and replace it w/ currentMask
+        currentMask = _createRectMask(rectMask!.children.elementAt(0) as ParallaxComponent, rectMask!.size);
+        game.remove(rectMask!);
+        game.add(currentMask);
+        rectMask = null;
+      }
+    }
   }
 
 
@@ -62,27 +76,34 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
   ///
   
   //check to see how rectangle should expand to properly fill world 
-  void _checkRectMaskExpansion(double dt) {
-    double rectMaskRight = rectMask.size.x + (rectMask.position.x - game.camera.viewport.position.x); 
+  bool _stopRectMaskExpansion(double dt) {
+    double rectMaskRight = rectMask!.size.x + (rectMask!.position.x - game.camera.viewport.position.x); //helper var
+    bool stopFlag = true;
 
     //move rect to ensure it is properly in the left 
-    if (rectMask.position.x > topLeft.x) {
-      rectMask.position.x -= dt*rectGrowthRate;
+    if (rectMask!.position.x > topLeft.x) {
+      rectMask!.position.x -= dt*rectGrowthRate;
+      stopFlag = false;
     }
     //move rect to ensure it is properly on the top
-    if (rectMask.position.y > topLeft.y) {
-      rectMask.position.y -= dt*rectGrowthRate;
+    if (rectMask!.position.y > topLeft.y) {
+      rectMask!.position.y -= dt*rectGrowthRate;
+      stopFlag = false;
     }
     //check if rect has surpassed right side of world
     if (rectMaskRight <= right) {
       //if not increase height
-      rectMask.size.x += dt * rectGrowthRate;
+      rectMask!.size.x += dt * rectGrowthRate;
+      stopFlag = false;
     } 
     //check if rect has surpassed bottom
-    if (rectMask.size.y <= game.camera.viewport.size.y) {
+    if (rectMask!.size.y <= game.camera.viewport.size.y) {
       //if not increase height
-      rectMask.size.y += dt * rectGrowthRate;
+      rectMask!.size.y += dt * rectGrowthRate;
+      stopFlag = false;
     }
+
+    return stopFlag; 
   }
 
   //LOAD ALL CONFIGS AND PARALLAX COMPONENTs
@@ -139,14 +160,25 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
     return layers;
   }
 
+  void spawnRectMask() {
+    //get random rectMask to set onLoad 
+    int maskBgIdx = rand.nextInt(backgroundList.length-1);
+    if (maskBgIdx == currentBgIdx) {
+      maskBgIdx++;
+    }
+    currentBgIdx = maskBgIdx;
+    rectMask = _createRectMask(backgroundList[maskBgIdx], Vector2.all(radius));
+    game.add(rectMask!);
+  }
+
   //load the rectangle mask
-  ClipComponent _createRectMask(List<ParallaxComponent> backgroundList, int idx) {
-    backgroundList[idx].position = Vector2.all(0);
+  ClipComponent _createRectMask(ParallaxComponent bgImg, Vector2 size) {
+    bgImg.position = Vector2.all(0);
 
     return ClipComponent.rectangle(
       position: topLeft,
-      size: Vector2.all(radius),
-      children: [backgroundList[idx]],
+      size: size,
+      children: [bgImg],
       priority: -1
     );
   }

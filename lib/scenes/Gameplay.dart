@@ -146,6 +146,9 @@ late ParallaxBackground bg;
     await game.world.add(ball);
     hoop = Hoop(spawnRight, hoopLowerImg, hoopUpperImg);
     await game.world.add(hoop);
+
+    //change background
+    bg.spawnRectMask();
   }
 
   //spawn the gameover scene when ded
