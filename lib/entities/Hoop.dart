@@ -10,6 +10,10 @@ class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBl
 
   bool spawnRight;
 
+  //sprites
+  late SpriteComponent hoopLowerSprite;
+  late SpriteComponent hoopUpperSprite; 
+
   //physics bodies
   late HoopHitbox leftHb;
   late HoopHitbox rightHb;
@@ -29,7 +33,7 @@ class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBl
     //set pos
     super.position = _randomPos();
 
-    SpriteComponent hoopLowerSprite = SpriteComponent(
+    hoopLowerSprite = SpriteComponent(
       sprite: hoopLowerImg,
       size: Vector2(11.5, 2.875),
       anchor: Anchor.center,
@@ -37,7 +41,7 @@ class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBl
       position: Vector2(getSuperPosition().x,getSuperPosition().y)
     );
 
-    SpriteComponent hoopUpperSprite = SpriteComponent(
+    hoopUpperSprite = SpriteComponent(
       sprite: hoopUpperImg,
       size: Vector2(11.5, 2.875),
       anchor: Anchor.center,
@@ -86,8 +90,16 @@ class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBl
     await game.world.add(hoopCollDetect);
   }
   
+  @override 
+  void update(double dt) {
+    moveAllChildren(1, dt);
+  }
 
   Vector2 getSuperPosition() {
     return super.position;
+  }
+
+  void moveAllChildren(double rate, double dt) {
+
   }
 }

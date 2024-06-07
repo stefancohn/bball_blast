@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:bball_blast/BBallBlast.dart';
 import 'package:bball_blast/config.dart';
 import 'package:flame/collisions.dart';
@@ -23,7 +24,7 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame> {
   static double velocityRatio = 1/5.026548245743669;
 
   //how far trajectory projection should be
-  static int steps = 180;
+  static int steps = 50;
 
 
   Ball(this.game, this.position, this.radius, Sprite sprite) : super (
@@ -32,7 +33,7 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame> {
 
     //start body as static then set as dynamic when it is shot
     bodyDef: BodyDef()
-      ..position = position
+      ..position = Vector2(position.x, -75)
       ..type = BodyType.static
       ..linearDamping = 0,
 
@@ -80,7 +81,7 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame> {
   static List<Vector2> trajectoryPoints(Vector2 initialVelocity, Vector2 startPos, int steps, double timeStep) {
     List<Vector2> points = [];
 
-    for(int i=0; i<steps+1; i++) {
+    for(int i=0; i<steps; i+=2) {
       //get the timestep for a certain time in place
       double t = i * timeStep;
 
@@ -145,8 +146,9 @@ class Collider extends CircleComponent with CollisionCallbacks {
   final Ball ball;
   final BBallBlast game;
   Collider(this.game, this.ball) : super(
-    priority: 0,
     radius: ball.radius,
+    paint: Paint()
+      ..color = const Color.fromRGBO(244, 67, 54, 0)
   ){
     add(CircleHitbox());
   }

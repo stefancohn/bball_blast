@@ -24,7 +24,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   late Timer gamePlayingDelay;
 
   //helper vars
-  late Vector2 impulse;
+  late Vector2 impulse = Vector2.zero();
   double minStrength = 40;
   late bool minForce;
 
@@ -47,7 +47,8 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     await loadMainMenuScene();
     gamePlayingDelay = Timer(0.3, onTick: ()=> gameplaying = true);
 
-    debugMode = true;
+    //debugMode = true;
+
     super.onLoad();
   }
 
@@ -121,7 +122,8 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   void onPanStart(DragStartInfo info) {
     //when user drags screen, store whre it happened and let program know dragging=true
     if (gameplaying) {
-      if (!gameplay.isShot){
+      if (!gameplay.isShot && gameplay.readyToBeShot){
+      //ball can't be shot and must be ready
         gameplay.startOfDrag = Offset(info.eventPosition.global.x, info.eventPosition.global.y);
         gameplay.isDragging = true;
       }
@@ -131,7 +133,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   @override 
   void onPanUpdate(DragUpdateInfo info) {
     if (gameplaying) {
-      if (!gameplay.isShot){
+      if (!gameplay.isShot && gameplay.readyToBeShot && gameplay.isDragging){
         //we get the dragPos, then we get the distance of the drag relative to starting point 
         //then apply it to our "dragBehindBall" which is given to trajectory drawing 
         gameplay.currentDragPos = Offset(info.eventPosition.global.x, info.eventPosition.global.y);
@@ -149,12 +151,13 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     //make sure there is enough 'umff' for ball to be thrown 
     minForce = enoughForce();
     
-    if (gameplaying && minForce && !gameplay.isShot){
+    //if the ball is readytobeshot, isshot, has minimum force and the game is being played
+    if (gameplaying && minForce && !gameplay.isShot && gameplay.readyToBeShot && gameplay.isDragging){
       //make ball move when thrown
-      gameplay.ball.body.setType(BodyType.dynamic);
-      Ball.velocityRatio = 1/gameplay.ball.body.mass;
-      gameplay.ball.body.applyLinearImpulse(impulse);
-      gameplay.ball.body.applyAngularImpulse(impulse.x * -1);
+      gameplay.ball!.body.setType(BodyType.dynamic);
+      Ball.velocityRatio = 1/gameplay.ball!.body.mass;
+      gameplay.ball!.body.applyLinearImpulse(impulse);
+      gameplay.ball!.body.applyAngularImpulse(impulse.x * -1);
       //print("BALL MASS: ${gameplay.ball.body.mass}");
 
 
@@ -167,7 +170,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
 
   //method to make sure players don't accidently launch ball with no speed
   bool enoughForce() {
-    if (impulse.x.abs() < minStrength && impulse.y.abs() < minStrength ) {
+    if (impulse.x.abs() < minStrength && impulse.y.abs() < minStrength && gameplay.readyToBeShot) {
       gameplay.dragBehindBall = Offset.zero;
       gameplay.isDragging = false;
       return false;

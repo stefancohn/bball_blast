@@ -3,16 +3,15 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:bball_blast/BBallBlast.dart';
 import 'package:bball_blast/Background/ParallaxBackground.dart';
-import 'package:bball_blast/Background/ParallaxBackgroundConfig.dart';
 import 'package:bball_blast/entities/Hoop.dart';
 import 'package:bball_blast/entities/Wall.dart';
 import 'package:bball_blast/entities/ball.dart';
 import 'package:bball_blast/scenes/PauseOverlay.dart';
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flame/extensions.dart';
 import 'package:bball_blast/config.dart';
 import 'package:flame/input.dart';
-import 'package:flame_forge2d/flame_forge2d.dart';
 
 class Gameplay extends Component with HasGameRef<BBallBlast>{
   //vars we need to be visible thoughout entire file------------------------
@@ -39,33 +38,23 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   late Vector2 startPos;
 
   //Vars for determining how ball should be thrown
-  late Offset startOfDrag;
-  late Offset currentDragPos;
+  late Offset startOfDrag = Offset.zero;
+  late Offset currentDragPos = Offset.zero;
   late Offset dragBehindBall = Offset.zero;
-  bool isDragging = false;
-  bool isShot = false;
 
   //ball score and spawn/death vars
+  bool isDragging = false;
+  bool isShot = false;
+  bool readyToBeShot = false; 
   bool ballScored = false;
+  bool spawnRight = true;
+  bool died = false; 
   late Timer scoredOpsTimer;
   late Timer gameoverOpsTimer;
-  bool spawnRight = true;
   int score = 0;
-  bool died = false; 
 
-  //backgrounds
-  ParallaxBackgroundConfig bgCf = ParallaxBackgroundConfig(
-    imageLayers: {'skyBackground/sky.png' : Vector2.all(0), 'skyBackground/clouds.png' : Vector2(3,-2),},
-    baseVelocity: Vector2(1,0),
-  );
+  late ParallaxBackground bg;
 
-ParallaxBackgroundConfig bgBrick = ParallaxBackgroundConfig(
-  imageLayers: {'brickBackground.png' : Vector2(10,0)},
-  baseVelocity: Vector2(2,0),
-);
-
-late ParallaxBackground bg;
-////////////////////////////////////////////////////
 
 
 
@@ -110,9 +99,6 @@ late ParallaxBackground bg;
     await addAll([pauseButton]); //add components to world and game
     await game.world.addAll([ball, wallLeft, wallRight, hoop]);
 
-    //Ball.velocityRatio = 1/ball.body.mass;
-    //ball.body.setType(BodyType.static);
-
     //launch method to reset scene after user scores and after user dies !
     scoredOpsTimer = Timer(0.5, onTick: () => spawnNewScene());
     gameoverOpsTimer = Timer(0.5, onTick: () => spawnGameoverScene());
@@ -122,12 +108,14 @@ late ParallaxBackground bg;
 
 
 
+
   //------------OTHER METHODS-----------
   //reset our scene
   spawnNewScene() async {
     //reset vars and timer
     isShot = false;
     ballScored = false;
+    readyToBeShot = false;
     spawnRight = !spawnRight;
     scoredOpsTimer.stop();
     scoredOpsTimer.start();
@@ -177,6 +165,18 @@ late ParallaxBackground bg;
     game.timeScale = 1;
   }
 
+  //this gives a lil intro when ball and hoop get added
+  void ballSpawnIntro(double dt) {
+    if (ball.body.position.y <= startPos.y && !readyToBeShot) {
+      ball.body.position.y += 55 * dt;
+    } else {
+      readyToBeShot = true;
+    }
+  }
+
+
+
+
   //----------------------DRAWING----------------------------
   ///////////
   ///////////
@@ -185,7 +185,7 @@ late ParallaxBackground bg;
     super.render(canvas);
 
     //render the projected trajectory
-    if (isDragging) {
+    if (isDragging && readyToBeShot) {
       //we multiply the input by that number as it's the ratio that converts pixel to velocity
       Vector2 initialVelocity = Vector2(dragBehindBall.dx, dragBehindBall.dy) * linearImpulseStrengthMult * Ball.velocityRatio;
       initialVelocity = Ball.checkVelMax(initialVelocity);
@@ -201,10 +201,9 @@ late ParallaxBackground bg;
       for (int i = 0; i < points.length - 1; i++) {
         //conversion to put accurately
         Vector2 point1 = game.worldToScreen(points[i]);
-        Vector2 point2 = game.worldToScreen(points[i+1]);
-        canvas.drawLine(
-          Offset(point1.x, point1.y),
-          Offset(point2.x, point2.y),
+        canvas.drawCircle(
+          point1.toOffset(),
+          5,
           paint,
         );
       }
@@ -221,16 +220,23 @@ late ParallaxBackground bg;
   @override
   void update(double dt) {
     super.update(dt);
-    //print("VEL: ${ball.body.linearVelocity}");
 
     //if ball gets scored start scored operations timer 
     //ballScored var gets updated in Hoop class because that class contains hit box logic 
     if (ballScored) {
+      //make ball fade out of existance!
+      ball.children.first.add(OpacityEffect.fadeOut(EffectController(duration: 3.0)));
       scoredOpsTimer.update(dt);
     }
-    //check if ball has missed AKA gone beyond the bottom of the world 
-    if (game.world.children.contains(ball) && ball.getSuperPosition().y > game.camera.visibleWorldRect.bottom + 5 && !ballScored) {
-      gameoverOpsTimer.update(dt);
+
+    if (game.world.children.contains(ball)) {
+      //ball intro 
+      ballSpawnIntro(dt);
+
+      //check if ball has missed AKA gone beyond the bottom of the world 
+      if (ball.getSuperPosition().y > game.camera.visibleWorldRect.bottom + 5 && !ballScored) {
+        gameoverOpsTimer.update(dt); //start gameover operations
+      }
     }
   }
 }   

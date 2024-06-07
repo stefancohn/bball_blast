@@ -168,6 +168,7 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
     }
     currentBgIdx = maskBgIdx;
     rectMask = _createRectMask(backgroundList[maskBgIdx], Vector2.all(radius));
+    
     game.add(rectMask!);
   }
 
