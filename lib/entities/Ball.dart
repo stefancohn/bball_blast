@@ -24,7 +24,7 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame> {
   static double velocityRatio = 1/5.026548245743669;
 
   //how far trajectory projection should be
-  static int steps = 50;
+  static int steps = 40;
 
 
   Ball(this.game, this.position, this.radius, Sprite sprite) : super (
@@ -81,7 +81,7 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame> {
   static List<Vector2> trajectoryPoints(Vector2 initialVelocity, Vector2 startPos, int steps, double timeStep) {
     List<Vector2> points = [];
 
-    for(int i=0; i<steps; i+=2) {
+    for(double i=0; i<steps; i+=4.5) {
       //get the timestep for a certain time in place
       double t = i * timeStep;
 

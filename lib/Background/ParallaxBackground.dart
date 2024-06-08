@@ -62,7 +62,7 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
         } 
 
         //make deep copy of rectMask as currentMask, remove rectMask and replace it w/ currentMask
-        currentMask = _createRectMask(rectMask!.children.elementAt(0) as ParallaxComponent, rectMask!.size);
+        currentMask = _createRectMask(rectMask!.children.elementAt(0) as ParallaxComponent, game.camera.viewport.size);
         game.remove(rectMask!);
         game.add(currentMask);
         rectMask = null;

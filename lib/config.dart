@@ -17,4 +17,15 @@ TextPaint textPaint = TextPaint(
   ),
 );
 
+double outlineWidth = 3;
+double circleRadius = 4;
+Paint outline = Paint()
+    ..color = const Color.fromARGB(255, 0, 0, 0)
+    ..strokeWidth = outlineWidth
+    ..style = PaintingStyle.stroke;
+
+Paint insideWhite = Paint() 
+  ..color = const Color.fromARGB(255, 255, 255, 255)
+  ..style = PaintingStyle.fill;
+
 //30 brush stroke

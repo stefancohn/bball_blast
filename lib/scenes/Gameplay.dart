@@ -12,6 +12,7 @@ import 'package:flame/effects.dart';
 import 'package:flame/extensions.dart';
 import 'package:bball_blast/config.dart';
 import 'package:flame/input.dart';
+import 'package:flame_forge2d/flame_forge2d.dart';
 
 class Gameplay extends Component with HasGameRef<BBallBlast>{
   //vars we need to be visible thoughout entire file------------------------
@@ -63,6 +64,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   @override
   FutureOr<void> onLoad() async {
     priority = 0;
+
     //set startPos of ball
     startPos = _randomBallPos();
 
@@ -193,19 +195,23 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
       //get points to draw projected trajectory
       points = Ball.trajectoryPoints(initialVelocity, startPos, Ball.steps, (1/60)); //60 fps so our dt is 1/60
 
-      Paint paint = Paint()
-        ..color = const Color.fromRGBO(244, 67, 54, 1)
-        ..strokeWidth = 1
-        ..style = PaintingStyle.stroke;
-
-      for (int i = 0; i < points.length - 1; i++) {
+      for (int i = 0; i < points.length; i++) {
         //conversion to put accurately
         Vector2 point1 = game.worldToScreen(points[i]);
-        canvas.drawCircle(
-          point1.toOffset(),
-          5,
-          paint,
-        );
+
+        if (game.camera.viewport.position.x < point1.x && point1.x < (game.camera.viewport.size.x + game.camera.viewport.position.x)
+        && game.camera.viewport.position.y < point1.y && point1.y < (game.camera.viewport.size.y + game.camera.viewport.position.y)){
+          canvas.drawCircle(
+            point1.toOffset(),
+            circleRadius,
+            outline
+          );
+          canvas.drawCircle(
+            point1.toOffset(),
+            circleRadius - (outlineWidth/2),
+            insideWhite
+          );
+        }
       }
     }
 
@@ -226,6 +232,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     if (ballScored) {
       //make ball fade out of existance!
       ball.children.first.add(OpacityEffect.fadeOut(EffectController(duration: 3.0)));
+      hoop.fadeOutAllComponents();
       scoredOpsTimer.update(dt);
     }
 

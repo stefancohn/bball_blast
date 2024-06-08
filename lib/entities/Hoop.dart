@@ -5,10 +5,12 @@ import 'package:bball_blast/BBallBlast.dart';
 import 'package:bball_blast/entities/HoopHitbox.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 
 class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBlast> {
 
   bool spawnRight;
+  late Vector2 startPos;
 
   //sprites
   late SpriteComponent hoopLowerSprite;
@@ -29,9 +31,9 @@ class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBl
 
   @override
   Future<void> onLoad() async {
-
+    startPos = _randomPos();
     //set pos
-    super.position = _randomPos();
+    super.position = Vector2(0,-75);
 
     hoopLowerSprite = SpriteComponent(
       sprite: hoopLowerImg,
@@ -92,14 +94,29 @@ class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBl
   
   @override 
   void update(double dt) {
-    moveAllChildren(1, dt);
+    //check to see if move all children
+    moveAllChildren(55, dt);
   }
 
   Vector2 getSuperPosition() {
     return super.position;
   }
 
+  //move all children for things like the intro scene
   void moveAllChildren(double rate, double dt) {
+    if (position.y <= startPos.y) {
+      position.y += rate*dt;
+      hoopLowerSprite.position.y += rate * dt;
+      hoopUpperSprite.position.y += rate*dt;
+      hoopCollDetect.position.y += rate*dt;
+      // Update physics bodies using setTransform
+      leftHb.body.setTransform(leftHb.body.position + Vector2(0, rate * dt), leftHb.body.angle);
+      rightHb.body.setTransform(rightHb.body.position + Vector2(0, rate * dt), rightHb.body.angle);
+    }
+  }
 
+  void fadeOutAllComponents() {
+    hoopLowerSprite.add(OpacityEffect.fadeOut(EffectController(duration: 3.0)));
+    hoopUpperSprite.add(OpacityEffect.fadeOut(EffectController(duration: 3.0)));
   }
 }

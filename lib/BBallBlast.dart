@@ -3,7 +3,6 @@ import 'package:bball_blast/entities/Ball.dart';
 import 'package:bball_blast/scenes/GameOver.dart';
 import 'package:bball_blast/scenes/MainMenu.dart';
 import 'package:bball_blast/scenes/Gameplay.dart';
-import 'package:flame/camera.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
@@ -154,10 +153,10 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     //if the ball is readytobeshot, isshot, has minimum force and the game is being played
     if (gameplaying && minForce && !gameplay.isShot && gameplay.readyToBeShot && gameplay.isDragging){
       //make ball move when thrown
-      gameplay.ball!.body.setType(BodyType.dynamic);
-      Ball.velocityRatio = 1/gameplay.ball!.body.mass;
-      gameplay.ball!.body.applyLinearImpulse(impulse);
-      gameplay.ball!.body.applyAngularImpulse(impulse.x * -1);
+      gameplay.ball.body.setType(BodyType.dynamic);
+      Ball.velocityRatio = 1/gameplay.ball.body.mass;
+      gameplay.ball.body.applyLinearImpulse(impulse);
+      gameplay.ball.body.applyAngularImpulse(impulse.x * -1);
       //print("BALL MASS: ${gameplay.ball.body.mass}");
 
 
