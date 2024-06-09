@@ -33,7 +33,7 @@ class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBl
   Future<void> onLoad() async {
     startPos = _randomPos();
     //set pos
-    super.position = Vector2(0,-75);
+    super.position = Vector2(startPos.x,-75);
 
     hoopLowerSprite = SpriteComponent(
       sprite: hoopLowerImg,
@@ -62,7 +62,6 @@ class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBl
     await game.world.add(leftHb);
 
     _addCollDetect(); 
-
     await super.onLoad();
   }
  

@@ -150,7 +150,7 @@ class Collider extends CircleComponent with CollisionCallbacks {
     paint: Paint()
       ..color = const Color.fromRGBO(244, 67, 54, 0)
   ){
-    add(CircleHitbox());
+    add(CircleHitbox(radius: 4));
   }
 
   @override

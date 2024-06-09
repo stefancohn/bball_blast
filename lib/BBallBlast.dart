@@ -46,7 +46,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     await loadMainMenuScene();
     gamePlayingDelay = Timer(0.3, onTick: ()=> gameplaying = true);
 
-    //debugMode = true;
+    debugMode = true;
 
     super.onLoad();
   }
