@@ -24,3 +24,8 @@ flutter:
   assets:
     - assets/images/
     - assets/images/skyBackground/
+  fonts:
+    - family: Score
+      fonts: 
+        - asset: assets/fonts/score.ttf
+  

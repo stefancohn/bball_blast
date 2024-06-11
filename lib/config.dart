@@ -1,6 +1,8 @@
+import 'dart:ui';
+
 import 'package:flame/game.dart';
 import 'package:flame/palette.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Gradient;
 
 double gameWidth = 375;
 double gameHeight = 812;
@@ -12,9 +14,9 @@ const double gravity = 95;
 TextPaint textPaint = TextPaint(
   style: TextStyle(
     fontSize: 48.0,
-    fontFamily: 'Arial',
-    color: BasicPalette.blue.color,
-  ),
+    fontFamily: 'Score',
+    color: Color.fromARGB(255, 255, 255, 255),
+  )
 );
 
 double outlineWidth = 3;
@@ -28,4 +30,10 @@ Paint insideWhite = Paint()
   ..color = const Color.fromARGB(255, 255, 255, 255)
   ..style = PaintingStyle.fill;
 
+final gradientPaint = Paint()
+    ..shader = Gradient.linear(
+      Offset.zero,
+      const Offset(0, 100),
+      [const Color.fromARGB(255, 255, 0, 0), Color.fromARGB(255, 255, 137, 10)],
+    );
 //30 brush stroke

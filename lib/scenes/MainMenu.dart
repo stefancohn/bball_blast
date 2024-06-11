@@ -2,13 +2,16 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:bball_blast/BBallBlast.dart';
+import 'package:bball_blast/config.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Gradient;
 
 class MainMenu extends Component with HasGameRef<BBallBlast>{ 
-  MainMenu() : super(priority: 3);
+  Sprite? logoImg;
+  SpriteComponent? logoComponent;
 
+  MainMenu() : super(priority: 3);
 
   @override
   Future<void> onLoad() async {
@@ -18,7 +21,42 @@ class MainMenu extends Component with HasGameRef<BBallBlast>{
         color: const Color(0xffadde6c),
         borderColor: const Color.fromARGB(255, 121, 30, 126),
       );
-      add(button1);
+      await add(button1);
+
+      logoImg = await game.loadSprite('ballBoomLogo.png');
+
+      logoComponent = SpriteComponent(
+        sprite: logoImg,
+        size: Vector2(310,350),
+        position: Vector2(game.camera.viewport.position.x + game.camera.viewport.size.x/2 - 3,230),
+        anchor: Anchor.center,
+      );
+
+      RectangleComponent logoGradientBackground = RectangleComponent(
+        paint: gradientPaint,
+        size: Vector2(310,350),
+        position: Vector2(game.camera.viewport.position.x + game.camera.viewport.size.x/2 - 3,230),
+        anchor: Anchor.center,
+      );
+
+      await add(logoGradientBackground);
+      await add(logoComponent!);
+  }
+
+  @override
+  void render(Canvas canvas) {
+    canvas.drawRect(Rect.fromLTRB(game.camera.viewport.position.x, game.camera.viewport.position.y, game.camera.viewport.size.x + game.camera.viewport.position.x, game.camera.viewport.size.y + game.camera.viewport.position.y), insideWhite);
+    super.render(canvas);
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    gradientPaint.shader = Gradient.linear(
+      Offset.zero,
+      const Offset(0, 200),
+      [const Color.fromARGB(255, 255, 0, 0), Color.fromARGB(255, 255, 137, 10)],
+    );
   }
 }
 

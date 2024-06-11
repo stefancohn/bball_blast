@@ -164,7 +164,7 @@ class Collider extends CircleComponent with CollisionCallbacks {
     if (other is RectangleComponent && ball.wentAboveRim) {
       BBallBlast.gameplay.ballScored = true;
     } else {
-      print(other);
+      //print(other);
     }
     super.onCollision(intersectionPoints, other);
   }

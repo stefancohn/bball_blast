@@ -43,10 +43,11 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   @override
   FutureOr<void> onLoad() async {
     game.camera.viewfinder.position.setAll(0);
+
     await loadMainMenuScene();
     gamePlayingDelay = Timer(0.3, onTick: ()=> gameplaying = true);
 
-    debugMode = true;
+    //debugMode = true;
 
     super.onLoad();
   }
@@ -147,23 +148,25 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
 
   @override
   void onPanEnd(DragEndInfo info) {
-    //make sure there is enough 'umff' for ball to be thrown 
-    minForce = enoughForce();
     
     //if the ball is readytobeshot, isshot, has minimum force and the game is being played
-    if (gameplaying && minForce && !gameplay.isShot && gameplay.readyToBeShot && gameplay.isDragging){
-      //make ball move when thrown
-      gameplay.ball.body.setType(BodyType.dynamic);
-      Ball.velocityRatio = 1/gameplay.ball.body.mass;
-      gameplay.ball.body.applyLinearImpulse(impulse);
-      gameplay.ball.body.applyAngularImpulse(impulse.x * -1);
-      //print("BALL MASS: ${gameplay.ball.body.mass}");
+    if (gameplaying) {
+      //make sure there is enough 'umff' for ball to be thrown 
+      minForce = enoughForce();
+      if (minForce && !gameplay.isShot && gameplay.readyToBeShot && gameplay.isDragging){
+        //make ball move when thrown
+        gameplay.ball.body.setType(BodyType.dynamic);
+        Ball.velocityRatio = 1/gameplay.ball.body.mass;
+        gameplay.ball.body.applyLinearImpulse(impulse);
+        gameplay.ball.body.applyAngularImpulse(impulse.x * -1);
+        //print("BALL MASS: ${gameplay.ball.body.mass}");
 
 
-      //change necessary vars 
-      gameplay.isDragging=false;
-      gameplay.isShot = true;
-      gameplay.dragBehindBall = Offset.zero;
+        //change necessary vars 
+        gameplay.isDragging=false;
+        gameplay.isShot = true;
+        gameplay.dragBehindBall = Offset.zero;
+      }
     }
   }
 
