@@ -216,7 +216,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     }
 
     //score text
-    textPaint.render(canvas, "$score", game.worldToScreen(Vector2(0, game.camera.visibleWorldRect.top+5)), anchor: Anchor.center);
+    textPaint.render(canvas, "$score", game.worldToScreen(Vector2(0, game.camera.visibleWorldRect.top+10)), anchor: Anchor.center);
   }
 
 

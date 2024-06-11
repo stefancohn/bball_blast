@@ -4,59 +4,32 @@ import 'dart:ui';
 import 'package:bball_blast/BBallBlast.dart';
 import 'package:bball_blast/config.dart';
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart' hide Gradient;
 
 class MainMenu extends Component with HasGameRef<BBallBlast>{ 
-  Sprite? logoImg;
-  SpriteComponent? logoComponent;
 
   MainMenu() : super(priority: 3);
 
   @override
   Future<void> onLoad() async {
+    LogoComponent logoComponent = LogoComponent();
+    add(logoComponent);
     RoundedButton button1 = RoundedButton(
         text: 'Level 1',
-        action: () { game.loadGameScene();},
+        action: () { 
+          logoComponent.logoComponent!.add(OpacityEffect.fadeOut(EffectController(duration: 1.0), onComplete: ()=> game.loadGameScene()));},
         color: const Color(0xffadde6c),
         borderColor: const Color.fromARGB(255, 121, 30, 126),
       );
       await add(button1);
-
-      logoImg = await game.loadSprite('ballBoomLogo.png');
-
-      logoComponent = SpriteComponent(
-        sprite: logoImg,
-        size: Vector2(310,350),
-        position: Vector2(game.camera.viewport.position.x + game.camera.viewport.size.x/2 - 3,230),
-        anchor: Anchor.center,
-      );
-
-      RectangleComponent logoGradientBackground = RectangleComponent(
-        paint: gradientPaint,
-        size: Vector2(310,350),
-        position: Vector2(game.camera.viewport.position.x + game.camera.viewport.size.x/2 - 3,230),
-        anchor: Anchor.center,
-      );
-
-      await add(logoGradientBackground);
-      await add(logoComponent!);
   }
 
   @override
   void render(Canvas canvas) {
     canvas.drawRect(Rect.fromLTRB(game.camera.viewport.position.x, game.camera.viewport.position.y, game.camera.viewport.size.x + game.camera.viewport.position.x, game.camera.viewport.size.y + game.camera.viewport.position.y), insideWhite);
     super.render(canvas);
-  }
-
-  @override
-  void update(double dt) {
-    super.update(dt);
-    gradientPaint.shader = Gradient.linear(
-      Offset.zero,
-      const Offset(0, 200),
-      [const Color.fromARGB(255, 255, 0, 0), Color.fromARGB(255, 255, 137, 10)],
-    );
   }
 }
 
@@ -117,5 +90,106 @@ class RoundedButton extends PositionComponent with TapCallbacks {
   @override
   void onTapCancel(TapCancelEvent event) {
     scale = Vector2.all(1.0);
+  }
+}
+
+class LogoComponent extends Component with HasGameRef<BBallBlast>{
+  Sprite? logoImg;
+  SpriteComponent? logoComponent;
+  RectangleComponent? logoGradientBackground;
+
+  Vector2 logoSize = Vector2(310,350);
+  late Vector2 logoPos = Vector2(game.camera.viewport.position.x + game.camera.viewport.size.x/2 - 3,230);
+
+  //for our gradient animation 
+  List<double> colorStops = [0, 0.5, 1];
+  List<Color> gradientColors = [const Color.fromARGB(255, 255, 0, 0), const Color.fromARGB(255, 255, 128, 0),const Color.fromARGB(255, 251, 255, 21)];
+
+  late var gradientPaint = Paint()
+    ..shader = Gradient.linear(
+      Offset.zero,
+      const Offset(0, 350),
+      gradientColors,
+      colorStops,
+      TileMode.mirror,
+  );
+
+  LogoComponent();
+
+  @override
+  Future<void> onLoad() async {
+    logoImg = await game.loadSprite('ballBoomLogo.png');
+
+    logoComponent = SpriteComponent(
+      sprite: logoImg,
+      size: logoSize,
+      position: logoPos,
+      anchor: Anchor.center,
+    );
+
+    logoGradientBackground = RectangleComponent(
+      paint: gradientPaint,
+      size: logoSize,
+      position: logoPos,
+      anchor: Anchor.center,
+    );
+
+    //this thing works by having a white image with transparency inside the letters 
+    //so that "under" the logoComponent is the gradient background
+    add(logoGradientBackground!);
+    add(logoComponent!);
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+
+    _animateGradient(dt);
+  }
+
+  //essentially create our own animation loop :D 
+  bool insertNewFlag = false;
+  void _animateGradient(double dt) {
+    //increase the colorStop
+    for (int i =0; i < colorStops.length; i++) {
+      colorStops[i] += 0.3*dt; 
+    }
+
+    //once a color reaches a color beyond "the end" we 
+    //add that same color to the beginning at the list at a 
+    //position off the "gradient" and we have a flag so that 
+    //this function doesn't repeatedly get called
+    var lastColor = gradientColors[gradientColors.length-1];
+    var lastStop = colorStops[colorStops.length-1];
+    if (lastStop >= 1 && !insertNewFlag) {
+      colorStops.insert(0, -0.5);
+      gradientColors.insert(0, lastColor);
+      insertNewFlag = true;
+    }
+    
+    //once the second to last color reaches "the end" we have 
+    //to calibrate our list by removing the previous last color
+    //and shifting the colors and stops one to the right!
+    var secondToLastStop = colorStops[colorStops.length-2];
+    if (secondToLastStop >= 1) {
+      colorStops.remove(lastStop);
+      gradientColors.remove(lastColor);
+      var lastElement = gradientColors.removeLast();
+      gradientColors.insert(0, lastElement);
+      insertNewFlag = false;
+    }
+
+    //must recreate gradient paint and reassign ti to 
+    //logoGradientBackground
+    gradientPaint = Paint()
+      ..shader = Gradient.linear(
+        Offset.zero,
+        const Offset(0, 350),
+        gradientColors,
+        colorStops,
+        TileMode.clamp
+      );
+
+    logoGradientBackground!.paint = gradientPaint;
   }
 }

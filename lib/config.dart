@@ -30,10 +30,4 @@ Paint insideWhite = Paint()
   ..color = const Color.fromARGB(255, 255, 255, 255)
   ..style = PaintingStyle.fill;
 
-final gradientPaint = Paint()
-    ..shader = Gradient.linear(
-      Offset.zero,
-      const Offset(0, 100),
-      [const Color.fromARGB(255, 255, 0, 0), Color.fromARGB(255, 255, 137, 10)],
-    );
 //30 brush stroke
