@@ -5,6 +5,7 @@ import 'package:bball_blast/scenes/MainMenu.dart';
 import 'package:bball_blast/scenes/Gameplay.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
@@ -16,6 +17,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   static late Gameplay gameplay;
   static late MainMenu mainMenu;
   static late Gameover gameover;
+
 
   //statemanagement
   bool gameplaying = false; 
@@ -45,12 +47,16 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     game.camera.viewfinder.position.setAll(0);
 
     await loadMainMenuScene();
+
     gamePlayingDelay = Timer(0.3, onTick: ()=> gameplaying = true);
 
-    //debugMode = true;
-
+    debugMode = true;
     super.onLoad();
   }
+
+  //background color to white
+  @override
+  Color backgroundColor() => const Color.fromARGB(255, 255, 255, 255);
 
 
 
@@ -87,8 +93,8 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
 
     mainMenu = MainMenu();
     currentScene = mainMenu;
+    await add(mainMenu);
 
-    add(mainMenu);
   }
 
   //load gameplay
@@ -108,7 +114,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     resetWorld();
 
     gameover = Gameover();
-    await game.add(gameover);
+    await add(gameover);
     gameplaying = false;
     currentScene  = gameover;
   }

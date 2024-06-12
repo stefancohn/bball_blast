@@ -12,7 +12,7 @@ double gameScale =0;
 const double gravity = 95;
 
 TextPaint textPaint = TextPaint(
-  style: TextStyle(
+  style: const TextStyle(
     fontSize: 48.0,
     fontFamily: 'Score',
     color: Color.fromARGB(255, 255, 255, 255),
