@@ -9,7 +9,6 @@ import 'package:flame/events.dart';
 import 'package:flutter/material.dart' hide Gradient;
 
 class MainMenu extends Component with HasGameRef<BBallBlast>{ 
-
   MainMenu() : super(priority: 0);
 
   @override
@@ -19,20 +18,18 @@ class MainMenu extends Component with HasGameRef<BBallBlast>{
 
     RoundedButton button1 = RoundedButton(
       action: () { 
-        logoComponent.logoComponent!.add(OpacityEffect.fadeOut(EffectController(duration: 1.0), onComplete: ()=> game.loadGameScene()));},
+        logoComponent.logoGradientBackground.fadeOut();
+        logoComponent.logoComponent!.add(OpacityEffect.fadeOut(EffectController(duration: 1.5), onComplete: ()=> game.loadGameScene()));},
     );
     await add(button1);
   }
 
-  @override
-  void render(Canvas canvas) {
-    super.render(canvas);
-  }
 }
 
 class RoundedButton extends PositionComponent with TapCallbacks, HasGameRef<BBallBlast> {
   final void Function() action;
   late SpriteComponent playButton;
+  late  GradientBackground gradientBackground;
 
   RoundedButton({
     required this.action,
@@ -51,12 +48,14 @@ class RoundedButton extends PositionComponent with TapCallbacks, HasGameRef<BBal
       anchor: Anchor.topLeft,
     );
 
-    GradientBackground gradientBackground = GradientBackground(
+    gradientBackground = GradientBackground(
       colors: gradientColors,
       size: playButton.size,
       position: Vector2.all(0),
-      anchor: Anchor.topLeft
+      anchor: Anchor.topLeft,
+      fadeOutSpeed: 1.5,
     );
+
     await add(gradientBackground);
     await add(playButton);
 
@@ -66,7 +65,6 @@ class RoundedButton extends PositionComponent with TapCallbacks, HasGameRef<BBal
   @override
   void update(double dt) {
     super.update(dt);
-
   }
 
   @override
@@ -77,7 +75,11 @@ class RoundedButton extends PositionComponent with TapCallbacks, HasGameRef<BBal
   @override
   void onTapUp(TapUpEvent event) {
     scale = Vector2.all(1.0);
-    action();
+    //initialize fade out
+    playButton.add(OpacityEffect.fadeOut(EffectController(duration: 1.5)));
+    gradientBackground.fadeOut();
+
+    action(); //call action
   }
 
   @override
@@ -89,6 +91,7 @@ class RoundedButton extends PositionComponent with TapCallbacks, HasGameRef<BBal
 class LogoComponent extends Component with HasGameRef<BBallBlast>{
   Sprite? logoImg;
   SpriteComponent? logoComponent;
+  late GradientBackground logoGradientBackground;
 
   Vector2 logoSize = Vector2(310,350);
   late Vector2 logoPos = Vector2(game.camera.viewport.position.x + game.camera.viewport.size.x/2 - 3,230);
@@ -108,7 +111,7 @@ class LogoComponent extends Component with HasGameRef<BBallBlast>{
       anchor: Anchor.center,
     );
 
-    GradientBackground logoGradientBackground = GradientBackground(colors: gradientColors, size: logoSize, position: logoPos, anchor: Anchor.center);
+    logoGradientBackground = GradientBackground(colors: gradientColors, size: logoSize, position: logoPos, anchor: Anchor.center, fadeOutSpeed: 1.5);
 
     //this thing works by having a white image with transparency inside the letters 
     //so that "under" the logoComponent is the gradient background

@@ -114,8 +114,8 @@ class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBl
     }
   }
 
-  void fadeOutAllComponents() {
-    hoopLowerSprite.add(OpacityEffect.fadeOut(EffectController(duration: 3.0)));
-    hoopUpperSprite.add(OpacityEffect.fadeOut(EffectController(duration: 3.0)));
+  void fadeOutAllComponents(double duration) {
+    hoopLowerSprite.add(OpacityEffect.fadeOut(EffectController(duration: duration)));
+    hoopUpperSprite.add(OpacityEffect.fadeOut(EffectController(duration: duration)));
   }
 }

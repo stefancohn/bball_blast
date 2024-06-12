@@ -12,7 +12,7 @@ import 'package:flame/effects.dart';
 import 'package:flame/extensions.dart';
 import 'package:bball_blast/config.dart';
 import 'package:flame/input.dart';
-import 'package:flame_forge2d/flame_forge2d.dart';
+import 'package:flutter/material.dart';
 
 class Gameplay extends Component with HasGameRef<BBallBlast>{
   //vars we need to be visible thoughout entire file------------------------
@@ -210,13 +210,15 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
           canvas.drawCircle(
             point1.toOffset(),
             circleRadius - (outlineWidth/2),
-            insideWhite
+            Paint()..color=const Color.fromARGB(255, 254, 255, 255)
+              ..style = PaintingStyle.fill
           );
         }
       }
     }
 
     //score text
+    textPaintBlack.render(canvas, "$score", game.worldToScreen(Vector2(0, game.camera.visibleWorldRect.top+10)), anchor: Anchor.center);
     textPaint.render(canvas, "$score", game.worldToScreen(Vector2(0, game.camera.visibleWorldRect.top+10)), anchor: Anchor.center);
   }
 
@@ -233,7 +235,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     if (ballScored) {
       //make ball fade out of existance!
       ball.children.first.add(OpacityEffect.fadeOut(EffectController(duration: 3.0)));
-      hoop.fadeOutAllComponents();
+      hoop.fadeOutAllComponents(3);
       scoredOpsTimer.update(dt);
     }
 

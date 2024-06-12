@@ -18,6 +18,13 @@ TextPaint textPaint = TextPaint(
     color: Color.fromARGB(255, 255, 255, 255),
   )
 );
+TextPaint textPaintBlack = TextPaint(
+  style: const TextStyle(
+    fontSize: 58.0,
+    fontFamily: 'Score',
+    color: Color.fromARGB(255, 0, 0, 0),
+  )
+);
 
 double outlineWidth = 3;
 double circleRadius = 4;

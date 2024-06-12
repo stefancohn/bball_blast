@@ -8,9 +8,12 @@ class GradientBackground extends RectangleComponent {
 
   List<Color> colors;
   List<double> colorStops = [0, 0.5, 1];
+
+  double? fadeOutSpeed;
+  bool fadeOutCalled = false;
   
   GradientBackground({
-    required this.colors, required Vector2 super.size, required Vector2 super.position, super.anchor, super.priority = -1
+    required this.colors, required Vector2 super.size, required Vector2 super.position, super.anchor, super.priority = -1, this.fadeOutSpeed
   });
 
   @override
@@ -30,7 +33,10 @@ class GradientBackground extends RectangleComponent {
     super.update(dt);
 
     _animateGradient(dt);
-    fadeOut(60/1.5, dt);
+
+    if (fadeOutCalled) {
+      _fadeOut((fadeOutSpeed!/dt) * dt);
+    }
   }
 
 
@@ -80,16 +86,21 @@ class GradientBackground extends RectangleComponent {
     super.paint = gradientPaint!;
   }
 
-  //fade out function
+  //fade out function inner workings
   double alpha = 255;
-  void fadeOut(double duration, double dt) {
+  void _fadeOut(double duration) {
     for (int i =0; i < colors.length; i++) {
       if (alpha > 0) {
-        alpha -= duration*dt;
+        alpha -= duration;
       } else {
         alpha = 0;
       }
       colors[i] = Color.fromARGB(alpha.round(), colors[i].red, colors[i].green, colors[i].blue);
     }
+  }
+
+  //called from the outside to intialize the fade out
+  void fadeOut() {
+    fadeOutCalled = true;
   }
 }

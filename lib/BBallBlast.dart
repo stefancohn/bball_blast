@@ -10,6 +10,7 @@ import 'package:flame/events.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:bball_blast/config.dart';
+import 'package:flutter/material.dart';
 
 
 class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, HasCollisionDetection, CollisionCallbacks, HasTimeScale {
@@ -17,6 +18,8 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   static late Gameplay gameplay;
   static late MainMenu mainMenu;
   static late Gameover gameover;
+
+  late RectangleComponent _fader;
 
 
   //statemanagement
@@ -50,13 +53,16 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
 
     gamePlayingDelay = Timer(0.3, onTick: ()=> gameplaying = true);
 
-    debugMode = true;
+    _fader = _initializeFader();
+
+    //debugMode = true;
     super.onLoad();
   }
 
   //background color to white
   @override
   Color backgroundColor() => const Color.fromARGB(255, 255, 255, 255);
+
 
 
 
@@ -102,21 +108,28 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     removeScene();
     resetWorld();
 
+    await add(_fader);
     gameplay = Gameplay();
     await add(gameplay);
     gameplaying = true;
+
+    _fader.add(OpacityEffect.fadeOut(EffectController(duration: 1.5)));
 
     currentScene = gameplay;
   }
 
   void loadGameoverScene() async {
-    removeScene();
-    resetWorld();
-
-    gameover = Gameover();
-    await add(gameover);
-    gameplaying = false;
-    currentScene  = gameover;
+    await add(_fader);
+    gameplay.hoop.fadeOutAllComponents(1.5); //fade hoop
+    //fade everything else and call appropriate functions once complete
+    _fader.add(OpacityEffect.fadeIn(EffectController(duration:1.5), onComplete: () async {
+      removeScene();
+      resetWorld();
+      gameover = Gameover();
+      await add(gameover);
+      gameplaying = false;
+      currentScene  = gameover;
+    },));
   }
   ///////////
 
@@ -158,7 +171,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     //if the ball is readytobeshot, isshot, has minimum force and the game is being played
     if (gameplaying) {
       //make sure there is enough 'umff' for ball to be thrown 
-      minForce = enoughForce();
+      minForce = _enoughForce();
       if (minForce && !gameplay.isShot && gameplay.readyToBeShot && gameplay.isDragging){
         //make ball move when thrown
         gameplay.ball.body.setType(BodyType.dynamic);
@@ -177,12 +190,20 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   }
 
   //method to make sure players don't accidently launch ball with no speed
-  bool enoughForce() {
+  bool _enoughForce() {
     if (impulse.x.abs() < minStrength && impulse.y.abs() < minStrength && gameplay.readyToBeShot) {
       gameplay.dragBehindBall = Offset.zero;
       gameplay.isDragging = false;
       return false;
     }
     return true;
+  }
+
+  RectangleComponent _initializeFader() {
+    return RectangleComponent(
+      size: camera.viewport.size,
+      position: camera.viewport.position,
+      paint: insideWhite,
+    );
   }
 } 
