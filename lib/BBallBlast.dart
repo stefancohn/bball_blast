@@ -55,7 +55,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
 
     _fader = _initializeFader();
 
-    //debugMode = true;
+    debugMode = true;
     super.onLoad();
   }
 
@@ -81,7 +81,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   void removeScene() async {
     //remove game children
     children.forEach((child) {
-      if (!(child is Forge2DWorld || child is CameraComponent)){
+      if (!(child is Forge2DWorld || child is CameraComponent|| child == _fader)){
         child.removeFromParent();
       }
     });

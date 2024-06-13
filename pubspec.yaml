@@ -28,4 +28,5 @@ flutter:
     - family: Score
       fonts: 
         - asset: assets/fonts/score.ttf
-  
+  shaders:
+    - assets/shaders/animatedGradient.frag

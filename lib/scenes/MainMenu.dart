@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:bball_blast/BBallBlast.dart';
@@ -9,19 +10,21 @@ import 'package:flame/events.dart';
 import 'package:flutter/material.dart' hide Gradient;
 
 class MainMenu extends Component with HasGameRef<BBallBlast>{ 
+  LogoComponent? logoComponent;
+  RoundedButton? button1; 
   MainMenu() : super(priority: 0);
 
   @override
   Future<void> onLoad() async {
-    LogoComponent logoComponent = LogoComponent();
-    await add(logoComponent);
+    logoComponent = LogoComponent();
+    await add(logoComponent!);
 
-    RoundedButton button1 = RoundedButton(
+    button1 = RoundedButton(
       action: () { 
-        logoComponent.logoGradientBackground.fadeOut();
-        logoComponent.logoComponent!.add(OpacityEffect.fadeOut(EffectController(duration: 1.5), onComplete: ()=> game.loadGameScene()));},
+        logoComponent!.logoGradientBackground.fadeOut();
+        logoComponent!.logoComponent!.add(OpacityEffect.fadeOut(EffectController(duration: 1.5), onComplete: ()=> game.loadGameScene()));},
     );
-    await add(button1);
+    await add(button1!);
   }
 
 }
@@ -38,7 +41,7 @@ class RoundedButton extends PositionComponent with TapCallbacks, HasGameRef<BBal
   @override
   Future<FutureOr<void>> onLoad() async {
     super.anchor = Anchor.center;
-    super.size = Vector2(200,200);
+    super.size = Vector2(150,150);
     super.position = Vector2(game.camera.viewport.position.x + game.camera.viewport.size.x/2, 550);
 
     List<Color> gradientColors = [const Color.fromARGB(255, 255, 0, 0), const Color.fromARGB(255, 255, 128, 0),const Color.fromARGB(255, 251, 255, 21)];
@@ -46,6 +49,7 @@ class RoundedButton extends PositionComponent with TapCallbacks, HasGameRef<BBal
     playButton = SpriteComponent(
       sprite: await game.loadSprite('playButton.png'),
       anchor: Anchor.topLeft,
+      size: Vector2(150,150)
     );
 
     gradientBackground = GradientBackground(
@@ -117,5 +121,24 @@ class LogoComponent extends Component with HasGameRef<BBallBlast>{
     //so that "under" the logoComponent is the gradient background
     await add(logoGradientBackground);
     await add(logoComponent!);
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+
+    _sinWaveMove(dt);
+  }
+
+  //sin wave function :D 
+  double elapsedTime = 0.0;
+  double amplitude = 1;
+  double frequency = 1.5;
+
+  void _sinWaveMove(double dt){
+    elapsedTime += dt/2;
+
+    logoComponent!.position.y += (amplitude * sin(elapsedTime * pi * frequency));
+    logoGradientBackground.position.y += (amplitude * sin(elapsedTime * pi * frequency));
   }
 }
