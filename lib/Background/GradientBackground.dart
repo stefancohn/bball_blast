@@ -103,4 +103,8 @@ class GradientBackground extends RectangleComponent {
   void fadeOut() {
     fadeOutCalled = true;
   }
+
+  Paint getSuperPaint() {
+    return super.paint; 
+  }
 }

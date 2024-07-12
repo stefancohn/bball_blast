@@ -26,9 +26,8 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: Scaffold(
-        body: Builder(
+        body: Builder(  
           builder: (context) {
-            
             // Get screen dimensions using MediaQuery, if screenSize greater than stated, change it for camera sake
             final screenSize = MediaQuery.of(context).size;
             deviceWidth = screenSize.width;

@@ -161,11 +161,18 @@ class Collider extends CircleComponent with CollisionCallbacks {
 
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other){
-    if (other is RectangleComponent && ball.wentAboveRim) {
+    //if the ball hit the hoop collider and went over it
+    if (other == (BBallBlast.gameplay.hoop.hoopCollDetect) && ball.wentAboveRim) {
       BBallBlast.gameplay.ballScored = true;
-    } else {
-      //print(other);
+    } 
+
+    //if ball hits wall
+    if (other == BBallBlast.gameplay.wallRight.children.first) {
+      BBallBlast.gameplay.wallBumpAnimation(game.worldToScreen(ball.body.position), false);
+    } else if (other == BBallBlast.gameplay.wallLeft.children.first) {
+      BBallBlast.gameplay.wallBumpAnimation(game.worldToScreen(ball.body.position), true);
     }
+    
     super.onCollision(intersectionPoints, other);
   }
 

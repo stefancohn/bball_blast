@@ -30,3 +30,4 @@ flutter:
         - asset: assets/fonts/score.ttf
   shaders:
     - assets/shaders/animatedGradient.frag
+    - assets/shaders/colorChange.frag

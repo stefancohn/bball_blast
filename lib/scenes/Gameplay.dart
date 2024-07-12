@@ -12,6 +12,9 @@ import 'package:flame/effects.dart';
 import 'package:flame/extensions.dart';
 import 'package:bball_blast/config.dart';
 import 'package:flame/input.dart';
+import 'package:flame/particles.dart';
+import 'package:flame/sprite.dart';
+import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flutter/material.dart';
 
 class Gameplay extends Component with HasGameRef<BBallBlast>{
@@ -24,7 +27,6 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   late Sprite hoopUpperImg;
   late Wall wallLeft;
   late Wall wallRight;
-  //late Wall ceiling;
 
   double linearImpulseStrengthMult = 3;
   double radius = 4;
@@ -54,10 +56,15 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   late Timer gameoverOpsTimer;
   int score = 0;
 
+   late Timer bumpedTooSoonReset = Timer(0.25, onTick: () { 
+      bumpedTooSoon = false;
+  });
+
   late ParallaxBackground bg;
 
+  late SpriteSheet wallBumpAniSpritesheet;
 
-
+  late List<Paint> wallParticlePaints;
 
 
   
@@ -69,112 +76,10 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     //set startPos of ball
     startPos = _randomBallPos();
 
-    //make ballSprite and ball
-    ballImg = await game.loadSprite('basketball.png');
-    ball = Ball(game, startPos, radius, ballImg);
-
-    //add leftWall and rightWall, and ceiling
-    wallLeft = Wall(Vector2(game.camera.visibleWorldRect.topLeft.dx-1, game.camera.visibleWorldRect.topLeft.dy), 1.0, gameHeight);
-    wallRight = Wall(Vector2(game.camera.visibleWorldRect.topRight.dx+1, game.camera.visibleWorldRect.topRight.dy), 1.0, gameHeight);
-    //ceiling = Wall(Vector2(game.camera.visibleWorldRect.topLeft.dx-1, game.camera.visibleWorldRect.topRight.dy-1), gameWidth, 1.0);
-
-    //create hoopimg, hoop, and add it
-    hoopUpperImg = await game.loadSprite('hoopUpper.png'); //just to load in beforehand
-    hoopLowerImg = await game.loadSprite('hoopLower.png');
-    hoop = Hoop(spawnRight, hoopLowerImg, hoopUpperImg);
-
-    //pause button 
-    pauseButton = ButtonComponent(
-      position:game.worldToScreen(Vector2(game.camera.visibleWorldRect.topLeft.dx, game.camera.visibleWorldRect.topLeft.dy)),
-      button: PositionComponent(
-        size: Vector2(50,50),
-      ),
-      onPressed: () { 
-        pauseOverlay = PauseOverlay(this); 
-        add(pauseOverlay);
-      },
-    );
-
-
-
-    bg = ParallaxBackground();
-    await add(bg);
-    await addAll([pauseButton]); //add components to world and game
-    await game.world.addAll([ball, wallLeft, wallRight, hoop]);
-
-    //launch method to reset scene after user scores and after user dies !
-    scoredOpsTimer = Timer(0.5, onTick: () => spawnNewScene());
-    gameoverOpsTimer = Timer(0.5, onTick: () => spawnGameoverScene());
+    //create our objects 
+    await _intiializeObjects();
 
     super.onLoad();
-  }
-
-
-
-
-  //------------OTHER METHODS-----------
-  //reset our scene
-  spawnNewScene() async {
-    //reset vars and timer
-    isShot = false;
-    ballScored = false;
-    readyToBeShot = false;
-    spawnRight = !spawnRight;
-    scoredOpsTimer.stop();
-    scoredOpsTimer.start();
-    score++; //add to score
-
-    //reset world components
-    for (var child in game.world.children) {
-      if (child is! Wall) {
-        game.world.remove(child);
-      }
-    }
-    
-    //Create and add new ball, hoop
-    startPos = _randomBallPos();
-    ball = Ball(game, startPos, radius, ballImg);
-    await game.world.add(ball);
-    hoop = Hoop(spawnRight, hoopLowerImg, hoopUpperImg);
-    await game.world.add(hoop);
-
-    //change background
-    bg.spawnRectMask();
-  }
-
-  //spawn the gameover scene when ded
-  void spawnGameoverScene() async {
-    gameoverOpsTimer.stop();
-    gameoverOpsTimer.start();
-
-    game.loadGameoverScene();
-  }
-
-  //random ball spawn
-  Vector2 _randomBallPos() {
-    double randomY = (rand.nextDouble() * 77) - 37;
-    if (spawnRight) {
-      double randomX = -16 + rand.nextDouble() * -3;
-      return Vector2(randomX,randomY);
-    } else {
-      double randomX = (rand.nextDouble() * 3) + 16;
-      return Vector2(randomX,randomY);
-    }
-  }
-
-  //need this to remove pause overlay
-  void removePauseOverlay() {
-    remove(pauseOverlay);
-    game.timeScale = 1;
-  }
-
-  //this gives a lil intro when ball and hoop get added
-  void ballSpawnIntro(double dt) {
-    if (ball.body.position.y <= startPos.y && !readyToBeShot) {
-      ball.body.position.y += 55 * dt;
-    } else {
-      readyToBeShot = true;
-    }
   }
 
 
@@ -246,7 +151,183 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
       //check if ball has missed AKA gone beyond the bottom of the world 
       if (ball.getSuperPosition().y > game.camera.visibleWorldRect.bottom + 5 && !ballScored) {
         gameoverOpsTimer.update(dt); //start gameover operations
+        ball.collider.removeFromParent();
       }
     }
+
+    bumpedTooSoonReset.update(dt);
   }
+
+
+
+
+  //------------OTHER METHODS-----------
+  //reset our scene
+  spawnNewScene() async {
+    //reset vars and timer
+    isShot = false;
+    ballScored = false;
+    readyToBeShot = false;
+    spawnRight = !spawnRight;
+    scoredOpsTimer.stop();
+    scoredOpsTimer.start();
+    score++; //add to score
+
+    //reset world components
+    for (var child in game.world.children) {
+      if (child is! Wall) {
+        game.world.remove(child);
+      }
+    }
+    
+    //Create and add new ball, hoop
+    startPos = _randomBallPos();
+    ball = Ball(game, startPos, radius, ballImg);
+    await game.world.add(ball);
+    hoop = Hoop(spawnRight, hoopLowerImg, hoopUpperImg);
+    await game.world.add(hoop);
+
+    //change background
+    bg.spawnRectMask();
+  }
+
+  //spawn the gameover scene when ded
+  void spawnGameoverScene() async {
+    gameoverOpsTimer.stop();
+    gameoverOpsTimer.start();
+
+    game.loadGameoverScene();
+  }
+
+  //random ball spawn
+  Vector2 _randomBallPos() {
+    double randomY = (rand.nextDouble() * 77) - 37;
+    if (spawnRight) {
+      double randomX = -16 + rand.nextDouble() * -3;
+      return Vector2(randomX,randomY);
+    } else {
+      double randomX = (rand.nextDouble() * 3) + 16;
+      return Vector2(randomX,randomY);
+    }
+  }
+
+  //need this to remove pause overlay
+  void removePauseOverlay() {
+    remove(pauseOverlay);
+    game.timeScale = 1;
+  }
+
+  //this gives a lil intro when ball and hoop get added
+  void ballSpawnIntro(double dt) {
+    if (ball.body.position.y <= startPos.y && !readyToBeShot) {
+      ball.body.position.y += 55 * dt;
+    } else {
+      readyToBeShot = true;
+    }
+  }
+
+  //method to spawn a new wall bump particle and add it to wall
+  bool bumpedTooSoon = false;
+  Future<void> wallBumpAnimation(Vector2 position, bool flip) async {
+    //make sure hasn't been bumped too soon
+    if  (!bumpedTooSoon){
+      //select a random paint from our list of paints
+      Paint paint = wallParticlePaints[rand.nextInt(wallParticlePaints.length)];
+
+      ParticleSystemComponent wallBumpShow = ParticleSystemComponent(
+        position: Vector2(position.x + 10,position.y), //manual adjustments needed
+        particle: SpriteAnimationParticle(
+          animation: wallBumpAniSpritesheet.createAnimation(row: 0, stepTime: 0.18),
+          size: Vector2(20,300),
+          overridePaint: paint
+        ),
+        anchor: Anchor.center
+      );
+
+      //if on left side of world, flip and adjust position a lil
+      if (flip) {
+        wallBumpShow.flipHorizontally();
+        wallBumpShow.x -= 27;
+      }
+      
+      //start a timer that reinstates bumpedTooSoon after .25 seconds
+      bumpedTooSoon = true;
+      bumpedTooSoonReset.start();
+
+      await add(wallBumpShow);
+    }
+  }
+
+  //initialize all objects add add them to world/game
+  Future<void> _intiializeObjects()  async {
+    //make ballSprite and ball
+    ballImg = await game.loadSprite('basketball.png');
+    ball = Ball(game, startPos, radius, ballImg);
+
+    //add leftWall and rightWall, and ceiling
+    wallLeft = Wall(Vector2(game.camera.visibleWorldRect.topLeft.dx-1, game.camera.visibleWorldRect.topLeft.dy), 1.0, gameHeight);
+    wallRight = Wall(Vector2(game.camera.visibleWorldRect.topRight.dx+1, game.camera.visibleWorldRect.topRight.dy), 1.0, gameHeight);
+    //ceiling = Wall(Vector2(game.camera.visibleWorldRect.topLeft.dx-1, game.camera.visibleWorldRect.topRight.dy-1), gameWidth, 1.0);
+
+    //create hoopimg, hoop, and add it
+    hoopUpperImg = await game.loadSprite('hoopUpper.png'); //just to load in beforehand
+    hoopLowerImg = await game.loadSprite('hoopLower.png');
+    hoop = Hoop(spawnRight, hoopLowerImg, hoopUpperImg);
+
+    //pause button 
+    pauseButton = ButtonComponent(
+      position:game.worldToScreen(Vector2(game.camera.visibleWorldRect.topLeft.dx, game.camera.visibleWorldRect.topLeft.dy)),
+      button: PositionComponent(
+        size: Vector2(50,50),
+      ),
+      onPressed: () { 
+        pauseOverlay = PauseOverlay(this); 
+        add(pauseOverlay);
+      },
+    );
+
+    //background
+    bg = ParallaxBackground(); 
+
+    await addAll([pauseButton, bg]); //add components to world and game
+    await game.world.addAll([ball, wallLeft, wallRight, hoop]);
+
+    //launch method to reset scene after user scores and after user dies !
+    scoredOpsTimer = Timer(0.5, onTick: () => spawnNewScene());
+    gameoverOpsTimer = Timer(0.5, onTick: () => spawnGameoverScene());
+
+    //load up wallbump animations 
+    Sprite wallBumpAniImg = await game.loadSprite('wallBumpAni.png');
+    wallBumpAniSpritesheet = SpriteSheet(
+      image: wallBumpAniImg.image,
+      srcSize: Vector2(75,125),
+    );
+
+    wallParticlePaints = _wallPaintsCreate();
+  }
+
+  //method to generate all the paints that will be used for our wall particle
+  List<Paint> _wallPaintsCreate() {
+    //paint list for our particle when ball hits wall
+    Paint whiteBlend = Paint()
+        ..colorFilter = const ColorFilter.mode(
+          Color.fromARGB(255, 224, 224, 224), // Change this to the desired color
+          BlendMode.modulate,
+    );
+
+    Paint grayBlend = Paint()
+        ..colorFilter = const ColorFilter.mode(
+          Color.fromARGB(255, 150, 150, 150), // Change this to the desired color
+          BlendMode.modulate,
+    );
+
+    Paint blueBlend = Paint()
+        ..colorFilter = const ColorFilter.mode(
+          Color.fromARGB(255, 8, 168, 255), // Change this to the desired color
+          BlendMode.modulate,
+    );
+
+    return [whiteBlend, grayBlend, blueBlend];
+  }
+
 }   

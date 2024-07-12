@@ -1,9 +1,12 @@
+import 'package:bball_blast/config.dart';
+import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 
 class Wall extends BodyComponent with HasGameRef<Forge2DGame>{
-  
-  Wall(Vector2 position, double width, double height) : super (
+  @override
+  Vector2 position;
+  Wall(this.position, double width, double height) : super (
     renderBody: false,
     bodyDef: BodyDef() 
       ..position = position,
@@ -16,5 +19,18 @@ class Wall extends BodyComponent with HasGameRef<Forge2DGame>{
       ]
   );
 
+  @override
+  Future<void> onLoad() {
+    RectangleComponent hitbox = RectangleComponent(
+      position: position,
+      size: Vector2(1.3, gameHeight),
+      children: [RectangleHitbox()],
+    );
+    add(hitbox);
 
+    if (position.x >= game.camera.visibleWorldRect.right) {
+      hitbox.position.x -= 1.3;
+    }
+    return super.onLoad();
+  }
 }

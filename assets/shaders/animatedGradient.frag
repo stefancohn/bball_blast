@@ -1,4 +1,4 @@
-#version 330 core
+#version 460 core
 
 #include <flutter/runtime_effect.glsl>
 
@@ -32,7 +32,7 @@ void main()
 
     //animation offset
     float speed = speed; 
-    float offset = mod(u_time * speed, 1.0);
+    float offset = mod(u_time * speed, 1);
 
     //apply offset to uv
     float offsetY = mod(uv.y + offset, 1.0);
