@@ -11,6 +11,7 @@ import 'package:flame/extensions.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:bball_blast/config.dart';
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
 
 
 class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, HasCollisionDetection, CollisionCallbacks, HasTimeScale {
@@ -32,10 +33,11 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   double minStrength = 40;
   late bool minForce;
 
+  final Database database;
 
 
   //--------CONSTRUCTOR-------------
-  BBallBlast(): super(
+  BBallBlast({required this.database}): super(
       gravity: Vector2(0,gravity),
       camera: CameraComponent.withFixedResolution(width: gameWidth, height: gameHeight),
       zoom: 8,
@@ -54,6 +56,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     gamePlayingDelay = Timer(0.3, onTick: ()=> gameplaying = true);
 
     _fader = _initializeFader();
+    await add(_fader);
 
     debugMode = true;
     super.onLoad();
@@ -101,34 +104,38 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     currentScene = mainMenu;
     await add(mainMenu);
 
+
   }
 
   //load gameplay
   void loadGameScene() async {
-    removeScene();
-    resetWorld();
+    _fader.add(OpacityEffect.fadeIn(EffectController(duration: .75), onComplete: () async {
+      removeScene();
+      resetWorld();
 
-    await add(_fader);
-    gameplay = Gameplay();
-    await add(gameplay);
-    gameplaying = true;
+      gameplay = Gameplay();
+      await add(gameplay);
+      gameplaying = true;
 
-    _fader.add(OpacityEffect.fadeOut(EffectController(duration: 1.5)));
+      _fader.add(OpacityEffect.fadeOut(EffectController(duration: .75)));
 
-    currentScene = gameplay;
+      currentScene = gameplay;
+    }));
   }
 
   void loadGameoverScene() async {
     await add(_fader);
-    gameplay.hoop.fadeOutAllComponents(1.5); //fade hoop
+    gameplay.hoop.fadeOutAllComponents(.75); //fade hoop
+
     //fade everything else and call appropriate functions once complete
-    _fader.add(OpacityEffect.fadeIn(EffectController(duration:1.5), onComplete: () async {
+    _fader.add(OpacityEffect.fadeIn(EffectController(duration:.75), onComplete: () async {
       removeScene();
       resetWorld();
       gameover = Gameover();
       await add(gameover);
       gameplaying = false;
       currentScene  = gameover;
+      _fader.add(OpacityEffect.fadeOut(EffectController(duration: .75)));
     },));
   }
   ///////////
@@ -200,10 +207,13 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   }
 
   RectangleComponent _initializeFader() {
-    return RectangleComponent(
+    RectangleComponent fader = RectangleComponent(
       size: camera.viewport.size,
       position: camera.viewport.position,
       paint: insideWhite,
+      priority: 3,
     );
+    fader.opacity = 0;
+    return fader;
   }
 } 

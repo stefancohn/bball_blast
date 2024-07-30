@@ -3,20 +3,35 @@ import 'package:bball_blast/config.dart';
 import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Flame.device.fullScreen();
-  //Flame.device.setPortrait();
+  Flame.device.setPortrait();
+  
+  //open DB at default file loc
+  final db = await openDatabase(
+    join(await getDatabasesPath(), 'bball_blast.db'),
+    onCreate: (db, version) {
+      return db.execute(
+        'CREATE TABLE highscores(score INTEGER)',
+      );
+    },
+    version: 1,
+  );
 
   runApp(
-    MyApp()
+    MyApp(db: db)
   );
 }
 
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final Database db;
+  const MyApp({super.key, required this.db});
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +49,7 @@ class MyApp extends StatelessWidget {
             deviceHeight = screenSize.height;
             
 
-            final game = BBallBlast();
+            final game = BBallBlast(database: db);
 
             return GameWidget(
               game: game,

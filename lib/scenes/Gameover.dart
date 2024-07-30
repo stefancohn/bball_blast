@@ -14,64 +14,65 @@ class Gameover extends PositionComponent with HasGameRef<BBallBlast>{
  
  late Sprite replayImage;
  SpriteComponent? replaySprite;
- 
- late GradientBackground gradientBackground;
+
+ late Vector2 replaySpriteSize = Vector2(game.camera.viewport.size.x/3, game.camera.viewport.size.x/3);
+
 
  Gameover() : super(
  );
 
-
  @override
  Future<void> onLoad() async {
-  replayImage = await game.loadSprite('playButtonWhite.png');
+  replayImage = await game.loadSprite('replayButton.png');
 
-  List<Color> gradientColors = [const Color.fromARGB(255, 255, 0, 0), const Color.fromARGB(255, 255, 128, 0),const Color.fromARGB(255, 251, 255, 21)];
 
-  gradientBackground = GradientBackground(
-      colors: gradientColors,
-      size: Vector2.zero(),
-      position: Vector2.all(0),
-      anchor: Anchor.topLeft,
-      fadeOutSpeed: 1.5,
-    );
-
-  Paint blueBlend = Paint()
+  /*Paint gradientBlend = Paint()
     ..colorFilter = const ColorFilter.mode(
       Color.fromARGB(255, 8, 168, 255), // Change this to the desired color
       BlendMode.modulate,
-  );
+    );*/
 
+  //replay button spirte
   replaySprite = SpriteComponent(
     sprite: replayImage, 
-    position: (game.camera.viewport.position),
-    paint: blueBlend
+    size: replaySpriteSize,
+    position: game.worldToScreen(Vector2(0, 28)),
+    anchor: Anchor.center
   );
 
+  GradientBackground gradientBg = GradientBackground(
+    colors: [const Color.fromARGB(255, 255, 0, 0), const Color.fromARGB(255, 255, 128, 0),const Color.fromARGB(255, 251, 255, 21)],
+    size: replaySpriteSize,
+    position: replaySprite!.position,
+    anchor: Anchor.center
+  );
+
+  //text
    gameOverText= TextBoxComponent(
      text: "Game Over",
      textRenderer: textPaint,
      position: Vector2(400,200),
    );
 
-
+    //restart
    restartButton = ButtonComponent(
-     position: Vector2(300,300),
+     position: replaySprite!.position,
      button: PositionComponent(
-       size: Vector2(100,100),
+       size: replaySprite!.size,
      ),
      onPressed: ()=>game.loadGameScene(),
+     anchor: Anchor.center
    );
-  
-   add(gameOverText);
-   add(restartButton);
-   add(replaySprite!);
+
+    //add to game
+   await game.add(gameOverText);
+   await game.add(restartButton);
+   await game.add(replaySprite!);
+   await game.add(gradientBg);
  }
 
  @override
   void update(double dt) {
     super.update(dt);
-    if (replaySprite != null) {
-      replaySprite!.paint = gradientBackground.paint;
-    }
   }
 }

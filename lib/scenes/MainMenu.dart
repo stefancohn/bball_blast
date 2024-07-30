@@ -21,9 +21,8 @@ class MainMenu extends Component with HasGameRef<BBallBlast>{
 
     button1 = RoundedButton(
       action: () { 
-        logoComponent!.logoGradientBackground.fadeOut();
-        logoComponent!.logoComponent!.add(OpacityEffect.fadeOut(EffectController(duration: 1.5), onComplete: ()=> game.loadGameScene()));},
-    );
+        game.loadGameScene();
+      });
     await add(button1!);
   }
 

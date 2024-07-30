@@ -235,7 +235,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
       Paint paint = wallParticlePaints[rand.nextInt(wallParticlePaints.length)];
 
       ParticleSystemComponent wallBumpShow = ParticleSystemComponent(
-        position: Vector2(position.x + 10,position.y), //manual adjustments needed
+        position: Vector2(position.x + 25,position.y), //manual adjustments needed
         particle: SpriteAnimationParticle(
           animation: wallBumpAniSpritesheet.createAnimation(row: 0, stepTime: 0.18),
           size: Vector2(20,300),
@@ -267,7 +267,6 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     //add leftWall and rightWall, and ceiling
     wallLeft = Wall(Vector2(game.camera.visibleWorldRect.topLeft.dx-1, game.camera.visibleWorldRect.topLeft.dy), 1.0, gameHeight);
     wallRight = Wall(Vector2(game.camera.visibleWorldRect.topRight.dx+1, game.camera.visibleWorldRect.topRight.dy), 1.0, gameHeight);
-    //ceiling = Wall(Vector2(game.camera.visibleWorldRect.topLeft.dx-1, game.camera.visibleWorldRect.topRight.dy-1), gameWidth, 1.0);
 
     //create hoopimg, hoop, and add it
     hoopUpperImg = await game.loadSprite('hoopUpper.png'); //just to load in beforehand
