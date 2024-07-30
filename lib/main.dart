@@ -10,9 +10,10 @@ import 'package:sqflite/sqflite.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Flame.device.fullScreen();
-  Flame.device.setPortrait();
+  //Flame.device.setPortrait();
   
-  //open DB at default file loc
+  //open DB at default file loc and create tables
+  print(await getDatabasesPath());
   final db = await openDatabase(
     join(await getDatabasesPath(), 'bball_blast.db'),
     onCreate: (db, version) {
@@ -22,7 +23,7 @@ Future<void> main() async {
     },
     version: 1,
   );
-
+  db.delete('highscores');
   runApp(
     MyApp(db: db)
   );
