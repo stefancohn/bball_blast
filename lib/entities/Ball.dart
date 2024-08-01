@@ -168,9 +168,9 @@ class Collider extends CircleComponent with CollisionCallbacks {
 
     //if ball hits wall
     if (other == BBallBlast.gameplay.wallRight.children.first) {
-      BBallBlast.gameplay.wallBumpAnimation(game.worldToScreen(ball.body.position), false);
+      BBallBlast.gameplay.wallBumpAnimation(false);
     } else if (other == BBallBlast.gameplay.wallLeft.children.first) {
-      BBallBlast.gameplay.wallBumpAnimation(game.worldToScreen(ball.body.position), true);
+      BBallBlast.gameplay.wallBumpAnimation(true);
     }
     
     super.onCollision(intersectionPoints, other);

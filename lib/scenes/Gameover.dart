@@ -21,8 +21,7 @@ class Gameover extends PositionComponent with HasGameRef<BBallBlast>{
  late List highscoresList;
 
 
- Gameover() : super(
- );
+ Gameover() : super();
 
  @override
  Future<void> onLoad() async {
@@ -54,11 +53,21 @@ class Gameover extends PositionComponent with HasGameRef<BBallBlast>{
     anchor: Anchor.center
   );
 
+  //convert the raw map we get from our SQL db query into a nicely formatted,
+  //displayable string for high scores
+  String highscoreString = "High Scores:\n\n";
+  for (int i = 0; i < highscoresList.length; i++){
+    highscoreString = "$highscoreString${i+1}) ${highscoresList[i]['score']}\n";
+  }
+
   //text
-   gameOverText= TextBoxComponent(
-     text: "High Scores",
+   gameOverText = TextBoxComponent(
+     text: highscoreString,
      textRenderer: textPaintBlack,
-     position: Vector2(400,200),
+     position: game.worldToScreen(Vector2(0, -15)),
+     align: Anchor.center,
+     anchor: Anchor.center,
+     size: game.camera.viewport.size
    );
 
   //restart button

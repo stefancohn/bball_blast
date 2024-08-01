@@ -66,8 +66,6 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
 
   late List<Paint> wallParticlePaints;
 
-
-  
   //----------ONLOAD------------------
   @override
   FutureOr<void> onLoad() async {
@@ -105,6 +103,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
         //conversion to put accurately
         Vector2 point1 = game.worldToScreen(points[i]);
 
+        //if within bounds of world, draw trajectory circles
         if (game.camera.viewport.position.x < point1.x && point1.x < (game.camera.viewport.size.x + game.camera.viewport.position.x)
         && game.camera.viewport.position.y < point1.y && point1.y < (game.camera.viewport.size.y + game.camera.viewport.position.y)){
           canvas.drawCircle(
@@ -226,28 +225,33 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     }
   }
 
+  //
   //method to spawn a new wall bump particle and add it to wall
-  bool bumpedTooSoon = false;
-  Future<void> wallBumpAnimation(Vector2 position, bool flip) async {
+  //works via collision detect via ball collider. it calls on this method with the proper position
+  //and whether the particle should be "flipped" depending on what ball it hits
+  bool bumpedTooSoon = false; 
+  late double leftWorldToScreen = game.worldToScreen(game.camera.visibleWorldRect.topLeft.toVector2()).x; 
+  late double rightWorldToScreen = game.worldToScreen(game.camera.visibleWorldRect.topRight.toVector2()).x; 
+  Future<void> wallBumpAnimation(bool flip) async {
     //make sure hasn't been bumped too soon
     if  (!bumpedTooSoon){
       //select a random paint from our list of paints
       Paint paint = wallParticlePaints[rand.nextInt(wallParticlePaints.length)];
 
       ParticleSystemComponent wallBumpShow = ParticleSystemComponent(
-        position: Vector2(position.x + 25,position.y), //manual adjustments needed
+        position: Vector2(rightWorldToScreen - 20, game.camera.viewport.size.y), //manual adjustments needed
         particle: SpriteAnimationParticle(
-          animation: wallBumpAniSpritesheet.createAnimation(row: 0, stepTime: 0.18),
-          size: Vector2(20,300),
+          animation: wallBumpAniSpritesheet.createAnimation(row: 0, stepTime: 1.5),
+          size: Vector2(50, game.camera.viewport.size.y + 50),
           overridePaint: paint
         ),
-        anchor: Anchor.center
+        anchor: Anchor.center,
       );
 
       //if on left side of world, flip and adjust position a lil
       if (flip) {
+        wallBumpShow.x = leftWorldToScreen + 20;
         wallBumpShow.flipHorizontally();
-        wallBumpShow.x -= 27;
       }
       
       //start a timer that reinstates bumpedTooSoon after .25 seconds
@@ -299,7 +303,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     Sprite wallBumpAniImg = await game.loadSprite('wallBumpAni.png');
     wallBumpAniSpritesheet = SpriteSheet(
       image: wallBumpAniImg.image,
-      srcSize: Vector2(75,125),
+      srcSize: Vector2(76,125),
     );
 
     wallParticlePaints = _wallPaintsCreate();
@@ -310,20 +314,20 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     //paint list for our particle when ball hits wall
     Paint whiteBlend = Paint()
         ..colorFilter = const ColorFilter.mode(
-          Color.fromARGB(255, 224, 224, 224), // Change this to the desired color
-          BlendMode.modulate,
+          Color.fromARGB(200, 224, 224, 224), // Change this to the desired color
+          BlendMode.dstATop,
     );
 
     Paint grayBlend = Paint()
         ..colorFilter = const ColorFilter.mode(
-          Color.fromARGB(255, 150, 150, 150), // Change this to the desired color
-          BlendMode.modulate,
+          Color.fromARGB(200, 72, 223, 237), // Change this to the desired color
+          BlendMode.dstATop,
     );
 
     Paint blueBlend = Paint()
         ..colorFilter = const ColorFilter.mode(
-          Color.fromARGB(255, 8, 168, 255), // Change this to the desired color
-          BlendMode.modulate,
+          Color.fromARGB(200, 119, 255, 126), // Change this to the desired color
+          BlendMode.dstATop,
     );
 
     return [whiteBlend, grayBlend, blueBlend];
