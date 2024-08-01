@@ -200,7 +200,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
 
   //random ball spawn
   Vector2 _randomBallPos() {
-    double randomY = (rand.nextDouble() * 77) - 37;
+    double randomY = (rand.nextDouble() * 77) - 30;
     if (spawnRight) {
       double randomX = -16 + rand.nextDouble() * -3;
       return Vector2(randomX,randomY);
@@ -239,10 +239,10 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
       Paint paint = wallParticlePaints[rand.nextInt(wallParticlePaints.length)];
 
       ParticleSystemComponent wallBumpShow = ParticleSystemComponent(
-        position: Vector2(rightWorldToScreen - 20, game.camera.viewport.size.y), //manual adjustments needed
+        position: Vector2(rightWorldToScreen - 25, game.camera.viewport.size.y/2), //manual adjustments needed
         particle: SpriteAnimationParticle(
-          animation: wallBumpAniSpritesheet.createAnimation(row: 0, stepTime: 1.5),
-          size: Vector2(50, game.camera.viewport.size.y + 50),
+          animation: wallBumpAniSpritesheet.createAnimation(row: 0, stepTime: 3.5, from: 0, to: 20),
+          size: Vector2(50, game.camera.viewport.size.y + 30),
           overridePaint: paint
         ),
         anchor: Anchor.center,
@@ -250,7 +250,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
 
       //if on left side of world, flip and adjust position a lil
       if (flip) {
-        wallBumpShow.x = leftWorldToScreen + 20;
+        wallBumpShow.x = leftWorldToScreen + 25;
         wallBumpShow.flipHorizontally();
       }
       
@@ -312,22 +312,23 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   //method to generate all the paints that will be used for our wall particle
   List<Paint> _wallPaintsCreate() {
     //paint list for our particle when ball hits wall
+    //dst is paint, src is img
     Paint whiteBlend = Paint()
         ..colorFilter = const ColorFilter.mode(
           Color.fromARGB(200, 224, 224, 224), // Change this to the desired color
-          BlendMode.dstATop,
+          BlendMode.dstIn,
     );
 
     Paint grayBlend = Paint()
         ..colorFilter = const ColorFilter.mode(
           Color.fromARGB(200, 72, 223, 237), // Change this to the desired color
-          BlendMode.dstATop,
+          BlendMode.dstIn,
     );
 
     Paint blueBlend = Paint()
         ..colorFilter = const ColorFilter.mode(
           Color.fromARGB(200, 119, 255, 126), // Change this to the desired color
-          BlendMode.dstATop,
+          BlendMode.dstIn,
     );
 
     return [whiteBlend, grayBlend, blueBlend];

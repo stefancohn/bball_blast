@@ -23,13 +23,13 @@ class Wall extends BodyComponent with HasGameRef<Forge2DGame>{
   Future<void> onLoad() {
     RectangleComponent hitbox = RectangleComponent(
       position: position,
-      size: Vector2(1.3, gameHeight),
+      size: Vector2(1.35, gameHeight),
       children: [RectangleHitbox()],
     );
     add(hitbox);
 
     if (position.x >= game.camera.visibleWorldRect.right) {
-      hitbox.position.x -= 1.3;
+      hitbox.position.x -= 1.35;
     }
     return super.onLoad();
   }
