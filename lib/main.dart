@@ -13,7 +13,7 @@ Future<void> main() async {
   //Flame.device.setPortrait();
   
   //open DB at default file loc and create tables
-  print(await getDatabasesPath());
+  
   final db = await openDatabase(
     join(await getDatabasesPath(), 'bball_blast.db'),
     onCreate: (db, version) {

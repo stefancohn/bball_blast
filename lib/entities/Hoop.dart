@@ -2,11 +2,13 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:bball_blast/BBallBlast.dart';
+import 'package:bball_blast/entities/Backboard.dart';
 import 'package:bball_blast/entities/HoopHitbox.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 
+//this isn't just a hoop, it encompasses the hoop, its hitboxes, and the backboard if there is one 
 class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBlast> {
 
   bool spawnRight;
@@ -20,6 +22,9 @@ class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBl
   late HoopHitbox leftHb;
   late HoopHitbox rightHb;
 
+  //backboard
+  late Backboard backboard;
+
   //for collision
   late RectangleComponent hoopCollDetect;
 
@@ -27,11 +32,16 @@ class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBl
 
   Sprite hoopUpperImg;
   Sprite hoopLowerImg;
-  Hoop(this.spawnRight, this.hoopLowerImg, this.hoopUpperImg) : super(priority: 3);
+  Sprite backboardImg;
+  Hoop(this.spawnRight, this.hoopLowerImg, this.hoopUpperImg, this.backboardImg) : super(priority: 3);
 
   @override
   Future<void> onLoad() async {
+    await super.onLoad();
     startPos = _randomPos();
+
+    backboard = Backboard(Vector2(0,0), backboardImg);
+
     //set pos
     super.position = Vector2(startPos.x,-75);
 
@@ -54,6 +64,7 @@ class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBl
     //MUST ADD TO WORLD FOR PROPER BALL VISUAL EFFECT
     game.world.addAll([hoopUpperSprite, hoopLowerSprite]);
 
+
     //add both physics boxes to each side of hoop
     rightHb = HoopHitbox(Vector2(getSuperPosition().x + (5.4), getSuperPosition().y-1.25));
     await game.world.add(rightHb);
@@ -61,8 +72,11 @@ class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBl
     leftHb = HoopHitbox(Vector2(getSuperPosition().x - (5.4), getSuperPosition().y-1.25));
     await game.world.add(leftHb);
 
+
+    //add backboard
+    await game.world.add(backboard);
+
     _addCollDetect(); 
-    await super.onLoad();
   }
  
   Vector2 _randomPos() {

@@ -25,6 +25,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   late Sprite ballImg;
   late Sprite hoopLowerImg;
   late Sprite hoopUpperImg;
+  late Sprite backboardImg;
   late Wall wallLeft;
   late Wall wallRight;
 
@@ -183,7 +184,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     startPos = _randomBallPos();
     ball = Ball(game, startPos, radius, ballImg);
     await game.world.add(ball);
-    hoop = Hoop(spawnRight, hoopLowerImg, hoopUpperImg);
+    hoop = Hoop(spawnRight, hoopLowerImg, hoopUpperImg, backboardImg);
     await game.world.add(hoop);
 
     //change background
@@ -200,7 +201,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
 
   //random ball spawn
   Vector2 _randomBallPos() {
-    double randomY = (rand.nextDouble() * 77) - 30;
+    double randomY = (rand.nextDouble() * 73) - 30;
     if (spawnRight) {
       double randomX = -16 + rand.nextDouble() * -3;
       return Vector2(randomX,randomY);
@@ -275,7 +276,9 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     //create hoopimg, hoop, and add it
     hoopUpperImg = await game.loadSprite('hoopUpper.png'); //just to load in beforehand
     hoopLowerImg = await game.loadSprite('hoopLower.png');
-    hoop = Hoop(spawnRight, hoopLowerImg, hoopUpperImg);
+    backboardImg = await game.loadSprite('backboard.png');
+
+    hoop = Hoop(spawnRight, hoopLowerImg, hoopUpperImg, backboardImg);
 
     //pause button 
     pauseButton = ButtonComponent(
@@ -293,7 +296,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     bg = ParallaxBackground(); 
 
     await addAll([pauseButton, bg]); //add components to world and game
-    await game.world.addAll([ball, wallLeft, wallRight, hoop]);
+    await game.world.addAll([ball, wallLeft, wallRight, hoop,]);
 
     //launch method to reset scene after user scores and after user dies !
     scoredOpsTimer = Timer(0.5, onTick: () => spawnNewScene());
@@ -332,6 +335,10 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     );
 
     return [whiteBlend, grayBlend, blueBlend];
+  }
+
+  Future<void> _loadAllImages() async {
+    
   }
 
 }   
