@@ -120,7 +120,8 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
       baseVelocity: Vector2(2,0),
     );
 
-    //LAYERS
+    //GET LAYER FOR PARALLAX COMPONENT BY INPUTTIN CONFIG INTO
+    //LAYER CREATION
     final skyLayers = _createLayers(skyConfig);
     final bricksLayers = _createLayers(bricksConfig);
 

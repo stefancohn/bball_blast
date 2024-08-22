@@ -31,7 +31,7 @@ class MainMenu extends Component with HasGameRef<BBallBlast>{
 class RoundedButton extends PositionComponent with TapCallbacks, HasGameRef<BBallBlast> {
   final void Function() action;
   late SpriteComponent playButton;
-  late  GradientBackground gradientBackground;
+  late GradientBackground gradientBackground;
 
   RoundedButton({
     required this.action,

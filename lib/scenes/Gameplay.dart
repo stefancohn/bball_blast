@@ -26,6 +26,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   late Sprite hoopLowerImg;
   late Sprite hoopUpperImg;
   late Sprite backboardImg;
+  late Sprite wallBumpAniImg;
   late Wall wallLeft;
   late Wall wallRight;
 
@@ -265,18 +266,13 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
 
   //initialize all objects add add them to world/game
   Future<void> _intiializeObjects()  async {
+    await _loadAllImages();
     //make ballSprite and ball
-    ballImg = await game.loadSprite('basketball.png');
     ball = Ball(game, startPos, radius, ballImg);
 
     //add leftWall and rightWall, and ceiling
     wallLeft = Wall(Vector2(game.camera.visibleWorldRect.topLeft.dx-1, game.camera.visibleWorldRect.topLeft.dy), 1.0, gameHeight);
     wallRight = Wall(Vector2(game.camera.visibleWorldRect.topRight.dx+1, game.camera.visibleWorldRect.topRight.dy), 1.0, gameHeight);
-
-    //create hoopimg, hoop, and add it
-    hoopUpperImg = await game.loadSprite('hoopUpper.png'); //just to load in beforehand
-    hoopLowerImg = await game.loadSprite('hoopLower.png');
-    backboardImg = await game.loadSprite('backboard.png');
 
     hoop = Hoop(spawnRight, hoopLowerImg, hoopUpperImg, backboardImg);
 
@@ -303,7 +299,6 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     gameoverOpsTimer = Timer(0.5, onTick: () => spawnGameoverScene());
 
     //load up wallbump animations 
-    Sprite wallBumpAniImg = await game.loadSprite('wallBumpAni.png');
     wallBumpAniSpritesheet = SpriteSheet(
       image: wallBumpAniImg.image,
       srcSize: Vector2(76,125),
@@ -337,8 +332,15 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     return [whiteBlend, grayBlend, blueBlend];
   }
 
+  //CENTRAL METHOD TO LOAD IMAGES
+  //THIS WORKS BY DECLARING VARS AT START OF GAMEPLAY CLASS
+  //THEN LOADING THEM HERE AND PASSING THEM TO THE APPROPRIAT OBJECTS
+  //WE NEED THIS SO THINGS GET INITIALIZED PROPERLY
   Future<void> _loadAllImages() async {
-    
+    ballImg = await game.loadSprite('basketball.png');
+    hoopUpperImg = await game.loadSprite('hoopUpper.png');
+    hoopLowerImg = await game.loadSprite('hoopLower.png');
+    backboardImg = await game.loadSprite('backboard.png');
+    wallBumpAniImg = await game.loadSprite('wallBumpAni.png');
   }
-
 }   

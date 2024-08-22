@@ -2,7 +2,7 @@ import 'package:flame/components.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 
 class Backboard extends BodyComponent with HasGameRef<Forge2DGame> {
-  Vector2 size = Vector2(2.2, 12.5);
+  Vector2 size = Vector2(1.75, 11.5);
 
   Vector2 startPos;
   Sprite sprite;
@@ -12,6 +12,7 @@ class Backboard extends BodyComponent with HasGameRef<Forge2DGame> {
   Future<void> onLoad() async{
     //sprite and add it to body
     renderBody = false; 
+    priority = 4;
     await super.onLoad();
 
    await add(SpriteComponent(

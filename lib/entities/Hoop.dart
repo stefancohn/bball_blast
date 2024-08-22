@@ -13,6 +13,7 @@ class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBl
 
   bool spawnRight;
   late Vector2 startPos;
+  Vector2 hoopSize = Vector2(11.5, 5.75);
 
   //sprites
   late SpriteComponent hoopLowerSprite;
@@ -40,22 +41,20 @@ class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBl
     await super.onLoad();
     startPos = _randomPos();
 
-    backboard = Backboard(Vector2(0,0), backboardImg);
-
     //set pos
     super.position = Vector2(startPos.x,-75);
 
     hoopLowerSprite = SpriteComponent(
       sprite: hoopLowerImg,
-      size: Vector2(11.5, 2.875),
+      size: Vector2(hoopSize.x, hoopSize.y/2),
       anchor: Anchor.center,
-      priority: 4,
+      priority: 3,
       position: Vector2(getSuperPosition().x,getSuperPosition().y)
     );
 
     hoopUpperSprite = SpriteComponent(
       sprite: hoopUpperImg,
-      size: Vector2(11.5, 2.875),
+      size: Vector2(hoopSize.x, hoopSize.y/2),
       anchor: Anchor.center,
       priority: 2,
       position: Vector2(getSuperPosition().x,getSuperPosition().y-2.75)
@@ -74,6 +73,8 @@ class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBl
 
 
     //add backboard
+    Vector2 backboardPos = _getBackboardPos();
+    backboard = Backboard(backboardPos, backboardImg);
     await game.world.add(backboard);
 
     _addCollDetect(); 
@@ -116,20 +117,46 @@ class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBl
   }
 
   //move all children for things like the intro scene
+  //startPos refers to where we want to component to end
   void moveAllChildren(double rate, double dt) {
     if (position.y <= startPos.y) {
       position.y += rate*dt;
       hoopLowerSprite.position.y += rate * dt;
       hoopUpperSprite.position.y += rate*dt;
       hoopCollDetect.position.y += rate*dt;
-      // Update physics bodies using setTransform
+
+      // Update PHYSICS BODUIES using setTransform. 
       leftHb.body.setTransform(leftHb.body.position + Vector2(0, rate * dt), leftHb.body.angle);
       rightHb.body.setTransform(rightHb.body.position + Vector2(0, rate * dt), rightHb.body.angle);
+      backboard.body.setTransform(backboard.body.position + Vector2(0, rate*dt), backboard.body.angle);
     }
   }
 
+  //this gets called in BBallBlast.gameoverScene to get rid of all components nicely
+  //since they are in world  they have to be removed this way 
   void fadeOutAllComponents(double duration) {
     hoopLowerSprite.add(OpacityEffect.fadeOut(EffectController(duration: duration)));
     hoopUpperSprite.add(OpacityEffect.fadeOut(EffectController(duration: duration)));
+    backboard.children.first.add(OpacityEffect.fadeOut(EffectController(duration: duration)));
+  }
+
+  //50% chance backboard will spawn
+  Vector2 _getBackboardPos() {
+    double chance = rand.nextDouble();
+    
+    //see if chance is greater than 0.5 we will spawn backboard
+    if (chance >= 0.5) {
+      //if the hoop is on right adjust position properly
+      if (spawnRight) {
+        return Vector2(startPos.x + hoopSize.x/2+1.2, (getSuperPosition().y - 2 - 11.5/2));
+      }
+      //if hoop is left adjust position properly
+      return Vector2(startPos.x - hoopSize.x/2-1.2, (getSuperPosition().y - 2 - 11.5/2));
+    } 
+    //if chance is less than 0.5 we just put the position off the map. don't just get rid 
+    //of it because it makes update loop n stuff have lots more code !
+    else {
+      return Vector2(100, getSuperPosition().y);
+    }
   }
 }
