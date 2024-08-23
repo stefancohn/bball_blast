@@ -282,9 +282,11 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
       button: PositionComponent(
         size: Vector2(50,50),
       ),
-      onPressed: () { 
-        pauseOverlay = PauseOverlay(this); 
-        add(pauseOverlay);
+      onPressed: () async { 
+        await game.fader.add(OpacityEffect.to(0.5, EffectController(duration:.75), onComplete: () {
+          pauseOverlay = PauseOverlay(this); 
+          add(pauseOverlay);
+        },));
       },
     );
 
@@ -314,19 +316,19 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     Paint whiteBlend = Paint()
         ..colorFilter = const ColorFilter.mode(
           Color.fromARGB(200, 224, 224, 224), // Change this to the desired color
-          BlendMode.dstIn,
+          BlendMode.modulate,
     );
 
     Paint grayBlend = Paint()
         ..colorFilter = const ColorFilter.mode(
           Color.fromARGB(200, 72, 223, 237), // Change this to the desired color
-          BlendMode.dstIn,
+          BlendMode.modulate,
     );
 
     Paint blueBlend = Paint()
         ..colorFilter = const ColorFilter.mode(
           Color.fromARGB(200, 119, 255, 126), // Change this to the desired color
-          BlendMode.dstIn,
+          BlendMode.modulate,
     );
 
     return [whiteBlend, grayBlend, blueBlend];

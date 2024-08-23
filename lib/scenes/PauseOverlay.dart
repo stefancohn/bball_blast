@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bball_blast/BBallBlast.dart';
 import 'package:bball_blast/scenes/Gameplay.dart';
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flame/input.dart';
 
 class PauseOverlay extends Component with HasGameRef<BBallBlast> {
@@ -22,6 +23,7 @@ class PauseOverlay extends Component with HasGameRef<BBallBlast> {
       ),
       onPressed: () {
         gamep.removePauseOverlay();
+        game.fader.add(OpacityEffect.fadeOut(EffectController(duration:.75)));
       },
     );
     await add(resumeButton);

@@ -10,7 +10,6 @@ import 'package:flame/events.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:bball_blast/config.dart';
-import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
 
@@ -20,7 +19,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   static late MainMenu mainMenu;
   static late Gameover gameover;
 
-  late RectangleComponent _fader;
+  late RectangleComponent fader;
 
 
   //statemanagement
@@ -55,8 +54,8 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
 
     gamePlayingDelay = Timer(0.3, onTick: ()=> gameplaying = true);
 
-    _fader = _initializeFader();
-    await add(_fader);
+    fader = _initializeFader();
+    await add(fader);
 
     //debugMode = true;
     super.onLoad();
@@ -84,7 +83,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   void removeScene() async {
     //remove game children
     children.forEach((child) {
-      if (!(child is Forge2DWorld || child is CameraComponent|| child == _fader)){
+      if (!(child is Forge2DWorld || child is CameraComponent|| child == fader)){
         child.removeFromParent();
       }
     });
@@ -109,7 +108,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
 
   //load gameplay
   void loadGameScene() async {
-    _fader.add(OpacityEffect.fadeIn(EffectController(duration: .75), onComplete: () async {
+    fader.add(OpacityEffect.fadeIn(EffectController(duration: .75), onComplete: () async {
       removeScene();
       resetWorld();
 
@@ -117,25 +116,25 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
       await add(gameplay);
       gameplaying = true;
 
-      _fader.add(OpacityEffect.fadeOut(EffectController(duration: .75)));
+      fader.add(OpacityEffect.fadeOut(EffectController(duration: .75)));
 
       currentScene = gameplay;
     }));
   }
 
   void loadGameoverScene() async {
-    await add(_fader);
+    await add(fader);
     gameplay.hoop.fadeOutAllComponents(.75); //fade hoop
 
     //fade everything else and call appropriate functions once complete
-    _fader.add(OpacityEffect.fadeIn(EffectController(duration:.75), onComplete: () async {
+    fader.add(OpacityEffect.fadeIn(EffectController(duration:.75), onComplete: () async {
       removeScene();
       resetWorld();
       gameover = Gameover();
       await add(gameover);
       gameplaying = false;
       currentScene  = gameover;
-      _fader.add(OpacityEffect.fadeOut(EffectController(duration: .75)));
+      fader.add(OpacityEffect.fadeOut(EffectController(duration: .75)));
     },));
   }
   ///////////
