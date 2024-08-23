@@ -4,6 +4,7 @@ import 'package:bball_blast/BBallBlast.dart';
 import 'package:bball_blast/config.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 
 class Ball extends BodyComponent with HasGameRef<Forge2DGame> {
@@ -53,12 +54,10 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame> {
         priority: 3,
       )
     ],
-
   );
 
   @override
   Future<void> onLoad() async {
-
     collider = Collider(game, this);
     await game.world.add(collider);
     super.onLoad();
@@ -69,6 +68,11 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame> {
     super.update(dt);
     
     _checkBallAboveRim();
+  }
+
+  //FADE BALL METHOD FOR WHEN GAME GETS PAUSED
+  void fadeOutAllComponentsTo({required double transparency, required double duration}) {
+    children.first.add(OpacityEffect.to(transparency, EffectController(duration: duration)));
   }
 
   //need to ensure ball is above the hoop to ensure a user can't score underneath!!
@@ -137,8 +141,7 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame> {
       vel.y=-120/velocityRatio;
     }
     return vel;
-  }
-  
+  }  
 }
 
 //need to wrap ball in this collider class to attach a hitbox to it.

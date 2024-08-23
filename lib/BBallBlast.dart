@@ -210,7 +210,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
       size: camera.viewport.size,
       position: camera.viewport.position,
       paint: insideWhite,
-      priority: 3,
+      priority: 5,
     );
     fader.opacity = 0;
     return fader;

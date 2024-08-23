@@ -139,6 +139,12 @@ class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBl
     hoopUpperSprite.add(OpacityEffect.fadeOut(EffectController(duration: duration)));
     backboard.children.first.add(OpacityEffect.fadeOut(EffectController(duration: duration)));
   }
+  //SAME METHOD AS ABOVE FOR FADE TO
+  void fadeOutAllComponentsTo({required double transparency, required double duration}) {
+    hoopLowerSprite.add(OpacityEffect.to(transparency, EffectController(duration: duration)));
+    hoopUpperSprite.add(OpacityEffect.to(transparency, EffectController(duration: duration)));
+    backboard.children.first.add(OpacityEffect.to(transparency, EffectController(duration: duration)));
+  }
 
   //50% chance backboard will spawn
   Vector2 _getBackboardPos() {

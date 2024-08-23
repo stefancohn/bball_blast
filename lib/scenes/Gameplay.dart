@@ -283,6 +283,8 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
         size: Vector2(50,50),
       ),
       onPressed: () async { 
+        hoop.fadeOutAllComponentsTo(transparency: 0.5, duration: 0.75);
+        ball.fadeOutAllComponentsTo(transparency: 0.5, duration: 0.75);
         await game.fader.add(OpacityEffect.to(0.5, EffectController(duration:.75), onComplete: () {
           pauseOverlay = PauseOverlay(this); 
           add(pauseOverlay);

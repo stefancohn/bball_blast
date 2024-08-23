@@ -48,7 +48,7 @@ class Gameover extends PositionComponent with HasGameRef<BBallBlast>{
   //matching gradient bg
   GradientBackground gradientBg = GradientBackground(
     colors: [const Color.fromARGB(255, 255, 0, 0), const Color.fromARGB(255, 255, 128, 0),const Color.fromARGB(255, 251, 255, 21)],
-    size: replaySpriteSize,
+    size: replaySpriteSize - Vector2(1,1),
     position: replaySprite!.position,
     anchor: Anchor.center
   );
