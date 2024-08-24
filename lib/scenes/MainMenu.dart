@@ -40,15 +40,15 @@ class RoundedButton extends PositionComponent with TapCallbacks, HasGameRef<BBal
   @override
   Future<FutureOr<void>> onLoad() async {
     super.anchor = Anchor.center;
-    super.size = Vector2(150,150);
-    super.position = Vector2(game.camera.viewport.position.x + game.camera.viewport.size.x/2, 550);
+    super.size = Vector2(game.camera.viewport.size.x/3, game.camera.viewport.size.y/6);
+    super.position = Vector2(game.camera.viewport.position.x + game.camera.viewport.size.x/2, game.camera.viewport.position.y + (game.camera.viewport.size.y - game.camera.viewport.size.y/6));
 
     List<Color> gradientColors = [const Color.fromARGB(255, 255, 0, 0), const Color.fromARGB(255, 255, 128, 0),const Color.fromARGB(255, 251, 255, 21)];
     
     playButton = SpriteComponent(
       sprite: await game.loadSprite('playButton.png'),
       anchor: Anchor.topLeft,
-      size: Vector2(150,150)
+      size: Vector2(game.camera.viewport.size.x/3, game.camera.viewport.size.y/6)
     );
 
     gradientBackground = GradientBackground(
@@ -96,8 +96,8 @@ class LogoComponent extends Component with HasGameRef<BBallBlast>{
   SpriteComponent? logoComponent;
   late GradientBackground logoGradientBackground;
 
-  Vector2 logoSize = Vector2(310,350);
-  late Vector2 logoPos = Vector2(game.camera.viewport.position.x + game.camera.viewport.size.x/2 - 3,230);
+  //Vector2 logoSize = Vector2(310,350);
+  late Vector2 logoPos = Vector2(game.camera.viewport.position.x + game.camera.viewport.size.x/2 - 3,game.camera.viewport.position.y + game.camera.viewport.size.y/4.5);
   List<Color> gradientColors = [const Color.fromARGB(255, 255, 0, 0), const Color.fromARGB(255, 255, 128, 0),const Color.fromARGB(255, 251, 255, 21)];
 
   //constructor
@@ -105,6 +105,7 @@ class LogoComponent extends Component with HasGameRef<BBallBlast>{
 
   @override
   Future<void> onLoad() async {
+    Vector2 logoSize = Vector2(game.camera.viewport.size.x/1.5, game.camera.viewport.size.y/2.5);
     logoImg = await game.loadSprite('ballBoomLogo.png');
 
     logoComponent = SpriteComponent(

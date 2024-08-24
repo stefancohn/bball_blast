@@ -74,6 +74,10 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame> {
   void fadeOutAllComponentsTo({required double transparency, required double duration}) {
     children.first.add(OpacityEffect.to(transparency, EffectController(duration: duration)));
   }
+  //MAKE BALL OPAQUE FOR WHEN GAME IS UNPAUSED
+  void unfade({required double duration}) {
+    children.first.add(OpacityEffect.fadeIn(EffectController(duration: duration)));
+  }
 
   //need to ensure ball is above the hoop to ensure a user can't score underneath!!
   void _checkBallAboveRim() {
