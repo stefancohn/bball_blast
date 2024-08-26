@@ -27,6 +27,9 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   late Sprite hoopUpperImg;
   late Sprite backboardImg;
   late Sprite wallBumpAniImg;
+  late Sprite resumeImg;
+  late Sprite pauseImg;
+
   late Wall wallLeft;
   late Wall wallRight;
 
@@ -38,6 +41,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   //vars for pause functionality 
   late ButtonComponent pauseButton;
   late PauseOverlay pauseOverlay; 
+  bool pauseActive = false;
 
   //positional vars
   late Vector2 startPos;
@@ -277,20 +281,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     hoop = Hoop(spawnRight, hoopLowerImg, hoopUpperImg, backboardImg);
 
     //pause button 
-    pauseButton = ButtonComponent(
-      position:game.worldToScreen(Vector2(game.camera.visibleWorldRect.topLeft.dx, game.camera.visibleWorldRect.topLeft.dy)),
-      button: PositionComponent(
-        size: Vector2(50,50),
-      ),
-      onPressed: () async { 
-        hoop.fadeOutAllComponentsTo(transparency: 0.5, duration: 0.75);
-        ball.fadeOutAllComponentsTo(transparency: 0.5, duration: 0.75);
-        await game.fader.add(OpacityEffect.to(0.5, EffectController(duration:.75), onComplete: () {
-          pauseOverlay = PauseOverlay(this); 
-          add(pauseOverlay);
-        },));
-      },
-    );
+    pauseButton = _initializePauseButton();
 
     //background
     bg = ParallaxBackground(); 
@@ -310,6 +301,10 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
 
     wallParticlePaints = _wallPaintsCreate();
   }
+
+
+  //---------------------------------------INITIALIZE METHODS BELOW HERE--------------------------------------------
+
 
   //method to generate all the paints that will be used for our wall particle
   List<Paint> _wallPaintsCreate() {
@@ -336,6 +331,36 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     return [whiteBlend, grayBlend, blueBlend];
   }
 
+
+  //Codes PauseButton, it's functionality, and sprite 
+  ButtonComponent _initializePauseButton() {
+    ButtonComponent pauseButton = ButtonComponent(
+      position:game.worldToScreen(Vector2(game.camera.visibleWorldRect.topLeft.dx, game.camera.visibleWorldRect.topLeft.dy)),
+      button: PositionComponent(
+        size: Vector2(50,50),
+      ),
+      onPressed: () async { 
+        //we need to control when pause can get pressed b/c if not it can be pressed again while game is paused
+        //adn break the game
+        if (pauseActive == false) {
+          //fade all world componenets
+          hoop.fadeOutAllComponentsTo(transparency: 0, duration: 0.75);
+          ball.fadeOutAllComponentsTo(transparency: 5, duration: 0.75);
+          //add translucence effect
+          await game.fader.add(OpacityEffect.to(0.5, EffectController(duration:.75), onComplete: () {
+            //initialize pause overlay, add it, and make pauseActive true
+            pauseOverlay = PauseOverlay(this, resumeImg); 
+            add(pauseOverlay);
+            pauseActive = true;
+          },));
+        }
+      },
+    );
+
+    return pauseButton;
+  }
+
+
   //CENTRAL METHOD TO LOAD IMAGES
   //THIS WORKS BY DECLARING VARS AT START OF GAMEPLAY CLASS
   //THEN LOADING THEM HERE AND PASSING THEM TO THE APPROPRIAT OBJECTS
@@ -346,5 +371,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     hoopLowerImg = await game.loadSprite('hoopLower.png');
     backboardImg = await game.loadSprite('backboard.png');
     wallBumpAniImg = await game.loadSprite('wallBumpAni.png');
+    resumeImg = await game.loadSprite('playButtonTransparent.png');
+
   }
 }   
