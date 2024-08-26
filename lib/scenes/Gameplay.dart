@@ -332,12 +332,14 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   }
 
 
-  //Codes PauseButton, it's functionality, and sprite 
+  //Codes PauseButton: it's functionality, sprite, positiion, size
   ButtonComponent _initializePauseButton() {
     ButtonComponent pauseButton = ButtonComponent(
-      position:game.worldToScreen(Vector2(game.camera.visibleWorldRect.topLeft.dx, game.camera.visibleWorldRect.topLeft.dy)),
-      button: PositionComponent(
-        size: Vector2(50,50),
+      position:game.worldToScreen(Vector2(game.camera.visibleWorldRect.topLeft.dx + 0.5, game.camera.visibleWorldRect.topLeft.dy + 0.5)),
+      size: Vector2(game.camera.viewport.size.x/8, game.camera.viewport.size.y/12),
+      button: SpriteComponent(
+        sprite: pauseImg,
+        size: Vector2(game.camera.viewport.size.x/8, game.camera.viewport.size.y/12),
       ),
       onPressed: () async { 
         //we need to control when pause can get pressed b/c if not it can be pressed again while game is paused
@@ -372,6 +374,6 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     backboardImg = await game.loadSprite('backboard.png');
     wallBumpAniImg = await game.loadSprite('wallBumpAni.png');
     resumeImg = await game.loadSprite('playButtonTransparent.png');
-
+    pauseImg = await game.loadSprite('pauseButton.png');
   }
 }   

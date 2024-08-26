@@ -23,6 +23,8 @@ class PauseOverlay extends Component with HasGameRef<BBallBlast> {
 
   @override
   FutureOr<void> onLoad() async {
+    gamep.pauseButton.button!.add(OpacityEffect.fadeOut(EffectController(duration: 0)));
+    //initialize bg
     bg = GradientBackground(colors: gradientColors, size: Vector2.all(0), position: Vector2.all(0));
 
     //CIRCLE w/ GRADIENT COLORING
@@ -50,6 +52,7 @@ class PauseOverlay extends Component with HasGameRef<BBallBlast> {
         gamep.removePauseOverlay();
         gamep.pauseActive = false; 
         //UNFADE WORLD COMPONENTS AND FADEOUT FADE OVERLAY :O 
+        gamep.pauseButton.button!.add(OpacityEffect.fadeIn(EffectController(duration: 0.75)));
         gamep.hoop.unfade(duration: .75);
         gamep.ball.unfade(duration: .75);
         game.fader.add(OpacityEffect.fadeOut(EffectController(duration:.75)));
