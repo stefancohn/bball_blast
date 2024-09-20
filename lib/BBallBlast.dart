@@ -57,7 +57,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     fader = _initializeFader();
     await add(fader);
 
-    debugMode = true;
+    //debugMode = true;
     super.onLoad();
   }
 
@@ -183,6 +183,10 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
         gameplay.ball.body.setType(BodyType.dynamic);
         Ball.velocityRatio = 1/gameplay.ball.body.mass;
         gameplay.ball.body.applyLinearImpulse(impulse);
+        //print(impulse);
+        //print(Ball.getInitialVelToScore(gameplay.hoop.position, gameplay.ball.position) / Ball.velocityRatio);
+
+        //so ball spins
         gameplay.ball.body.applyAngularImpulse(impulse.x * -1);
         //print("BALL MASS: ${gameplay.ball.body.mass}");
 

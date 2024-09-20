@@ -269,7 +269,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   }
 
   //initialize all objects add add them to world/game
-  Future<void> _intiializeObjects()  async {
+  Future<void> _intiializeObjects() async {
     await _loadAllImages();
     //make ballSprite and ball
     ball = Ball(game, startPos, radius, ballImg);
@@ -335,7 +335,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   //Codes PauseButton: it's functionality, sprite, positiion, size
   ButtonComponent _initializePauseButton() {
     ButtonComponent pauseButton = ButtonComponent(
-      position:game.worldToScreen(Vector2(game.camera.visibleWorldRect.topLeft.dx + 0.5, game.camera.visibleWorldRect.topLeft.dy + 0.5)),
+      position:game.worldToScreen(Vector2(game.camera.visibleWorldRect.topLeft.dx + 1, game.camera.visibleWorldRect.topLeft.dy + 1)),
       size: Vector2(game.camera.viewport.size.x/8, game.camera.viewport.size.y/12),
       button: SpriteComponent(
         sprite: pauseImg,

@@ -23,6 +23,7 @@ class PauseOverlay extends Component with HasGameRef<BBallBlast> {
 
   @override
   FutureOr<void> onLoad() async {
+    //make pause button dissapear
     gamep.pauseButton.button!.add(OpacityEffect.fadeOut(EffectController(duration: 0)));
     //initialize bg
     bg = GradientBackground(colors: gradientColors, size: Vector2.all(0), position: Vector2.all(0));

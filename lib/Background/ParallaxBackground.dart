@@ -29,6 +29,10 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
 
   late int currentBgIdx;
 
+  //OceanBg config numbers
+  Vector2 fishSpeed = Vector2(6, 0);
+  Vector2 reefSpeed = Vector2(8,0);
+
   ParallaxBackground() : super(
     priority: -2,
   );
@@ -120,10 +124,19 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
       baseVelocity: Vector2(2,0),
     );
 
+    ParallaxBackgroundConfig oceanConfig = ParallaxBackgroundConfig(
+      imageLayers: {"oceanBg/bgbg.png" : Vector2(2,0), "oceanBg/fr.png" : fishSpeed, "oceanBg/gf.png" : fishSpeed * -1, 
+      "oceanBg/r2.png" : reefSpeed, "oceanBg/r1.png": reefSpeed, "oceanBg/r3.png": reefSpeed, "oceanBg/r4.png" : reefSpeed,
+      "oceanBg/r5.png" : reefSpeed, "oceanBg/r6.png" : reefSpeed, "oceanBg/r7.png" : reefSpeed, "oceanBg/r8.png" : reefSpeed,
+      "oceanBg/r9.png" : reefSpeed},
+      baseVelocity: Vector2(1,0),
+    );
+
     //GET LAYER FOR PARALLAX COMPONENT BY INPUTTIN CONFIG INTO
     //LAYER CREATION
     final skyLayers = _createLayers(skyConfig);
     final bricksLayers = _createLayers(bricksConfig);
+    final oceanLayers = _createLayers(oceanConfig);
 
     //BGs/parallaxComponents
     ParallaxComponent skyBackground = ParallaxComponent(
@@ -146,7 +159,17 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
       position: game.camera.viewport.position,
     );
 
-    List<ParallaxComponent> backgroundList = [skyBackground, bricksBackground];
+    ParallaxComponent oceanBackground = ParallaxComponent(
+      parallax: Parallax(
+        await Future.wait(oceanLayers),
+        baseVelocity: oceanConfig.baseVelocity,
+        size: game.camera.viewport.size,
+      ),
+      priority: -2,
+      position: game.camera.viewport.position,
+    );
+
+    List<ParallaxComponent> backgroundList = [skyBackground, bricksBackground, oceanBackground];
     return backgroundList;
   }
 

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:ui';
 import 'package:bball_blast/BBallBlast.dart';
 import 'package:bball_blast/config.dart';
@@ -21,8 +22,10 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame> {
   //points to draw for trajectory
   late List<Vector2> points;
 
-  //TODO: CHANGE WHEN YOU CHANGE BODY
+  //FOR GENERATE TRAJ METHODS
   static double velocityRatio = 1/5.026548245743669;
+  static List<double> randomAnglesForCoinShot = [pi/4, pi/3, pi/3.5];
+  static Random rand = Random();
 
   //how far trajectory projection should be
   static int steps = 40;
@@ -107,6 +110,25 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame> {
     }
 
     return points;
+  }
+
+  static Vector2 getInitialVelToScore(Vector2 hoopPos, Vector2 ballStartPos){
+    // Calculate the horizontal and vertical distances
+    print(hoopPos.x);
+    print(ballStartPos.x);
+    double dx = hoopPos.x - ballStartPos.x;
+    double dy = hoopPos.y - ballStartPos.y;
+
+    double angle = randomAnglesForCoinShot[rand.nextInt(3)];
+
+    // Calculate the initial velocity required
+    double v0 = sqrt((gravity * dx * dx) / (2 * (dx * tan(angle) - dy) * cos(angle) * cos(angle)));
+
+    // Calculate the components of the initial velocity
+    double vx = v0 * cos(angle);
+    double vy = v0 * sin(angle);
+
+    return Vector2(vx,vy);
   }
 
   Vector2 getSuperPosition(){
