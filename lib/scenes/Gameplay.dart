@@ -3,9 +3,10 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:bball_blast/BBallBlast.dart';
 import 'package:bball_blast/Background/ParallaxBackground.dart';
+import 'package:bball_blast/entities/Ball.dart';
+import 'package:bball_blast/entities/Coin.dart';
 import 'package:bball_blast/entities/Hoop.dart';
 import 'package:bball_blast/entities/Wall.dart';
-import 'package:bball_blast/entities/ball.dart';
 import 'package:bball_blast/scenes/PauseOverlay.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
@@ -14,13 +15,13 @@ import 'package:bball_blast/config.dart';
 import 'package:flame/input.dart';
 import 'package:flame/particles.dart';
 import 'package:flame/sprite.dart';
-import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flutter/material.dart';
 
 class Gameplay extends Component with HasGameRef<BBallBlast>{
   //vars we need to be visible thoughout entire file------------------------
   late Ball ball; 
   late Hoop hoop;
+  late Coin coin;
 
   late Sprite ballImg;
   late Sprite hoopLowerImg;
@@ -29,6 +30,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   late Sprite wallBumpAniImg;
   late Sprite resumeImg;
   late Sprite pauseImg;
+  late Sprite coinImg;
 
   late Wall wallLeft;
   late Wall wallRight;
@@ -191,6 +193,8 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     await game.world.add(ball);
     hoop = Hoop(spawnRight, hoopLowerImg, hoopUpperImg, backboardImg);
     await game.world.add(hoop);
+    coin = Coin(sprite: coinImg, hoop: hoop, ball: ball);
+    await game.world.add(coin);
 
     //change background
     bg.spawnRectMask();
@@ -238,6 +242,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   bool bumpedTooSoon = false; 
   late double leftWorldToScreen = game.worldToScreen(game.camera.visibleWorldRect.topLeft.toVector2()).x; 
   late double rightWorldToScreen = game.worldToScreen(game.camera.visibleWorldRect.topRight.toVector2()).x; 
+
   Future<void> wallBumpAnimation(bool flip) async {
     //make sure hasn't been bumped too soon
     if  (!bumpedTooSoon){
@@ -273,6 +278,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     await _loadAllImages();
     //make ballSprite and ball
     ball = Ball(game, startPos, radius, ballImg);
+    print(ball.position);
 
     //add leftWall and rightWall, and ceiling
     wallLeft = Wall(Vector2(game.camera.visibleWorldRect.topLeft.dx-1, game.camera.visibleWorldRect.topLeft.dy), 1.0, gameHeight);
@@ -286,8 +292,11 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     //background
     bg = ParallaxBackground(); 
 
+    //coin 
+    coin = Coin( ball: ball, hoop: hoop, sprite: coinImg);
+
     await addAll([pauseButton, bg]); //add components to world and game
-    await game.world.addAll([ball, wallLeft, wallRight, hoop,]);
+    await game.world.addAll([ball, wallLeft, wallRight, hoop, coin]);
 
     //launch method to reset scene after user scores and after user dies !
     scoredOpsTimer = Timer(0.5, onTick: () => spawnNewScene());
@@ -345,16 +354,10 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
         //we need to control when pause can get pressed b/c if not it can be pressed again while game is paused
         //adn break the game
         if (pauseActive == false) {
-          //fade all world componenets
-          hoop.fadeOutAllComponentsTo(transparency: 0, duration: 0.75);
-          ball.fadeOutAllComponentsTo(transparency: 5, duration: 0.75);
-          //add translucence effect
-          await game.fader.add(OpacityEffect.to(0.5, EffectController(duration:.75), onComplete: () {
-            //initialize pause overlay, add it, and make pauseActive true
-            pauseOverlay = PauseOverlay(this, resumeImg); 
-            add(pauseOverlay);
-            pauseActive = true;
-          },));
+          //initialize pause overlay, add it, and make pauseActive true
+          pauseOverlay = PauseOverlay(this, resumeImg); 
+          add(pauseOverlay);
+          pauseActive = true;
         }
       },
     );
@@ -362,6 +365,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     return pauseButton;
   }
 
+  //---------------------------------------INITIALIZE METHODS ABOVE HERE--------------------------------------------
 
   //CENTRAL METHOD TO LOAD IMAGES
   //THIS WORKS BY DECLARING VARS AT START OF GAMEPLAY CLASS
@@ -375,5 +379,6 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     wallBumpAniImg = await game.loadSprite('wallBumpAni.png');
     resumeImg = await game.loadSprite('playButtonTransparent.png');
     pauseImg = await game.loadSprite('pauseButton.png');
+    coinImg = await game.loadSprite("coin.png");
   }
 }   

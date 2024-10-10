@@ -104,6 +104,8 @@ class Hoop extends PositionComponent with CollisionCallbacks, HasGameRef<BBallBl
     await hoopCollDetect.add(RectangleHitbox());
 
     await game.world.add(hoopCollDetect);
+
+    print(hoopCollDetect.position);
   }
   
   @override 
