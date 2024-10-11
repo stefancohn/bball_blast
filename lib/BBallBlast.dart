@@ -124,7 +124,8 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
 
   void loadGameoverScene() async {
     await add(fader);
-    gameplay.hoop.fadeOutAllComponents(.75); //fade hoop
+    gameplay.hoop.fadeOutAllComponents(.75); //fade hoop and coin
+    gameplay.coin.fadeOut(.75);
 
     //fade everything else and call appropriate functions once complete
     fader.add(OpacityEffect.fadeIn(EffectController(duration:.75), onComplete: () async {

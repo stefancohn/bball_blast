@@ -278,7 +278,6 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     await _loadAllImages();
     //make ballSprite and ball
     ball = Ball(game, startPos, radius, ballImg);
-    print(ball.position);
 
     //add leftWall and rightWall, and ceiling
     wallLeft = Wall(Vector2(game.camera.visibleWorldRect.topLeft.dx-1, game.camera.visibleWorldRect.topLeft.dy), 1.0, gameHeight);
