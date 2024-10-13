@@ -10,7 +10,9 @@ double gameHeight = 812;
 double deviceWidth = 0;
 double deviceHeight = 0;
 double gameScale =0;
+
 const double gravity = 95;
+const double startingYForComponents = -75;
 
 TextPaint textPaint = TextPaint(
   style: const TextStyle(

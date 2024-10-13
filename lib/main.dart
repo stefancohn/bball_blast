@@ -11,19 +11,34 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Flame.device.fullScreen();
   //Flame.device.setPortrait();
+
+  // Delete the old database to force onCreate to run
+  //await deleteDatabase(join(await getDatabasesPath(), 'bball_blast.db'));
   
   //open DB at default file loc and create tables
-  
   final db = await openDatabase(
     join(await getDatabasesPath(), 'bball_blast.db'),
-    onCreate: (db, version) {
-      return db.execute(
+    onCreate: (db, version) async {
+      await db.execute(
         'CREATE TABLE highscores(score INTEGER)',
+      );
+      await db.execute(
+        'CREATE TABLE coins(coin INTEGER)',
       );
     },
     version: 1,
+    /*
+    onUpgrade: (db, oldVersion, newVersion) async {
+      if (oldVersion < 1) {
+        await db.execute(
+          'CREATE TABLE coins(coin INTEGER)',
+        );
+      }
+    },*/
   );
+
   db.delete('highscores');
+  db.delete('coins');
   runApp(
     MyApp(db: db)
   );

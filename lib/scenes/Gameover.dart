@@ -99,7 +99,7 @@ class Gameover extends PositionComponent with HasGameRef<BBallBlast>{
       'score': BBallBlast.gameplay.score
     }; 
 
-    //if dbList isn't full, lets grab the smallest score, check if our current score
+    //if dbList is full, lets grab the smallest score, check if our current score
     //is larger than any existing score
     if (dbList.length > 3) {
       //get int from list of maps
@@ -109,7 +109,7 @@ class Gameover extends PositionComponent with HasGameRef<BBallBlast>{
       //check if smallest high score is less than new score
       if (curScore > lowestHs) {
         shouldInsert = true;
-        db.delete('highscores', where: 'score=?', whereArgs: [lowestHs]);
+        await db.delete('highscores', where: 'score=?', whereArgs: [lowestHs]);
       }
     } else { //if db has less than 3 entries put it inside 
       shouldInsert = true;

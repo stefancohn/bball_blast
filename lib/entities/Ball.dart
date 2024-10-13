@@ -36,7 +36,7 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame> {
 
     //start body as static then set as dynamic when it is shot
     bodyDef: BodyDef()
-      ..position = Vector2(position.x, -75)
+      ..position = Vector2(position.x, startingYForComponents)
       ..type = BodyType.static
       ..linearDamping = 0,
 
@@ -164,6 +164,7 @@ class Collider extends CircleComponent with CollisionCallbacks {
 
   @override
   void update(double dt) {
+    //move collider with physical body
     super.position = Vector2(ball.getSuperPosition().x - ball.radius, ball.getSuperPosition().y - ball.radius);
     super.update(dt);
   }
@@ -180,6 +181,11 @@ class Collider extends CircleComponent with CollisionCallbacks {
       BBallBlast.gameplay.wallBumpAnimation(false);
     } else if (other == BBallBlast.gameplay.wallLeft.children.first) {
       BBallBlast.gameplay.wallBumpAnimation(true);
+    }
+
+    //if ball hits coin and not yet collected, play collected animation for coin
+    if (other == BBallBlast.gameplay.coin && !BBallBlast.gameplay.coin.collected) {
+      BBallBlast.gameplay.coin.playCollectedAnimation();
     }
     
     super.onCollision(intersectionPoints, other);

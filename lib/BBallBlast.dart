@@ -136,6 +136,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
       gameplaying = false;
       currentScene  = gameover;
       fader.add(OpacityEffect.fadeOut(EffectController(duration: .75)));
+      
     },));
   }
   ///////////

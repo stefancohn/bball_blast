@@ -203,7 +203,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   //spawn the gameover scene when ded
   void spawnGameoverScene() async {
     gameoverOpsTimer.stop();
-    gameoverOpsTimer.start();
+    //gameoverOpsTimer.start();
 
     game.loadGameoverScene();
   }
