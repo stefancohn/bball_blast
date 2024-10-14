@@ -101,7 +101,7 @@ class Gameover extends PositionComponent with HasGameRef<BBallBlast>{
 
     //if dbList is full, lets grab the smallest score, check if our current score
     //is larger than any existing score
-    if (dbList.length > 3) {
+    if (dbList.length >= 3) {
       //get int from list of maps
       int curScore = score['score']! as int;
       int lowestHs = dbList[dbList.length-1]['score']! as int;

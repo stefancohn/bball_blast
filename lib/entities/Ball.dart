@@ -3,7 +3,6 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:bball_blast/BBallBlast.dart';
 import 'package:bball_blast/config.dart';
-import 'package:bball_blast/entities/Wall.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
@@ -167,9 +166,9 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame>, ContactCallbacks 
   @override
   void beginContact(Object other, Contact contact) {
     if (other == BBallBlast.gameplay.wallRight) {
-      BBallBlast.gameplay.wallBumpAnimation(false);
+      BBallBlast.gameplay.wallBumpAnimation(isLeft: false);
     } else if (other == BBallBlast.gameplay.wallLeft) {
-      BBallBlast.gameplay.wallBumpAnimation(true);
+      BBallBlast.gameplay.wallBumpAnimation(isLeft: true);
     }
   }
 }

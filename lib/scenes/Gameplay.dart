@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-import 'dart:ui';
 import 'package:bball_blast/BBallBlast.dart';
 import 'package:bball_blast/Background/ParallaxBackground.dart';
 import 'package:bball_blast/entities/Ball.dart';
@@ -13,9 +12,10 @@ import 'package:flame/effects.dart';
 import 'package:flame/extensions.dart';
 import 'package:bball_blast/config.dart';
 import 'package:flame/input.dart';
-import 'package:flame/particles.dart';
+import 'package:flame_noise/flame_noise.dart';
 import 'package:flame/sprite.dart';
 import 'package:flutter/material.dart';
+import 'package:flame/particles.dart';
 
 class Gameplay extends Component with HasGameRef<BBallBlast>{
   //vars we need to be visible thoughout entire file------------------------
@@ -63,10 +63,6 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   late Timer scoredOpsTimer;
   late Timer gameoverOpsTimer;
   int score = 0;
-
-   late Timer bumpedTooSoonReset = Timer(0.25, onTick: () { 
-      bumpedTooSoon = false;
-  });
 
   late ParallaxBackground bg;
 
@@ -161,8 +157,6 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
         ball.collider.removeFromParent();
       }
     }
-
-    bumpedTooSoonReset.update(dt);
   }
 
 
@@ -234,16 +228,45 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     }
   }
 
-  //
-  //method to spawn a new wall bump particle and add it to wall
-  //works via collision detect via ball collider. it calls on this method with the proper position
-  //and whether the particle should be "flipped" depending on what ball it hits
-  bool bumpedTooSoon = false; 
-  late double leftWorldToScreen = game.worldToScreen(game.camera.visibleWorldRect.topLeft.toVector2()).x; 
-  late double rightWorldToScreen = game.worldToScreen(game.camera.visibleWorldRect.topRight.toVector2()).x; 
+  //make camera shake, add falling orange particles
+  Future<void> wallBumpAnimation({required bool isLeft}) async {
+    //MAKE SCREEN SHAKE
+    game.camera.viewfinder.add(
+      MoveEffect.by(
+        Vector2(5, 5),
+        NoiseEffectController(duration: 0.2, noise: PerlinNoise(frequency: 400)),
+      ),
+    );
 
-  Future<void> wallBumpAnimation(bool flip) async {
-    
+    //vars for particle
+    int particleCount = 10;
+    double xPosForParticle;
+    List<Vector2> accelForParticle = List.filled(10, Vector2.all(0)); 
+    for(int i =0; i < particleCount; i++) {accelForParticle[i] = Vector2.random()..scale(100);} //set 10 diff vals
+
+    //Set vars correctly depending on which wall
+    if (isLeft) {
+      xPosForParticle = wallLeft.body.position.x;
+    } else {
+      xPosForParticle = wallRight.body.position.x;
+      for (int i=0;i<particleCount;i++) {accelForParticle[i].x*=-1;}//change x direction if on right
+    }
+    //our particle 
+    final particle = ParticleSystemComponent(
+      particle: Particle.generate(
+        count: particleCount,  // Number of particles
+        lifespan: 3,  // How long the particles last
+        generator: (i) => AcceleratedParticle(
+          acceleration: accelForParticle.elementAt(i),
+          position: Vector2(xPosForParticle, ball.body.position.y - 5),  // Where the impact happened
+          child: CircleParticle(
+            radius: 1,
+            paint: Paint()..color = Colors.orange,
+          ),
+        ),
+      ),
+    );
+    game.world.add(particle);
   }
 
   //initialize all objects add add them to world/game
