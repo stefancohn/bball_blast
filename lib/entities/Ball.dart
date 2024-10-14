@@ -3,12 +3,13 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:bball_blast/BBallBlast.dart';
 import 'package:bball_blast/config.dart';
+import 'package:bball_blast/entities/Wall.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 
-class Ball extends BodyComponent with HasGameRef<Forge2DGame> {
+class Ball extends BodyComponent with HasGameRef<Forge2DGame>, ContactCallbacks {
   @override
   final BBallBlast game;
   @override
@@ -34,19 +35,6 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame> {
     renderBody: false,
     priority: 3,
 
-    //start body as static then set as dynamic when it is shot
-    bodyDef: BodyDef()
-      ..position = Vector2(position.x, startingYForComponents)
-      ..type = BodyType.static
-      ..linearDamping = 0,
-
-    fixtureDefs: [
-      FixtureDef(CircleShape()..radius = radius)
-        ..restitution = 0.3
-        ..density = 0.1
-        //..friction = 0.5
-    ],
-
     //add our sprite
     children: [
       SpriteComponent(
@@ -59,9 +47,35 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame> {
   );
 
   @override
+  Body createBody() {
+    final bodyDef = BodyDef(
+      position: Vector2(position.x, startingYForComponents),
+      type: BodyType.static,
+      linearDamping: 0,
+      userData: this, 
+    );
+
+    final body = world.createBody(bodyDef);
+
+    final shape = CircleShape()
+      ..radius = radius;
+
+    final fixtureDef = FixtureDef(shape)
+      ..userData = this
+      ..restitution = 0.3
+      ..density = 0.1;
+
+    body.createFixture(fixtureDef);
+
+    return body;
+  }
+
+  @override
   Future<void> onLoad() async {
+    //add collider
     collider = Collider(game, this);
     await game.world.add(collider);
+
     super.onLoad();
   }
 
@@ -148,7 +162,20 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame> {
     }
     return vel;
   }  
+
+  //contact callbacks for physics bodies
+  @override
+  void beginContact(Object other, Contact contact) {
+    if (other == BBallBlast.gameplay.wallRight) {
+      BBallBlast.gameplay.wallBumpAnimation(false);
+    } else if (other == BBallBlast.gameplay.wallLeft) {
+      BBallBlast.gameplay.wallBumpAnimation(true);
+    }
+  }
 }
+
+
+
 
 //need to wrap ball in this collider class to attach a hitbox to it.
 class Collider extends CircleComponent with CollisionCallbacks {
@@ -175,13 +202,6 @@ class Collider extends CircleComponent with CollisionCallbacks {
     if (other == (BBallBlast.gameplay.hoop.hoopCollDetect) && ball.wentAboveRim) {
       BBallBlast.gameplay.ballScored = true;
     } 
-
-    //if ball hits wall
-    if (other == BBallBlast.gameplay.wallRight.children.first) {
-      BBallBlast.gameplay.wallBumpAnimation(false);
-    } else if (other == BBallBlast.gameplay.wallLeft.children.first) {
-      BBallBlast.gameplay.wallBumpAnimation(true);
-    }
 
     //if ball hits coin and not yet collected, play collected animation for coin
     if (other == BBallBlast.gameplay.coin && !BBallBlast.gameplay.coin.collected) {

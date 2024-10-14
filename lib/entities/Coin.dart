@@ -8,7 +8,6 @@ import 'package:bball_blast/entities/Hoop.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
-import 'package:flame/particles.dart';
 import 'package:sqflite/sqflite.dart';
 
 class Coin extends SpriteComponent with HasGameRef<BBallBlast>, CollisionCallbacks {
@@ -128,7 +127,7 @@ class Coin extends SpriteComponent with HasGameRef<BBallBlast>, CollisionCallbac
       MoveEffect.by(
         Vector2(0, game.camera.viewport.size.y + 100),
         EffectController(
-          duration: 5.5
+          duration: 5.8
         )
       )
     ]);

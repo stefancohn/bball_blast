@@ -203,7 +203,6 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   //spawn the gameover scene when ded
   void spawnGameoverScene() async {
     gameoverOpsTimer.stop();
-    //gameoverOpsTimer.start();
 
     game.loadGameoverScene();
   }
@@ -244,33 +243,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   late double rightWorldToScreen = game.worldToScreen(game.camera.visibleWorldRect.topRight.toVector2()).x; 
 
   Future<void> wallBumpAnimation(bool flip) async {
-    //make sure hasn't been bumped too soon
-    if  (!bumpedTooSoon){
-      //select a random paint from our list of paints
-      Paint paint = wallParticlePaints[rand.nextInt(wallParticlePaints.length)];
-
-      ParticleSystemComponent wallBumpShow = ParticleSystemComponent(
-        position: Vector2(rightWorldToScreen - 25, game.camera.viewport.size.y/2), //manual adjustments needed
-        particle: SpriteAnimationParticle(
-          animation: wallBumpAniSpritesheet.createAnimation(row: 0, stepTime: 3.5, from: 0, to: 20),
-          size: Vector2(50, game.camera.viewport.size.y + 30),
-          overridePaint: paint
-        ),
-        anchor: Anchor.center,
-      );
-
-      //if on left side of world, flip and adjust position a lil
-      if (flip) {
-        wallBumpShow.x = leftWorldToScreen + 25;
-        wallBumpShow.flipHorizontally();
-      }
-      
-      //start a timer that reinstates bumpedTooSoon after .25 seconds
-      bumpedTooSoon = true;
-      bumpedTooSoonReset.start();
-
-      await add(wallBumpShow);
-    }
+    
   }
 
   //initialize all objects add add them to world/game

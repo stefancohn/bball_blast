@@ -102,8 +102,6 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     mainMenu = MainMenu();
     currentScene = mainMenu;
     await add(mainMenu);
-
-
   }
 
   //load gameplay
@@ -136,7 +134,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
       gameplaying = false;
       currentScene  = gameover;
       fader.add(OpacityEffect.fadeOut(EffectController(duration: .75)));
-      
+
     },));
   }
   ///////////

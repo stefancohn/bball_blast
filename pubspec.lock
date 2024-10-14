@@ -49,14 +49,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.1"
+  fast_noise:
+    dependency: transitive
+    description:
+      name: fast_noise
+      sha256: "2aa7bbde5599d2b6769750ee23536ec8a0096606fc9d10d29a3855e80715e1c6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
+  fixnum:
+    dependency: transitive
+    description:
+      name: fixnum
+      sha256: "25517a4deb0c03aa0f32fd12db525856438902d9c16536311e76cdc57b31d7d1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   flame:
     dependency: "direct main"
     description:
       name: flame
-      sha256: "79133dc46a3ff870950f41d0dc1598414e7bd7ae2c29bd9f0a9de208d9a70cb7"
+      sha256: "89d65fdb10b8c4ac46c86b8d5541e560604bf55317c01f3f558d09c4a65953c1"
       url: "https://pub.dev"
     source: hosted
-    version: "1.18.0"
+    version: "1.20.0"
   flame_forge2d:
     dependency: "direct main"
     description:
@@ -65,6 +81,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.18.1"
+  flame_noise:
+    dependency: "direct main"
+    description:
+      name: flame_noise
+      sha256: d6a40cf883acdd11c604549c2ab0cafd8966c616ac2087510320b47c4d797079
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.2+1"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -151,10 +175,10 @@ packages:
     dependency: transitive
     description:
       name: ordered_set
-      sha256: "1bfaaaee0419e43ecc9eaebd410eb4bd5039657b72011de75ff3e2915c9aac60"
+      sha256: "3129515e563a14817adebbdeee2acbb845fc69b6fc99a94349b641d1c829d5cd"
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.3"
+    version: "6.1.0"
   path:
     dependency: "direct main"
     description:
