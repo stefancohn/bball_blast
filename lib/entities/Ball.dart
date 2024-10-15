@@ -196,15 +196,17 @@ class Collider extends CircleComponent with CollisionCallbacks {
   }
 
   @override
-  void onCollision(Set<Vector2> intersectionPoints, PositionComponent other){
+  Future<void> onCollision(Set<Vector2> intersectionPoints, PositionComponent other) async {
     //if the ball hit the hoop collider and went over it
     if (other == (BBallBlast.gameplay.hoop.hoopCollDetect) && ball.wentAboveRim) {
       BBallBlast.gameplay.ballScored = true;
     } 
 
-    //if ball hits coin and not yet collected, play collected animation for coin
+    //if ball hits coin and not yet collected, play collected animation for coin &
+    //update coinAmt display
     if (other == BBallBlast.gameplay.coin && !BBallBlast.gameplay.coin.collected) {
-      BBallBlast.gameplay.coin.playCollectedAnimation();
+      await BBallBlast.gameplay.coin.playCollectedAnimation();
+      await BBallBlast.gameplay.coinDisplay.initializeCoinAmt();
     }
     
     super.onCollision(intersectionPoints, other);

@@ -4,6 +4,7 @@ import 'package:bball_blast/BBallBlast.dart';
 import 'package:bball_blast/Background/ParallaxBackground.dart';
 import 'package:bball_blast/entities/Ball.dart';
 import 'package:bball_blast/entities/Coin.dart';
+import 'package:bball_blast/entities/CoinAmtDisplay.dart';
 import 'package:bball_blast/entities/Hoop.dart';
 import 'package:bball_blast/entities/Wall.dart';
 import 'package:bball_blast/scenes/PauseOverlay.dart';
@@ -22,6 +23,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   late Ball ball; 
   late Hoop hoop;
   late Coin coin;
+  late CoinAmtDisplay coinDisplay;
 
   late Sprite ballImg;
   late Sprite hoopLowerImg;
@@ -238,6 +240,8 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
       ),
     );
 
+
+    //PARTICLE
     //vars for particle
     int particleCount = 10;
     double xPosForParticle;
@@ -251,27 +255,40 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
       xPosForParticle = wallRight.body.position.x;
       for (int i=0;i<particleCount;i++) {accelForParticle[i].x*=-1;}//change x direction if on right
     }
+
     //our particle 
     final particle = ParticleSystemComponent(
       particle: Particle.generate(
         count: particleCount,  // Number of particles
-        lifespan: 3,  // How long the particles last
+        lifespan: 2,  // How long the particles last
         generator: (i) => AcceleratedParticle(
           acceleration: accelForParticle.elementAt(i),
           position: Vector2(xPosForParticle, ball.body.position.y - 5),  // Where the impact happened
-          child: CircleParticle(
-            radius: 1,
-            paint: Paint()..color = Colors.orange,
+          child: ComputedParticle(
+            renderer: (canvas, particle) {
+              //so the color slowly fades away
+              Paint paint = Paint()..color = Colors.orange;
+              paint.color = paint.color.withOpacity(1-particle.progress);
+
+              //our circle for particle
+              canvas.drawCircle(
+                Offset.zero,
+                1,
+                paint
+              );
+            }
           ),
         ),
       ),
     );
+
     game.world.add(particle);
   }
 
   //initialize all objects add add them to world/game
   Future<void> _intiializeObjects() async {
     await _loadAllImages();
+
     //make ballSprite and ball
     ball = Ball(game, startPos, radius, ballImg);
 
@@ -284,13 +301,21 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     //pause button 
     pauseButton = _initializePauseButton();
 
+    //coin indicator and necessary vars
+    Vector2 coinAmtDisplayPos = game.worldToScreen(game.camera.visibleWorldRect.topRight.toVector2());
+    Vector2 coinAmtDisplaySize = Vector2(65,10);
+    coinAmtDisplayPos.x -= coinAmtDisplaySize.x - 5;
+    coinAmtDisplayPos.y += 10;
+
+    coinDisplay = CoinAmtDisplay(coinImg: coinImg, position: coinAmtDisplayPos, size: coinAmtDisplaySize);
+
     //background
     bg = ParallaxBackground(); 
 
     //coin 
-    coin = Coin( ball: ball, hoop: hoop, sprite: coinImg);
+    coin = Coin(ball: ball, hoop: hoop, sprite: coinImg);
 
-    await addAll([pauseButton, bg]); //add components to world and game
+    await addAll([pauseButton, bg, coinDisplay]); //add components to world and game
     await game.world.addAll([ball, wallLeft, wallRight, hoop, coin]);
 
     //launch method to reset scene after user scores and after user dies !

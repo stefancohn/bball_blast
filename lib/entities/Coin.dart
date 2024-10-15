@@ -134,7 +134,7 @@ class Coin extends SpriteComponent with HasGameRef<BBallBlast>, CollisionCallbac
 
     await add(upAndOffScreen);
 
-    iteratePlayerCoins();
+    await iteratePlayerCoins();
   }
 
   //add one to coin count in player DB 
