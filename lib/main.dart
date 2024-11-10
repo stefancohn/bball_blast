@@ -25,6 +25,9 @@ Future<void> main() async {
       await db.execute(
         'CREATE TABLE coins(coin INTEGER)',
       );
+      await db.execute(
+        'CREATE TABLE balls(ball_name VAR_CHAR(50) PRIMARY KEY NOT NULL, acquired BOOLEAN NOT NULL DEFAULT FALSE)'
+      );
     },
     version: 1,
     /*
@@ -37,8 +40,9 @@ Future<void> main() async {
     },*/
   );
 
-  db.delete('highscores');
-  db.delete('coins');
+  //for testing
+  //db.delete('highscores');
+  //db.delete('coins');
   runApp(
     MyApp(db: db)
   );

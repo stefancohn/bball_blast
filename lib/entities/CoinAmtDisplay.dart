@@ -26,7 +26,7 @@ class CoinAmtDisplay extends PositionComponent with HasGameRef<BBallBlast> {
   @override
   FutureOr<void> onLoad() async {
     //Add coin 
-    coin = SpriteComponent(sprite: coinImg, size: coinSize, position: Vector2(0,5));
+    coin = SpriteComponent(sprite: coinImg, size: coinSize, position: Vector2(0,2.5));
     await add(coin!);
 
     //get DB

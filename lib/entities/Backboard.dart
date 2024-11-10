@@ -35,7 +35,7 @@ class Backboard extends BodyComponent with HasGameRef<Forge2DGame> {
       shape,
       userData: this,
       restitution: 0.4,
-      friction: 0.5,
+      friction: 0.2,
     );
 
     final bodyDef = BodyDef(

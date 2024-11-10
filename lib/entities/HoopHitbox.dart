@@ -19,7 +19,7 @@ class HoopHitbox extends BodyComponent with CollisionCallbacks {
       FixtureDef(CircleShape()..radius = 0.2)
         ..restitution = 0.1
         ..density = 1
-        //..friction = 0.5
+        ..friction = 0.1
     ],
   );
 

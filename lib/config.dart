@@ -4,23 +4,25 @@ import 'package:flutter/material.dart' hide Gradient;
 
 double gameWidth = 375;
 double gameHeight = 812;
-double deviceWidth = 0;
-double deviceHeight = 0;
+double deviceWidth = 1;
+double deviceHeight = 1;
 double gameScale =0;
+
+double fps = 60;
 
 const double gravity = 95;
 const double startingYForComponents = -75;
 
 TextPaint textPaint = TextPaint(
   style: const TextStyle(
-    fontSize: 48.0,
+    fontSize: 30,
     fontFamily: 'Score',
     color: Color.fromARGB(255, 255, 255, 255),
   )
 );
 TextPaint textPaintBlack = TextPaint(
   style: const TextStyle(
-    fontSize: 58.0,
+    fontSize: 35,
     fontFamily: 'Score',
     color: Color.fromARGB(255, 0, 0, 0),
   )

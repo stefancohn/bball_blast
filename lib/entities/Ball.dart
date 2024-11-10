@@ -62,6 +62,7 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame>, ContactCallbacks 
     final fixtureDef = FixtureDef(shape)
       ..userData = this
       ..restitution = 0.3
+      ..friction = 0.4
       ..density = 0.1;
 
     body.createFixture(fixtureDef);

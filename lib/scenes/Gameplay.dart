@@ -17,6 +17,7 @@ import 'package:flame_noise/flame_noise.dart';
 import 'package:flame/sprite.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/particles.dart';
+import 'package:forge2d/src/dynamics/body_type.dart';
 
 class Gameplay extends Component with HasGameRef<BBallBlast>{
   //vars we need to be visible thoughout entire file------------------------
@@ -71,6 +72,10 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   late SpriteSheet wallBumpAniSpritesheet;
 
   late List<Paint> wallParticlePaints;
+
+  //vars for determining ball stuck
+  double stuckTimer = 0;
+  double stuckDuration = 2; 
 
   //----------ONLOAD------------------
   @override
@@ -149,6 +154,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
       scoredOpsTimer.update(dt);
     }
 
+    //FOR ALL METHODS INVOLVING BALL 
     if (game.world.children.contains(ball)) {
       //ball intro 
       ballSpawnIntro(dt);
@@ -158,6 +164,8 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
         gameoverOpsTimer.update(dt); //start gameover operations
         ball.collider.removeFromParent();
       }
+
+      checkBallStuck(dt);
     }
   }
 
@@ -227,6 +235,32 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
       ball.body.position.y += 55 * dt;
     } else {
       readyToBeShot = true;
+    }
+  }
+
+  //check if the ball is stuck!
+  void checkBallStuck(double dt) async {
+    //make sure ball has been shot and velocity is very low
+    if (ball.body.linearVelocity.length <= 2 && isShot) {
+      stuckTimer += dt;
+
+      //once the timer hits the max duration
+      if (stuckTimer >= stuckDuration) {
+        //reset position
+        ball.body.setTransform(startPos, 0);
+        ball.body.setType(BodyType.static);
+
+        //reset nevessary vars
+        isShot = false;
+        ballScored = false;
+        readyToBeShot = false;
+
+        //Future.delayed(const Duration(milliseconds: 10));
+      }
+
+    } //reset our timer if ball not stuck
+    else {
+      stuckTimer = 0;
     }
   }
 
@@ -304,8 +338,8 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     //coin indicator and necessary vars
     Vector2 coinAmtDisplayPos = game.worldToScreen(game.camera.visibleWorldRect.topRight.toVector2());
     Vector2 coinAmtDisplaySize = Vector2(65,10);
-    coinAmtDisplayPos.x -= coinAmtDisplaySize.x - 5;
-    coinAmtDisplayPos.y += 10;
+    coinAmtDisplayPos.x -= coinAmtDisplaySize.x + 10;
+    coinAmtDisplayPos.y += 20;
 
     coinDisplay = CoinAmtDisplay(coinImg: coinImg, position: coinAmtDisplayPos, size: coinAmtDisplaySize);
 
@@ -364,7 +398,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   //Codes PauseButton: it's functionality, sprite, positiion, size
   ButtonComponent _initializePauseButton() {
     ButtonComponent pauseButton = ButtonComponent(
-      position:game.worldToScreen(Vector2(game.camera.visibleWorldRect.topLeft.dx + 1, game.camera.visibleWorldRect.topLeft.dy + 1)),
+      position:game.worldToScreen(Vector2(game.camera.visibleWorldRect.topLeft.dx + 2, game.camera.visibleWorldRect.topLeft.dy + 2)),
       size: Vector2(game.camera.viewport.size.x/8, game.camera.viewport.size.y/12),
       button: SpriteComponent(
         sprite: pauseImg,
