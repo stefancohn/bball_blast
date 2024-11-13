@@ -7,15 +7,19 @@ import 'package:bball_blast/Background/GradientBackground.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
+import 'package:flame/input.dart';
 import 'package:flutter/material.dart' hide Gradient;
 
 class MainMenu extends Component with HasGameRef<BBallBlast>{ 
   LogoComponent? logoComponent;
   RoundedButton? button1; 
+  ButtonComponent? customizeButton;
   MainMenu() : super(priority: 0);
 
   @override
   Future<void> onLoad() async {
+    Sprite customizeButtonImg = await game.loadSprite("customizeButton.png");
+
     logoComponent = LogoComponent();
     await add(logoComponent!);
 
@@ -24,6 +28,15 @@ class MainMenu extends Component with HasGameRef<BBallBlast>{
         game.loadGameScene();
       });
     await add(button1!);
+
+    //aspecs for customize button
+    customizeButton = ButtonComponent(
+      onPressed: () => game.loadCustomizerScene(),
+      position: Vector2(button1!.position.x, button1!.position.y + button1!.size.y + game.camera.viewport.size.y/16),
+      anchor: Anchor.center,
+      button: SpriteComponent(sprite: customizeButtonImg, size: button1!.playButton.size/1.2)
+    );
+    await add(customizeButton!);
   }
 
 }
@@ -41,7 +54,7 @@ class RoundedButton extends PositionComponent with TapCallbacks, HasGameRef<BBal
   Future<FutureOr<void>> onLoad() async {
     super.anchor = Anchor.center;
     super.size = Vector2(game.camera.viewport.size.x/3, game.camera.viewport.size.y/6);
-    super.position = Vector2(game.camera.viewport.position.x + game.camera.viewport.size.x/2, game.camera.viewport.position.y + (game.camera.viewport.size.y - game.camera.viewport.size.y/6));
+    super.position = Vector2(game.camera.viewport.position.x + game.camera.viewport.size.x/2, game.camera.viewport.position.y + (game.camera.viewport.size.y - game.camera.viewport.size.y/3.2));
 
     List<Color> gradientColors = [const Color.fromARGB(255, 255, 0, 0), const Color.fromARGB(255, 255, 128, 0),const Color.fromARGB(255, 251, 255, 21)];
     
@@ -132,8 +145,8 @@ class LogoComponent extends Component with HasGameRef<BBallBlast>{
 
   //sin wave function :D 
   double elapsedTime = 0.0;
-  double amplitude = 1;
-  double frequency = 1.5;
+  double get amplitude => game.camera.viewport.size.y * 0.001;
+  double frequency = 1.2;
 
   void _sinWaveMove(double dt){
     elapsedTime += dt/2;

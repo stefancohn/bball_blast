@@ -1,7 +1,7 @@
 name: bball_blast
 description: "A new Flutter project."
 publish_to: 'none'
-version: 0.1.0
+version: 1.0.0
 
 environment:
   sdk: '>=3.3.4 <4.0.0'
@@ -16,6 +16,7 @@ dependencies:
   path: ^1.9.0
   sqflite: ^2.3.3+1
   xml: ^6.5.0
+  flame_audio: ^2.10.5
 
 dev_dependencies:
   flutter_test:
@@ -28,6 +29,8 @@ flutter:
     - assets/images/
     - assets/images/skyBackground/
     - assets/images/oceanBg/
+    - assets/images/spaceBg/
+    - assets/audio/
   fonts:
     - family: Score
       fonts: 

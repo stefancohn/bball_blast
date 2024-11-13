@@ -38,4 +38,9 @@ Paint outline = Paint()
 Paint insideWhite = Paint() 
   ..color = const Color.fromARGB(255, 255, 255, 255)
   ..style = PaintingStyle.fill;
+
+Paint orangeBg = Paint()
+    ..color = const Color.fromRGBO(253, 111, 0, 100)
+    ..style = PaintingStyle.fill;
+
 //30 brush stroke

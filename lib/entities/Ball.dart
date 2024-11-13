@@ -15,6 +15,9 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame>, ContactCallbacks 
   Vector2 position;
   double radius;
 
+  late Sprite ballImg;
+  SpriteComponent? ballSprite;
+
   //collider wrapper
   late Collider collider; 
   bool wentAboveRim = false; 
@@ -30,19 +33,10 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame>, ContactCallbacks 
   static int steps = 40;
 
 
-  Ball(this.game, this.position, this.radius, Sprite sprite) : super (
+  Ball(this.game, this.position, this.radius, this.ballImg) : super (
     renderBody: false,
     priority: 3,
 
-    //add our sprite
-    children: [
-      SpriteComponent(
-        sprite: sprite,
-        size: Vector2.all(radius*2),
-        anchor: Anchor.center,
-        priority: 3,
-      )
-    ],
   );
 
   @override
@@ -72,9 +66,20 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame>, ContactCallbacks 
 
   @override
   Future<void> onLoad() async {
+    //reset for proper coloration
+    game.impulse = Vector2.zero();
+
     //add collider
     collider = Collider(game, this);
     await game.world.add(collider);
+
+    ballSprite = SpriteComponent(
+        sprite: ballImg,
+        size: Vector2.all(radius*2),
+        anchor: Anchor.center,
+        priority: 3,
+    );
+    await add(ballSprite!);
 
     super.onLoad();
   }
@@ -84,6 +89,35 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame>, ContactCallbacks 
     super.update(dt);
     
     _checkBallAboveRim();
+
+    _forceColoration();
+  }
+
+  double forceAppliedAbsMax = 650;
+  //apply red filter over ball depending on how much force will get applied
+  Future<void> _forceColoration() async {
+    //get 0-1 num based on how much pull is given to ball
+    double forceAppliedAbs = game.impulse.x.abs() + game.impulse.y.abs();
+    double forceAppliedPerc = min((forceAppliedAbs/forceAppliedAbsMax),1.0);
+    bool entryOnce = false; //want to apply last filter only once 
+
+    //apply red filter based on intensity of pull if has not been shot
+    if (ballSprite != null && !BBallBlast.gameplay.isShot && ballSprite!.children.isEmpty) {
+        await ballSprite!.add(ColorEffect(
+          Color.fromRGBO((forceAppliedPerc * 255).round(), 33, 0, 1),
+          opacityTo: (forceAppliedPerc), //helps get smooth look
+          EffectController(duration: 0.0),
+        ));
+    } 
+    //else apply no filter when ball gets shot
+    else if (ballSprite != null && BBallBlast.gameplay.isShot && !entryOnce) {
+      await ballSprite!.add(ColorEffect(
+        const Color.fromRGBO(255, 255, 255, 1),
+        opacityTo: (forceAppliedPerc), //helps get smooth look
+        EffectController(duration: 1),
+      ));
+      entryOnce = true;
+    }
   }
 
   //FADE BALL METHOD FOR WHEN GAME GETS PAUSED
@@ -171,6 +205,9 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame>, ContactCallbacks 
     } else if (other == BBallBlast.gameplay.wallLeft) {
       BBallBlast.gameplay.wallBumpAnimation(isLeft: true);
     }
+
+    //play sound on any collision
+    
   }
 }
 

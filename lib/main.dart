@@ -10,7 +10,7 @@ import 'package:sqflite/sqflite.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Flame.device.fullScreen();
-  //Flame.device.setPortrait();
+  Flame.device.setPortrait();
 
   // Delete the old database to force onCreate to run
   //await deleteDatabase(join(await getDatabasesPath(), 'bball_blast.db'));

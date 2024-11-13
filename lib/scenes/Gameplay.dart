@@ -30,7 +30,6 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   late Sprite hoopLowerImg;
   late Sprite hoopUpperImg;
   late Sprite backboardImg;
-  late Sprite wallBumpAniImg;
   late Sprite resumeImg;
   late Sprite pauseImg;
   late Sprite coinImg;
@@ -68,10 +67,6 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   int score = 0;
 
   late ParallaxBackground bg;
-
-  late SpriteSheet wallBumpAniSpritesheet;
-
-  late List<Paint> wallParticlePaints;
 
   //vars for determining ball stuck
   double stuckTimer = 0;
@@ -255,7 +250,6 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
         ballScored = false;
         readyToBeShot = false;
 
-        //Future.delayed(const Duration(milliseconds: 10));
       }
 
     } //reset our timer if ball not stuck
@@ -355,14 +349,6 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     //launch method to reset scene after user scores and after user dies !
     scoredOpsTimer = Timer(0.5, onTick: () => spawnNewScene());
     gameoverOpsTimer = Timer(0.5, onTick: () => spawnGameoverScene());
-
-    //load up wallbump animations 
-    wallBumpAniSpritesheet = SpriteSheet(
-      image: wallBumpAniImg.image,
-      srcSize: Vector2(76,125),
-    );
-
-    wallParticlePaints = _wallPaintsCreate();
   }
 
 
@@ -430,7 +416,6 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     hoopUpperImg = await game.loadSprite('hoopUpper.png');
     hoopLowerImg = await game.loadSprite('hoopLower.png');
     backboardImg = await game.loadSprite('backboard.png');
-    wallBumpAniImg = await game.loadSprite('wallBumpAni.png');
     resumeImg = await game.loadSprite('playButtonTransparent.png');
     pauseImg = await game.loadSprite('pauseButton.png');
     coinImg = await game.loadSprite("coin.png");

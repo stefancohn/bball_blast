@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:bball_blast/entities/Ball.dart';
+import 'package:bball_blast/scenes/CustomizeMenu.dart';
 import 'package:bball_blast/scenes/GameOver.dart';
 import 'package:bball_blast/scenes/MainMenu.dart';
 import 'package:bball_blast/scenes/Gameplay.dart';
@@ -18,6 +19,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   static late Gameplay gameplay;
   static late MainMenu mainMenu;
   static late Gameover gameover;
+  static late CustomizeMenu customMenu;
 
   late RectangleComponent fader;
 
@@ -107,6 +109,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   //load gameplay
   void loadGameScene() async {
     fader.add(OpacityEffect.fadeIn(EffectController(duration: .75), onComplete: () async {
+      fader.add(OpacityEffect.fadeOut(EffectController(duration: .75)));
       removeScene();
       resetWorld();
 
@@ -114,14 +117,12 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
       await add(gameplay);
       gameplaying = true;
 
-      fader.add(OpacityEffect.fadeOut(EffectController(duration: .75)));
-
       currentScene = gameplay;
     }));
   }
 
   void loadGameoverScene() async {
-    await add(fader);
+    //await add(fader);
     gameplay.hoop.fadeOutAllComponents(.75); //fade hoop and coin
     gameplay.coin.fadeOut(.75);
 
@@ -135,6 +136,21 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
       currentScene  = gameover;
       fader.add(OpacityEffect.fadeOut(EffectController(duration: .75)));
 
+    },));
+  }
+
+  void loadCustomizerScene() async {
+    fader.add(OpacityEffect.fadeIn(EffectController(duration: .75), onComplete: () async {
+      fader.add(OpacityEffect.fadeOut(EffectController(duration: .75)));
+
+      removeScene();
+      resetWorld();
+
+      customMenu = CustomizeMenu();
+      await add(customMenu);
+      
+      gameplaying = false;
+      currentScene = customMenu; 
     },));
   }
   ///////////
