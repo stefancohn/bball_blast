@@ -59,7 +59,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     fader = _initializeFader();
     await add(fader);
 
-    //debugMode = true;
+    debugMode = true;
     super.onLoad();
   }
 

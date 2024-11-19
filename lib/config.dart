@@ -13,6 +13,8 @@ double fps = 60;
 const double gravity = 95;
 const double startingYForComponents = -75;
 
+double boxRadius = 20;
+
 TextPaint textPaint = TextPaint(
   style: const TextStyle(
     fontSize: 30,
@@ -36,11 +38,15 @@ Paint outline = Paint()
     ..style = PaintingStyle.stroke;
 
 Paint insideWhite = Paint() 
-  ..color = const Color.fromARGB(255, 255, 255, 255)
+  ..color = Color.fromARGB(255, 255, 255, 255)
   ..style = PaintingStyle.fill;
 
 Paint orangeBg = Paint()
     ..color = const Color.fromRGBO(253, 111, 0, 100)
     ..style = PaintingStyle.fill;
+
+Paint whiteBg = Paint()
+  ..color = Color.fromARGB(255, 255, 255, 255)
+  ..style = PaintingStyle.fill;
 
 //30 brush stroke
