@@ -42,7 +42,7 @@ Paint insideWhite = Paint()
   ..style = PaintingStyle.fill;
 
 Paint orangeBg = Paint()
-    ..color = const Color.fromRGBO(253, 111, 0, 100)
+    ..color = Color.fromARGB(255, 253, 110, 0)
     ..style = PaintingStyle.fill;
 
 Paint whiteBg = Paint()

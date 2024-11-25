@@ -2,9 +2,11 @@
 import 'dart:async';
 
 import 'package:bball_blast/BBallBlast.dart';
+import 'package:bball_blast/Background/ParallaxBackground.dart';
 import 'package:bball_blast/config.dart';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
+import 'package:flame/input.dart';
 import 'package:flame/text.dart';
 import 'package:flutter/material.dart';
 
@@ -17,12 +19,13 @@ TextPaint textPaintWhite = TextPaint(
 );
 
 // ignore: camel_case_types
-enum menuState {def, ball, trail, bump, bg}
+enum MenuState {def, ball, trails, bump, bg}
 
 
 
 //GODUNIT of our customize menu
 class CustomizeMenu extends Component with HasGameRef<BBallBlast>{
+  static MenuState curState = MenuState.def; 
 
   @override
   FutureOr<void> onLoad() async {
@@ -48,6 +51,8 @@ class CustomizeMenu extends Component with HasGameRef<BBallBlast>{
     );
     await add(iconContainer);
 
+    addParalaxBg();
+
     setPriority(children);
 
     return super.onLoad();
@@ -65,7 +70,189 @@ class CustomizeMenu extends Component with HasGameRef<BBallBlast>{
       if (children.elementAt(i) is _customizationIconContainer) {
         children.elementAt(i).priority = 0;
       }
+
+      //parallax containers at -1
+      if (children.elementAt(i) is ParallaxBackground) {
+        children.elementAt(i).priority = -1;
+      }
     }
+  }
+
+  //helper to make parallax bg the bg with a gray overlay
+  void addParalaxBg() async{
+    ParallaxBackground parallax = ParallaxBackground();
+    await add(parallax);
+    RectangleComponent rect = RectangleComponent(priority: -2, anchor: Anchor.center, position: game.worldToScreen(Vector2(0,0)), size: game.camera.viewport.size, paint: Paint() ..color = Color.fromARGB(107, 255, 255, 255));
+    await game.add(rect);
+  }
+}
+
+
+
+int iconsPerRowDef = 2;
+//container for all icons, includes logic for switching state and all
+class _customizationIconContainer extends PositionComponent with HasGameRef<BBallBlast> {
+  Paint bgPaint;
+  Paint borderPaint;
+  // ignore: prefer_const_constructors
+  late Rect bgRect = Rect.fromLTRB(0, 0, 50, 50);
+
+  late Sprite ballIconImg; 
+  late Sprite trailsIconImg;
+  late Sprite bgIconImg;
+  late Sprite bumpsIconImg;
+
+  double? margin; 
+  Vector2? defIconSize;
+
+  List<_icon> icons = [];
+  
+
+  //constructor
+  _customizationIconContainer({
+    required Vector2 position, required Vector2 size, required this.bgPaint, required this.borderPaint
+  }) : super (
+    position: position, 
+    size: size,
+    anchor: Anchor.center,
+    
+  ) {
+    //init bgRect, margin, iconSize
+    bgRect = Rect.fromLTWH(0,0,size.x, size.y);
+
+    margin = (size.x/10) * 0.83333;
+
+    defIconSize = Vector2((size.x/10) * 3.75, (size.y/10) * 3.3);
+  }
+
+
+  @override
+  FutureOr<void> onLoad() async {
+    //load sprites, icons
+    await _loadAllSprites();
+    await _loadAllIcons();
+
+    //render icons
+    await renderIcons();
+
+    super.onLoad();
+  }
+
+
+  //render icons
+  //iterate icons and add those of which that are of current state
+  //remove those of which that are not of current state
+  Future<void> renderIcons() async {
+    for (int i = 0; i < icons.length; i++) {
+      _icon curElement = icons.elementAt(i);
+
+      //check matching states
+      if (curElement.stateWhenRendered == CustomizeMenu.curState) {
+        await addIcon(curElement, i);
+      }
+
+      //make sure to remove if it's in the component and not in cur state
+      else if (children.contains(curElement)) {
+        curElement.removeFromParent();
+      }
+
+    }
+  }
+
+  //helper to load icons
+  Future<void> _loadAllIcons() async {
+    _icon ballIcon = _icon(bgPaint: whiteBg, borderPaint: outline, sprite: ballIconImg, stateWhenRendered: MenuState.def, stateToLeadTo: MenuState.ball);
+    _icon trailsIcon = _icon(bgPaint: whiteBg, borderPaint: outline, sprite: trailsIconImg, stateWhenRendered: MenuState.def, stateToLeadTo: MenuState.trails);
+    _icon bgIcon = _icon(bgPaint: whiteBg, borderPaint: outline, sprite: bgIconImg, stateWhenRendered: MenuState.def, stateToLeadTo: MenuState.bg);
+    _icon bumpsIcon = _icon(bgPaint: whiteBg, borderPaint: outline, sprite: bumpsIconImg, stateWhenRendered: MenuState.def, stateToLeadTo: MenuState.bump);
+
+    //add to our list
+    icons.addAll({ballIcon, trailsIcon, bgIcon, bumpsIcon});
+  }
+
+
+  //helper to load all of our sprites 
+  Future<void> _loadAllSprites() async {
+    ballIconImg = await game.loadSprite("ballMenuIcon.png");
+    trailsIconImg = await game.loadSprite("trailsIcon.png");
+    bgIconImg = await game.loadSprite("bgIcon.png");
+    bumpsIconImg = await game.loadSprite("bumpsIcon.png");
+  }
+
+
+  @override
+  void render(Canvas canvas) {
+    //render bg rectangle
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        bgRect, Radius.circular(boxRadius)
+      ),
+      bgPaint
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        bgRect, Radius.circular(boxRadius)
+      ),
+      borderPaint
+    );
+        
+    super.render(canvas);
+  }
+
+  Future<void> addIcon(_icon icon, int iconNum) async {
+    if (CustomizeMenu.curState == MenuState.def) {
+      int row = ((iconNum / iconsPerRowDef).floor()); 
+      int col = (iconNum % iconsPerRowDef);
+
+      icon.size = defIconSize!;
+      icon.position = Vector2((margin! * (col + 1)) + (icon.size.x * col), (margin! * (row+1)) + (icon.size.y * row));
+      //so we get a proper render!
+      icon.bgRect = Rect.fromLTWH(0,0,icon.size.x, icon.size.y);
+    }
+    
+    await add(icon);
+
+  }
+}
+
+
+
+
+//icon
+class _icon extends ButtonComponent with HasGameRef<BBallBlast> {
+  Paint bgPaint;
+  Paint borderPaint;
+  late Rect bgRect;
+  Sprite sprite;
+
+  MenuState stateWhenRendered;
+  MenuState stateToLeadTo;
+
+  //constructor
+  _icon({
+    required this.bgPaint, required this.borderPaint, required this.sprite, required this.stateWhenRendered, required this.stateToLeadTo
+  }) : super (
+    anchor: Anchor.topLeft,
+  ) {
+    //init bgRect
+    bgRect = Rect.fromLTWH(0,0,size.x, size.y);
+  }
+
+  @override
+  FutureOr<void> onLoad() async {
+    //rect for util
+    bgRect = Rect.fromLTWH(0, 0, size.x, size.y);
+
+    //set spritecomponent of icon
+    SpriteComponent spriteIcon = SpriteComponent(sprite: sprite, size: size, position: size/2, anchor: Anchor.center);
+    super.button = spriteIcon;
+
+    //press/release functionality
+    onPressed = () => button!.scale = Vector2.all(1.05);
+    onReleased = () => button!.scale = Vector2.all(.95);
+
+    await add(spriteIcon);
+    super.onLoad();
   }
 }
 
@@ -129,127 +316,6 @@ class MyTextBox extends TextBoxComponent {
       );
     }
     
-    super.render(canvas);
-  }
-}
-
-
-
-
-//container for all icons, includes logic for switching state and all
-class _customizationIconContainer extends PositionComponent {
-  Paint bgPaint;
-  Paint borderPaint;
-  late Rect bgRect = Rect.fromLTRB(0, 0, 50, 50);
-
-  double? margin; 
-  Vector2? iconSize;
-
-  menuState currentState = menuState.def;
-
-  List<_icon> icons = [];
-  
-
-  //constructor
-  _customizationIconContainer({
-    required Vector2 position, required Vector2 size, required this.bgPaint, required this.borderPaint
-  }) : super (
-    position: position, 
-    size: size,
-    anchor: Anchor.center,
-    
-  ) {
-    //init bgRect, margin, iconSize
-    bgRect = Rect.fromLTWH(0,0,size.x, size.y);
-
-    margin = size.x/10;
-    iconSize = Vector2((size.x/10) * 3.75, 100);
-  }
-
-  @override
-  FutureOr<void> onLoad() {
-    _icon icon = _icon(bgPaint: whiteBg, borderPaint: outline, text: "Ball");
-    addIcon(icon);
-  
-
-    super.onLoad();
-  }
-
-  @override
-  void render(Canvas canvas) {
-    //render bg rectangle
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        bgRect, Radius.circular(boxRadius)
-      ),
-      bgPaint
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        bgRect, Radius.circular(boxRadius)
-      ),
-      borderPaint
-    );
-        
-    super.render(canvas);
-  }
-
-  void addIcon(_icon icon) async {
-    icon.size = iconSize!;
-    icon.position = Vector2(margin!, margin!);
-    //so we get a proper render!
-    icon.bgRect = Rect.fromLTWH(0,0,icon.size.x, icon.size.y);
-    
-    icons.add(icon);
-    await add(icon);
-  }
-}
-
-
-
-
-//icon
-class _icon extends PositionComponent with HasGameRef<BBallBlast> {
-  Paint bgPaint;
-  Paint borderPaint;
-  late Rect bgRect;
-
-  String text;
-
-  //constructor
-  _icon({required this.bgPaint, required this.borderPaint, required this.text}) : super (
-    anchor: Anchor.topLeft,
-  ) {
-    //init bgRect
-    bgRect = Rect.fromLTWH(0,0,size.x, size.y);
-  }
-
-  @override
-  FutureOr<void> onLoad() async {
-    bgRect = Rect.fromLTWH(0, 0, size.x, size.y);
-
-    SpriteComponent ballIcon = SpriteComponent(sprite: await game.loadSprite("ballMenuIcon.png"), size: size, position: size/2, anchor: Anchor.center);
-
-    await add(ballIcon);
-    super.onLoad();
-  }
-
-  @override
-  void render(Canvas canvas) {
-    //render bg rectangle
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        bgRect, Radius.circular(boxRadius)
-      ),
-      bgPaint
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        bgRect, Radius.circular(boxRadius)
-      ),
-      borderPaint
-    );    
-
     super.render(canvas);
   }
 }

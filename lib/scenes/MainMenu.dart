@@ -4,6 +4,7 @@ import 'dart:ui';
 
 import 'package:bball_blast/BBallBlast.dart';
 import 'package:bball_blast/Background/GradientBackground.dart';
+import 'package:bball_blast/Background/ParallaxBackground.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
@@ -37,6 +38,16 @@ class MainMenu extends Component with HasGameRef<BBallBlast>{
       button: SpriteComponent(sprite: customizeButtonImg, size: button1!.playButton.size/1.2)
     );
     await add(customizeButton!);
+
+    addParalaxBg();
+  }
+
+  //helper to make parallax bg the bg with a gray overlay
+  void addParalaxBg() async{
+    ParallaxBackground parallax = ParallaxBackground();
+    await add(parallax);
+    RectangleComponent rect = RectangleComponent(priority: -1, anchor: Anchor.center, position: game.worldToScreen(Vector2(0,0)), size: game.camera.viewport.size, paint: Paint() ..color = Color.fromARGB(107, 255, 255, 255));
+    await game.add(rect);
   }
 
 }
@@ -59,7 +70,7 @@ class RoundedButton extends PositionComponent with TapCallbacks, HasGameRef<BBal
     List<Color> gradientColors = [const Color.fromARGB(255, 255, 0, 0), const Color.fromARGB(255, 255, 128, 0),const Color.fromARGB(255, 251, 255, 21)];
     
     playButton = SpriteComponent(
-      sprite: await game.loadSprite('playButton.png'),
+      sprite: await game.loadSprite('playButtonWhite.png'),
       anchor: Anchor.topLeft,
       size: Vector2(game.camera.viewport.size.x/3, game.camera.viewport.size.y/6)
     );
@@ -72,7 +83,7 @@ class RoundedButton extends PositionComponent with TapCallbacks, HasGameRef<BBal
       fadeOutSpeed: 1.5,
     );
 
-    await add(gradientBackground);
+
     await add(playButton);
 
     super.onLoad();
@@ -107,7 +118,6 @@ class RoundedButton extends PositionComponent with TapCallbacks, HasGameRef<BBal
 class LogoComponent extends Component with HasGameRef<BBallBlast>{
   Sprite? logoImg;
   SpriteComponent? logoComponent;
-  late GradientBackground logoGradientBackground;
 
   //Vector2 logoSize = Vector2(310,350);
   late Vector2 logoPos = Vector2(game.camera.viewport.position.x + game.camera.viewport.size.x/2 - 3,game.camera.viewport.position.y + game.camera.viewport.size.y/4.5);
@@ -128,11 +138,6 @@ class LogoComponent extends Component with HasGameRef<BBallBlast>{
       anchor: Anchor.center,
     );
 
-    logoGradientBackground = GradientBackground(colors: gradientColors, size: logoSize, position: logoPos, anchor: Anchor.center, fadeOutSpeed: 1.5);
-
-    //this thing works by having a white image with transparency inside the letters 
-    //so that "under" the logoComponent is the gradient background
-    await add(logoGradientBackground);
     await add(logoComponent!);
   }
 
@@ -152,6 +157,5 @@ class LogoComponent extends Component with HasGameRef<BBallBlast>{
     elapsedTime += dt/2;
 
     logoComponent!.position.y += (amplitude * sin(elapsedTime * pi * frequency));
-    logoGradientBackground.position.y += (amplitude * sin(elapsedTime * pi * frequency));
   }
 }
