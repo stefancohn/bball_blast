@@ -125,7 +125,7 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
     );
 
     ParallaxBackgroundConfig oceanConfig = ParallaxBackgroundConfig(
-      imageLayers: {"oceanBg/bgbg.png" : Vector2(2,0), "oceanBg/fr.png" : fishSpeed, "oceanBg/gf.png" : fishSpeed * -1, 
+      imageLayers: {"oceanBg/bgbg.png" : Vector2(0,0), "oceanBg/fr.png" : fishSpeed, "oceanBg/gf.png" : fishSpeed * -1, 
       "oceanBg/r2.png" : reefSpeed, "oceanBg/r1.png": reefSpeed, "oceanBg/r3.png": reefSpeed, "oceanBg/r4.png" : reefSpeed,
       "oceanBg/r5.png" : reefSpeed, "oceanBg/r6.png" : reefSpeed, "oceanBg/r7.png" : reefSpeed, "oceanBg/r8.png" : reefSpeed,
       "oceanBg/r9.png" : reefSpeed},
@@ -135,7 +135,7 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
 
     ParallaxBackgroundConfig spaceConfig = ParallaxBackgroundConfig(
       imageLayers: {"spaceBg/l6.png" : Vector2(2,0), "spaceBg/l5.png" : Vector2(6,0), "spaceBg/l4.png" : Vector2(9,0), 
-      "spaceBg/l3.png" : Vector2(7,0), "spaceBg/l2.png" : Vector2(1,0), "spaceBg/l1.png" : Vector2(0.5,0)},
+      "spaceBg/l3.png" : Vector2(7,0), "spaceBg/l2.png" : Vector2(1,0), "spaceBg/l1.png" : Vector2(0,0)},
 
       baseVelocity: Vector2(1,0),
     );

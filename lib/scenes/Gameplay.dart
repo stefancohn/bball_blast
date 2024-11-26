@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:bball_blast/BBallBlast.dart';
+import 'package:bball_blast/Backend.dart';
 import 'package:bball_blast/Background/ParallaxBackground.dart';
 import 'package:bball_blast/entities/Ball.dart';
 import 'package:bball_blast/entities/Coin.dart';
@@ -76,7 +77,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   @override
   FutureOr<void> onLoad() async {
     priority = 0;
-
+    
     //set startPos of ball
     startPos = _randomBallPos();
 
@@ -291,7 +292,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
         lifespan: 2,  // How long the particles last
         generator: (i) => AcceleratedParticle(
           acceleration: accelForParticle.elementAt(i),
-          position: Vector2(xPosForParticle, ball.body.position.y - 5),  // Where the impact happened
+          position: Vector2(xPosForParticle, ball.body.position.y ),  // Where the impact happened
           child: ComputedParticle(
             renderer: (canvas, particle) {
               //so the color slowly fades away
@@ -412,7 +413,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   //THEN LOADING THEM HERE AND PASSING THEM TO THE APPROPRIAT OBJECTS
   //WE NEED THIS SO THINGS GET INITIALIZED PROPERLY
   Future<void> _loadAllImages() async {
-    ballImg = await game.loadSprite('basketball.png');
+    ballImg = await game.loadSprite(ballImgPath);
     hoopUpperImg = await game.loadSprite('hoopUpper.png');
     hoopLowerImg = await game.loadSprite('hoopLower.png');
     backboardImg = await game.loadSprite('backboard.png');

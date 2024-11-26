@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:bball_blast/BBallBlast.dart';
 import 'package:bball_blast/Background/ParallaxBackground.dart';
 import 'package:bball_blast/config.dart';
+import 'package:bball_blast/entities/PlayButton.dart';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame/input.dart';
@@ -19,13 +20,13 @@ TextPaint textPaintWhite = TextPaint(
 );
 
 // ignore: camel_case_types
-enum MenuState {def, ball, trails, bump, bg}
+enum MenuState {def, ball, trails, bump, bg, notDef}
 
 
 
 //GODUNIT of our customize menu
 class CustomizeMenu extends Component with HasGameRef<BBallBlast>{
-  static MenuState curState = MenuState.def; 
+  static ValueNotifier<MenuState> curState = ValueNotifier<MenuState>(MenuState.def);
 
   @override
   FutureOr<void> onLoad() async {
@@ -36,7 +37,7 @@ class CustomizeMenu extends Component with HasGameRef<BBallBlast>{
       align: Anchor.center,
       size: Vector2(game.camera.viewport.size.x/1.8, game.camera.visibleWorldRect.height/10),
     )
-      ..size = Vector2(game.camera.viewport.size.x/1.8, 50)
+      ..size = Vector2(game.camera.viewport.size.x/1.8, game.camera.viewport.size.y/10)
       ..position = game.worldToScreen(Vector2(0,-45))
       ..anchor = Anchor.center;
     await add(headerBox);
@@ -44,12 +45,16 @@ class CustomizeMenu extends Component with HasGameRef<BBallBlast>{
 
     //container to wrap our icons
     _customizationIconContainer iconContainer = _customizationIconContainer(
-      position: game.worldToScreen(Vector2(0,1.5)), 
-      size: Vector2(game.camera.viewport.size.x/1.45, game.camera.viewport.size.y/1.3), 
+      position: game.worldToScreen(Vector2(0,0)), 
+      size: Vector2(game.camera.viewport.size.x/1.45, game.camera.viewport.size.y/1.5), 
       bgPaint: orangeBg, 
       borderPaint: outline
     );
     await add(iconContainer);
+
+    //play button at bottom
+    PlayButton playButton = PlayButton(position: game.worldToScreen(Vector2(0, 43)), size: Vector2(game.camera.viewport.size.x/ 3, game.camera.viewport.size.y/8));
+    await add(playButton);
 
     addParalaxBg();
 
@@ -88,9 +93,9 @@ class CustomizeMenu extends Component with HasGameRef<BBallBlast>{
 }
 
 
-
 int iconsPerRowDef = 2;
 //container for all icons, includes logic for switching state and all
+// ignore: camel_case_types
 class _customizationIconContainer extends PositionComponent with HasGameRef<BBallBlast> {
   Paint bgPaint;
   Paint borderPaint;
@@ -101,9 +106,12 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
   late Sprite trailsIconImg;
   late Sprite bgIconImg;
   late Sprite bumpsIconImg;
+  late Sprite backIconImg;
 
   double? margin; 
+
   Vector2? defIconSize;
+  Vector2? notDefIconSize;
 
   List<_icon> icons = [];
   
@@ -123,11 +131,15 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
     margin = (size.x/10) * 0.83333;
 
     defIconSize = Vector2((size.x/10) * 3.75, (size.y/10) * 3.3);
+    notDefIconSize = Vector2(size.x/2.5, size.y/9);
   }
 
 
   @override
   FutureOr<void> onLoad() async {
+    //init statechanger
+    CustomizeMenu.curState.addListener(()=>renderIcons());
+
     //load sprites, icons
     await _loadAllSprites();
     await _loadAllIcons();
@@ -144,16 +156,21 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
   //remove those of which that are not of current state
   Future<void> renderIcons() async {
     for (int i = 0; i < icons.length; i++) {
-      _icon curElement = icons.elementAt(i);
+      _icon curIcon = icons[i];
 
-      //check matching states
-      if (curElement.stateWhenRendered == CustomizeMenu.curState) {
-        await addIcon(curElement, i);
+      //add curIcon if it matches menu state
+      if (curIcon.stateWhenRendered == CustomizeMenu.curState.value) {
+        await addIcon(curIcon, i);
+      }
+
+      //add our notDef icons if we are not on def state
+      else if (curIcon.stateWhenRendered == MenuState.notDef && CustomizeMenu.curState.value != MenuState.def) {
+        await addIcon(curIcon, i);
       }
 
       //make sure to remove if it's in the component and not in cur state
-      else if (children.contains(curElement)) {
-        curElement.removeFromParent();
+      else if (children.contains(curIcon)) {
+        curIcon.removeFromParent();
       }
 
     }
@@ -165,9 +182,10 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
     _icon trailsIcon = _icon(bgPaint: whiteBg, borderPaint: outline, sprite: trailsIconImg, stateWhenRendered: MenuState.def, stateToLeadTo: MenuState.trails);
     _icon bgIcon = _icon(bgPaint: whiteBg, borderPaint: outline, sprite: bgIconImg, stateWhenRendered: MenuState.def, stateToLeadTo: MenuState.bg);
     _icon bumpsIcon = _icon(bgPaint: whiteBg, borderPaint: outline, sprite: bumpsIconImg, stateWhenRendered: MenuState.def, stateToLeadTo: MenuState.bump);
+    _icon backIcon = _icon(bgPaint: whiteBg, borderPaint: outline, sprite: backIconImg, stateWhenRendered: MenuState.notDef, stateToLeadTo: MenuState.def);
 
     //add to our list
-    icons.addAll({ballIcon, trailsIcon, bgIcon, bumpsIcon});
+    icons.addAll({ballIcon, trailsIcon, bgIcon, bumpsIcon, backIcon});
   }
 
 
@@ -177,6 +195,7 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
     trailsIconImg = await game.loadSprite("trailsIcon.png");
     bgIconImg = await game.loadSprite("bgIcon.png");
     bumpsIconImg = await game.loadSprite("bumpsIcon.png");
+    backIconImg = await game.loadSprite("backIcon.png");
   }
 
 
@@ -200,15 +219,27 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
   }
 
   Future<void> addIcon(_icon icon, int iconNum) async {
-    if (CustomizeMenu.curState == MenuState.def) {
+    //def icon setup
+    if (CustomizeMenu.curState.value == MenuState.def) {
       int row = ((iconNum / iconsPerRowDef).floor()); 
       int col = (iconNum % iconsPerRowDef);
 
       icon.size = defIconSize!;
       icon.position = Vector2((margin! * (col + 1)) + (icon.size.x * col), (margin! * (row+1)) + (icon.size.y * row));
+
       //so we get a proper render!
       icon.bgRect = Rect.fromLTWH(0,0,icon.size.x, icon.size.y);
     }
+
+    //notDef icon setup
+    if (CustomizeMenu.curState.value != MenuState.def && icon.stateWhenRendered == MenuState.notDef) {
+      icon.size = notDefIconSize!;
+      icon.anchor = Anchor.center;
+      icon.position = Vector2(size.x/2, (3.5*size.y)/4 );
+
+      //so we get a proper render!
+      icon.bgRect = Rect.fromLTWH(0,0,icon.size.x, icon.size.y);
+    } 
     
     await add(icon);
 
@@ -248,8 +279,14 @@ class _icon extends ButtonComponent with HasGameRef<BBallBlast> {
     super.button = spriteIcon;
 
     //press/release functionality
-    onPressed = () => button!.scale = Vector2.all(1.05);
-    onReleased = () => button!.scale = Vector2.all(.95);
+    onPressed = () { 
+      button!.scale = Vector2.all(1.05);
+    };
+    onReleased = () {
+      button!.scale = Vector2.all(.95);
+      //change menu state - recall render, on release for smoothness
+      CustomizeMenu.curState.value = stateToLeadTo;
+    };
 
     await add(spriteIcon);
     super.onLoad();

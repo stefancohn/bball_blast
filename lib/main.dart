@@ -26,8 +26,16 @@ Future<void> main() async {
         'CREATE TABLE coins(coin INTEGER)',
       );
       await db.execute(
-        'CREATE TABLE balls(ball_name VAR_CHAR(50) PRIMARY KEY NOT NULL, acquired BOOLEAN NOT NULL DEFAULT FALSE)'
+        '''
+        CREATE TABLE balls(
+          ball_name VAR_CHAR(50) PRIMARY KEY NOT NULL, 
+          acquired BOOLEAN NOT NULL DEFAULT FALSE, 
+          equipped BOOLEAN, filepath VAR_CHAR(50)
+        )
+        '''
       );
+
+      await insertRows(db);
     },
     version: 1,
     /*
@@ -48,6 +56,31 @@ Future<void> main() async {
   );
 }
 
+Future<void> insertRows(Database db) async {
+  await db.transaction((txn) async {
+    //Insert ball rows
+    await txn.insert('balls', {
+      'ball_name': 'whiteBall',
+      'acquired' : true,
+      'equipped' : true,
+      'filepath' : 'whiteBall.png'
+    });
+
+    await txn.insert('balls', {
+      'ball_name': 'basketball',
+      'acquired' : false,
+      'equipped' : false,
+      'filepath' : 'basketball.png'
+    });
+
+    await txn.insert('balls', {
+      'ball_name' : 'smileyBall',
+      'acquired' : false,
+      'equipped' : false,
+      'filepath' : 'smileyBall.png'
+    });
+  });
+}
 
 class MyApp extends StatelessWidget {
   final Database db;

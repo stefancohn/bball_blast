@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:bball_blast/Backend.dart';
 import 'package:bball_blast/entities/Ball.dart';
 import 'package:bball_blast/scenes/CustomizeMenu.dart';
 import 'package:bball_blast/scenes/GameOver.dart';
@@ -35,6 +36,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   late bool minForce;
 
   final Database database;
+  static var db; 
 
 
   //--------CONSTRUCTOR-------------
@@ -50,6 +52,12 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   //----------ONLOAD------------------
   @override
   FutureOr<void> onLoad() async {
+    //set up static db
+    db = database;
+
+    //get imgPaths
+    await Backend.acquireImgPaths();
+
     game.camera.viewfinder.position.setAll(0);
 
     await loadMainMenuScene();
@@ -59,7 +67,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     fader = _initializeFader();
     await add(fader);
 
-    debugMode = true;
+    //debugMode = true;
     super.onLoad();
   }
 
