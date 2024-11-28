@@ -5,6 +5,7 @@ import 'package:bball_blast/BBallBlast.dart';
 import 'package:bball_blast/Backend.dart';
 import 'package:bball_blast/Background/ParallaxBackground.dart';
 import 'package:bball_blast/config.dart';
+import 'package:bball_blast/entities/CoinAmtDisplay.dart';
 import 'package:bball_blast/entities/PlayButton.dart';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
@@ -14,7 +15,7 @@ import 'package:flutter/material.dart';
 
 TextPaint textPaintWhite = TextPaint(
   style: const TextStyle(
-    fontSize: 20,
+    fontSize: 17,
     fontFamily: 'Score',
     color: Color.fromARGB(255, 255, 255, 255),
   )
@@ -46,9 +47,9 @@ class CustomizeMenu extends Component with HasGameRef<BBallBlast>{
       renderer: textPaintWhite, 
       bgPaint: orangeBg, borderPaint: outline, 
       align: Anchor.center,
-      size: Vector2(game.camera.viewport.size.x/1.8, game.camera.visibleWorldRect.height/10),
+      size: Vector2(game.camera.viewport.size.x*.5, game.camera.visibleWorldRect.height/10),
     )
-      ..size = Vector2(game.camera.viewport.size.x/1.8, game.camera.viewport.size.y/10)
+      ..size = Vector2(game.camera.viewport.size.x*.5, game.camera.viewport.size.y/10)
       ..position = game.worldToScreen(Vector2(0,-45))
       ..anchor = Anchor.center;
     await add(headerBox);
@@ -66,6 +67,12 @@ class CustomizeMenu extends Component with HasGameRef<BBallBlast>{
     //play button at bottom
     PlayButton playButton = PlayButton(position: game.worldToScreen(Vector2(0, 43)), size: Vector2(game.camera.viewport.size.x/ 3, game.camera.viewport.size.y/8));
     await add(playButton);
+
+    //add coin amt display
+    Vector2 coinAmtSize = Vector2(game.camera.viewport.size.x * .20, game.camera.viewport.size.y/10);
+    CoinAmtDisplay coinAmtDisplay = CoinAmtDisplay(coinImg: iconContainer.coinImg, position: Vector2(game.camera.viewport.position.x + game.camera.viewport.size.x - coinAmtSize.x/2, headerBox.position.y), size: coinAmtSize);
+    coinAmtDisplay.anchor = Anchor.center;
+    await add(coinAmtDisplay);
 
     addParalaxBg();
 
@@ -196,7 +203,7 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
         await addIcon(curIcon, addedCounter);
 
         addedCounter++;
-      }
+      } 
 
       //add our notDef icons if we are not on def state
       else if (curIcon.stateWhenRendered == MenuState.notDef && CustomizeMenu.curState.value != MenuState.def) {
@@ -204,7 +211,7 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
       }
 
       //make sure to remove if it's in the component and not in cur state
-      else if (children.contains(curIcon)) {
+      if (children.contains(curIcon) && curIcon.stateWhenRendered != CustomizeMenu.curState.value && curIcon.stateWhenRendered != MenuState.notDef) {
         curIcon.removeFromParent();
       }
     }
@@ -220,11 +227,11 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
 
     _icon backIcon = _icon(sprite: backIconImg, stateWhenRendered: MenuState.notDef, stateToLeadTo: MenuState.def);
 
-    //locked icon and checkmark 
-    _icon lockedIconCircle = _icon(sprite: lockedIconCircleImg, stateWhenRendered: MenuState.ball, stateToLeadTo: MenuState.buy);
+    //locked icon 
+    //_icon lockedIconCircle = _icon(sprite: lockedIconCircleImg, stateWhenRendered: MenuState.ball, stateToLeadTo: MenuState.buy);
 
     //add to our list
-    icons.addAll({ballIcon, trailsIcon, bgIcon, bumpsIcon, backIcon, lockedIconCircle});
+    icons.addAll({ballIcon, trailsIcon, bgIcon, bumpsIcon, backIcon, });
   }
 
 
@@ -235,19 +242,19 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
       var curBall = allBalls[i];
       _icon ball;
 
+      //get filepath to get name, create icon
+      String name = curBall['filepath'] as String;
+      name = name.substring(0, name.length-4);
+      name = name.trim();
+
       //show proper sprite if unlcoked
       if (curBall['acquired'] == 1){
-        //get filepath to get name, create icon
-        String name = curBall['filepath'] as String;
-        name = name.substring(0, name.length-4);
-        name = name.trim();
-
-        ball = _icon(sprite: ballSprites[name]!, stateWhenRendered: MenuState.ball, stateToLeadTo: (curBall['equipped'] == 1 ? MenuState.equipped : MenuState.equip));
+        ball = _icon(sprite: ballSprites[name]!, stateWhenRendered: MenuState.ball, stateToLeadTo: (curBall['equipped'] == 1 ? MenuState.equipped : MenuState.equip), name: name);
 
       } 
       //else show mystery, get proper price
       else {
-        ball = _icon(sprite: lockedIconCircleImg, stateWhenRendered: MenuState.ball, stateToLeadTo: MenuState.buy);
+        ball = _icon(sprite: lockedIconCircleImg, stateWhenRendered: MenuState.ball, stateToLeadTo: MenuState.buy, name: name);
       }
 
       icons.add(ball);
@@ -278,12 +285,6 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
       icon.size = ballCustomIconSize!;
       icon.position = Vector2((customIconMargin! * (col + 1)) + (icon.size.x * col), ((row == 0 ? customIconMargin! : customIconMargin! * 2) * (row+1)) + (icon.size.y * row));
 
-      //add price if locked
-      if (icon.stateToLeadTo == MenuState.buy) {
-        await icon.addPrice(coinImg);
-      } 
-
-
     }
 
 
@@ -299,14 +300,40 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
     
     await add(icon);
 
+    //add check mark to equpped ball
     if (icon.stateToLeadTo == MenuState.equipped) {
       await icon.addCheckMark(checkMarkImg);
     }
 
+    //add price if locked
+    if (icon.stateToLeadTo == MenuState.buy) {
+      await icon.addPrice(coinImg);
+    } 
+
   }
 
 
+  Future<void> refreshBallIcons() async {
+    //list to store icons to remove
+    List<_icon> iconsToRemove = [];
 
+    //add to removal list for proper removal from icons list
+    for (int i = 0; i < icons.length; i++) {
+      if (icons[i].stateWhenRendered == MenuState.ball) {
+        iconsToRemove.add(icons[i]);
+      }
+    }
+
+    //actually remove here
+    for (_icon icon in iconsToRemove) {
+      icon.removeFromParent();
+      icons.remove(icon);
+    }
+
+    //reload ball icons and re-render them
+    _loadBallIcons();
+    renderIcons();
+  }
 
   //render da nice rect
   @override
@@ -360,9 +387,11 @@ class _icon extends ButtonComponent with HasGameRef<BBallBlast> {
   MenuState stateWhenRendered;
   MenuState stateToLeadTo;
 
+  String? name;
+
   //constructor
   _icon({
-    required this.sprite, required this.stateWhenRendered, required this.stateToLeadTo, 
+    required this.sprite, required this.stateWhenRendered, required this.stateToLeadTo, this.name
   }) : super (
     anchor: Anchor.topLeft,
   ) {
@@ -385,7 +414,7 @@ class _icon extends ButtonComponent with HasGameRef<BBallBlast> {
     };
 
     //change menu state - recall render, on release for smoothness
-    onReleased = () {
+    onReleased = () async {
       button!.scale = Vector2.all(.95);
 
       //only refresh render on nonbuy/equip/equipped icons
@@ -395,8 +424,16 @@ class _icon extends ButtonComponent with HasGameRef<BBallBlast> {
 
       //reduce coins appropriately, set to unlocked
       if (stateToLeadTo == MenuState.buy) {
-        //verify we can buy it
-        
+        //verify we can buy it, then call Backend
+        if (coinAmt > newBallCost) {
+          await Backend.buyBall(name!);
+          stateToLeadTo = MenuState.equip;
+
+
+          //(button as SpriteComponent).sprite = (parent as _customizationIconContainer).ballSprites[name!]!;
+          //await (parent as _customizationIconContainer).renderIcons();
+          (parent as _customizationIconContainer).refreshBallIcons();
+        }
       }
     };
 

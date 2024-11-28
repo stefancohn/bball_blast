@@ -15,6 +15,7 @@ int coinAmt = 0;
 class Backend {
   static Database db = BBallBlast.db;
 
+
   static Future<void> acquireImgPaths() async {
     //set ballImgPath
     var dbList = await db.query('balls', where: 'equipped=?', whereArgs:[1]);
@@ -33,8 +34,19 @@ class Backend {
   }
 
 
-  static Future<void> buyBall() async {
-    
+  static Future<void> buyBall(String ballName) async {
+    //transaction - all queries either happen or all don't happen
+    await db.transaction((txn) async {
+      //update coins
+      await txn.rawUpdate("UPDATE coins set coin = ?", [coinAmt-newBallCost]);
+
+      //update balls
+      await txn.rawUpdate("UPDATE balls SET acquired = 1 WHERE ball_name = ?", [ballName]);
+    },);
+
+    //reload ball menu and coins since they were updated
+    await loadBallsForMenu();
+    await initializeCoinAmt();
   }
 
 
@@ -69,4 +81,11 @@ class Backend {
       await db.rawUpdate('UPDATE coins SET coin = coin +1');
     }
   }
+
+
+  //for testing
+  static Future<void> addLotsOfCoins() async {
+    await db.rawUpdate("UPDATE coins set coin = 9999");
+    await initializeCoinAmt();
+  } 
 }

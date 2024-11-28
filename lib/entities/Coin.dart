@@ -9,7 +9,6 @@ import 'package:bball_blast/entities/Hoop.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
-import 'package:sqflite/sqflite.dart';
 
 class Coin extends SpriteComponent with HasGameRef<BBallBlast>, CollisionCallbacks {
   Vector2 defSize = Vector2(6, 6);

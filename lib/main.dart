@@ -13,7 +13,7 @@ Future<void> main() async {
   Flame.device.setPortrait();
 
   // Delete the old database to force onCreate to run
-  //await deleteDatabase(join(await getDatabasesPath(), 'bball_blast.db'));
+  await deleteDatabase(join(await getDatabasesPath(), 'bball_blast.db'));
   
   //open DB at default file loc and create tables
   final db = await openDatabase(
@@ -48,9 +48,12 @@ Future<void> main() async {
     },*/
   );
 
-  //for testing
-  //db.delete('highscores');
-  //db.delete('coins');
+  //for testing 
+  /*
+  db.delete('highscores');
+  db.delete('coins');
+  db.delete('balls');
+  */
   runApp(
     MyApp(db: db)
   );
@@ -58,6 +61,10 @@ Future<void> main() async {
 
 Future<void> insertRows(Database db) async {
   await db.transaction((txn) async {
+    //Insert coin
+    await txn.insert('coins', {
+      'coin' : 0
+    });
     //Insert ball rows
     await txn.insert('balls', {
       'ball_name': 'whiteBall',
