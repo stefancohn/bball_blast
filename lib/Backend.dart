@@ -16,7 +16,7 @@ class Backend {
   static Database db = BBallBlast.db;
 
 
-  static Future<void> acquireImgPaths() async {
+  static Future<void> acquireBallPath() async {
     //set ballImgPath
     var dbList = await db.query('balls', where: 'equipped=?', whereArgs:[1]);
     if (dbList.isNotEmpty) {
@@ -34,11 +34,12 @@ class Backend {
   }
 
 
+  //update DB, reload allBalls and coins
   static Future<void> buyBall(String ballName) async {
     //transaction - all queries either happen or all don't happen
     await db.transaction((txn) async {
       //update coins
-      await txn.rawUpdate("UPDATE coins set coin = ?", [coinAmt-newBallCost]);
+      await txn.rawUpdate("UPDATE coins SET coin = ?", [coinAmt-newBallCost]);
 
       //update balls
       await txn.rawUpdate("UPDATE balls SET acquired = 1 WHERE ball_name = ?", [ballName]);
@@ -47,6 +48,21 @@ class Backend {
     //reload ball menu and coins since they were updated
     await loadBallsForMenu();
     await initializeCoinAmt();
+  }
+
+
+  static Future<void> equipBall(String ballName) async {
+    await db.transaction((txn) async {
+      //remove current equpped ball
+      await txn.rawUpdate("UPDATE balls SET equipped = 0 WHERE equipped = 1");
+
+      //set desired ball to equpped
+      await txn.rawUpdate("UPDATE balls SET equipped = 1 WHERE ball_name = ?", [ballName]);
+    });
+
+    //re-update balls list, set new ballimgpath
+    await loadBallsForMenu();
+    await acquireBallPath();
   }
 
 

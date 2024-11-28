@@ -56,7 +56,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     db = database;
 
     //start with loading all necessary things from DB
-    await Backend.acquireImgPaths();
+    await Backend.acquireBallPath();
     await Backend.loadBallsForMenu();
     await Backend.initializeCoinAmt();
     await Backend.addLotsOfCoins();

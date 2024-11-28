@@ -422,6 +422,7 @@ class _icon extends ButtonComponent with HasGameRef<BBallBlast> {
         CustomizeMenu.curState.value = stateToLeadTo;
       }
 
+
       //reduce coins appropriately, set to unlocked
       if (stateToLeadTo == MenuState.buy) {
         //verify we can buy it, then call Backend
@@ -434,6 +435,21 @@ class _icon extends ButtonComponent with HasGameRef<BBallBlast> {
           //await (parent as _customizationIconContainer).renderIcons();
           (parent as _customizationIconContainer).refreshBallIcons();
         }
+        //TODO: add animation for invalid purchase
+        else {
+
+        }
+      }
+
+
+      //change equpped ball when one is pressed
+      else if (stateToLeadTo == MenuState.equip) {
+        //modify DB
+        await Backend.equipBall(name!);
+        stateToLeadTo = MenuState.equipped;
+
+        //refresh icons
+        (parent as _customizationIconContainer).refreshBallIcons();
       }
     };
 
@@ -463,11 +479,12 @@ class _icon extends ButtonComponent with HasGameRef<BBallBlast> {
     await addAll({coinSprite, priceText});
   }
 
+
   //add check mark to equipped icon
   Future<void> addCheckMark(Sprite checkMarkImg) async {
     Vector2 checkMarkSize = size;
 
-    SpriteComponent checkMarkSprite = SpriteComponent(anchor: Anchor.center, position: position *2, size: checkMarkSize, sprite: checkMarkImg);
+    SpriteComponent checkMarkSprite = SpriteComponent(anchor: Anchor.center, position: bgRect.center.toVector2(), size: checkMarkSize, sprite: checkMarkImg); 
     checkMarkSprite.priority = 1;
     (button as SpriteComponent).opacity = 0.8;
 
