@@ -2,6 +2,7 @@
 import 'dart:math';
 import 'dart:ui';
 import 'package:bball_blast/BBallBlast.dart';
+import 'package:bball_blast/Backend.dart';
 import 'package:bball_blast/config.dart';
 import 'package:bball_blast/entities/Ball.dart';
 import 'package:bball_blast/entities/Hoop.dart';
@@ -134,27 +135,6 @@ class Coin extends SpriteComponent with HasGameRef<BBallBlast>, CollisionCallbac
 
     await add(upAndOffScreen);
 
-    await iteratePlayerCoins();
-  }
-
-  //add one to coin count in player DB 
-  Future<void> iteratePlayerCoins() async {
-    Database db = game.database;
-
-    //grab current score
-    var dbList = await db.query('coins',);
-
-    //if there isn't a score, must add
-    if(dbList.isEmpty) {
-      await db.insert(
-        'coins',
-        {"coin" : 1},
-        conflictAlgorithm: ConflictAlgorithm.ignore
-      );
-    }
-    //else just iterate by one
-    else {
-      await db.rawUpdate('UPDATE coins SET coin = coin +1');
-    }
+    await Backend.iteratePlayerCoins();
   }
 }

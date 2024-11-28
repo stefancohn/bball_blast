@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
 import 'package:bball_blast/BBallBlast.dart';
+import 'package:bball_blast/Backend.dart';
 import 'package:bball_blast/config.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
@@ -244,7 +245,7 @@ class Collider extends CircleComponent with CollisionCallbacks {
     //update coinAmt display
     if (other == BBallBlast.gameplay.coin && !BBallBlast.gameplay.coin.collected) {
       await BBallBlast.gameplay.coin.playCollectedAnimation();
-      await BBallBlast.gameplay.coinDisplay.initializeCoinAmt();
+      await Backend.initializeCoinAmt();
     }
     
     super.onCollision(intersectionPoints, other);

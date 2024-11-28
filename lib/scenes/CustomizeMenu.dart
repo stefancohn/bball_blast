@@ -20,8 +20,16 @@ TextPaint textPaintWhite = TextPaint(
   )
 );
 
+TextPaint textPaintWhiteSmall = TextPaint(
+  style: const TextStyle(
+    fontSize: 14,
+    fontFamily: 'Score',
+    color: Color.fromARGB(255, 255, 255, 255),
+  )
+);
+
 // ignore: camel_case_types
-enum MenuState {def, ball, trails, bump, bg, notDef, buy, equip}
+enum MenuState {def, ball, trails, bump, bg, notDef, buy, equip, equipped}
 
 
 
@@ -121,6 +129,8 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
   late Sprite bumpsIconImg;
   late Sprite backIconImg;
   late Sprite lockedIconCircleImg;
+  late Sprite coinImg;
+  late Sprite checkMarkImg;
 
   Map<String, Sprite> ballSprites = {};
 
@@ -184,6 +194,7 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
       //add curIcon if it matches menu state
       if (curIcon.stateWhenRendered == CustomizeMenu.curState.value && !(children.contains(curIcon))) {
         await addIcon(curIcon, addedCounter);
+
         addedCounter++;
       }
 
@@ -195,11 +206,6 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
       //make sure to remove if it's in the component and not in cur state
       else if (children.contains(curIcon)) {
         curIcon.removeFromParent();
-
-        //remove non-essential icons from list for memory
-        if (curIcon.stateWhenRendered != MenuState.def && curIcon.stateWhenRendered != MenuState.notDef) {
-          //icons.remove(curIcon);
-        }
       }
     }
   }
@@ -214,7 +220,7 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
 
     _icon backIcon = _icon(sprite: backIconImg, stateWhenRendered: MenuState.notDef, stateToLeadTo: MenuState.def);
 
-    //locked img icon
+    //locked icon and checkmark 
     _icon lockedIconCircle = _icon(sprite: lockedIconCircleImg, stateWhenRendered: MenuState.ball, stateToLeadTo: MenuState.buy);
 
     //add to our list
@@ -236,7 +242,7 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
         name = name.substring(0, name.length-4);
         name = name.trim();
 
-        ball = _icon(sprite: ballSprites[name]!, stateWhenRendered: MenuState.ball, stateToLeadTo: MenuState.equip);
+        ball = _icon(sprite: ballSprites[name]!, stateWhenRendered: MenuState.ball, stateToLeadTo: (curBall['equipped'] == 1 ? MenuState.equipped : MenuState.equip));
 
       } 
       //else show mystery, get proper price
@@ -249,25 +255,6 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
   }
 
 
-
-
-  //helper to load necessary sprites 
-  Future<void> _loadAllSprites() async {
-    //main functionality imgs
-    ballIconImg = await game.loadSprite("ballMenuIcon.png");
-    trailsIconImg = await game.loadSprite("trailsIcon.png");
-    bgIconImg = await game.loadSprite("bgIcon.png");
-    bumpsIconImg = await game.loadSprite("bumpsIcon.png");
-    backIconImg = await game.loadSprite("backIcon.png");
-
-    //locked img
-    lockedIconCircleImg = await game.loadSprite("lockedIconCircle.png");
-
-    //ball imgs
-    ballSprites["smileyBall"] = await game.loadSprite("smileyBall.png");
-    ballSprites["whiteBall"] = await game.loadSprite("whiteBall.png");
-    ballSprites["basketball"] = await game.loadSprite("basketball.png");
-  }
 
 
   Future<void> addIcon(_icon icon, int iconNum) async {
@@ -290,6 +277,13 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
 
       icon.size = ballCustomIconSize!;
       icon.position = Vector2((customIconMargin! * (col + 1)) + (icon.size.x * col), ((row == 0 ? customIconMargin! : customIconMargin! * 2) * (row+1)) + (icon.size.y * row));
+
+      //add price if locked
+      if (icon.stateToLeadTo == MenuState.buy) {
+        await icon.addPrice(coinImg);
+      } 
+
+
     }
 
 
@@ -304,6 +298,10 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
     //icon.bgRect = Rect.fromLTWH(0,0,icon.size.x, icon.size.y);
     
     await add(icon);
+
+    if (icon.stateToLeadTo == MenuState.equipped) {
+      await icon.addCheckMark(checkMarkImg);
+    }
 
   }
 
@@ -328,6 +326,26 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
     );
         
     super.render(canvas);
+  }
+
+  //helper to load necessary sprites 
+  Future<void> _loadAllSprites() async {
+    //main functionality imgs
+    ballIconImg = await game.loadSprite("ballMenuIcon.png");
+    trailsIconImg = await game.loadSprite("trailsIcon.png");
+    bgIconImg = await game.loadSprite("bgIcon.png");
+    bumpsIconImg = await game.loadSprite("bumpsIcon.png");
+    backIconImg = await game.loadSprite("backIcon.png");
+    coinImg = await game.loadSprite("coin.png");
+
+    //locked img
+    lockedIconCircleImg = await game.loadSprite("lockedIconCircle.png");
+    checkMarkImg = await game.loadSprite("checkMark.png");
+
+    //ball imgs
+    ballSprites["smileyBall"] = await game.loadSprite("smileyBall.png");
+    ballSprites["whiteBall"] = await game.loadSprite("whiteBall.png");
+    ballSprites["basketball"] = await game.loadSprite("basketball.png");
   }
 }
 
@@ -370,9 +388,15 @@ class _icon extends ButtonComponent with HasGameRef<BBallBlast> {
     onReleased = () {
       button!.scale = Vector2.all(.95);
 
-      //only refresh render on nonbuy icons
-      if (stateToLeadTo != MenuState.buy && stateToLeadTo != MenuState.equip){
+      //only refresh render on nonbuy/equip/equipped icons
+      if (stateToLeadTo != MenuState.buy && stateToLeadTo != MenuState.equip && stateToLeadTo != MenuState.equipped){
         CustomizeMenu.curState.value = stateToLeadTo;
+      }
+
+      //reduce coins appropriately, set to unlocked
+      if (stateToLeadTo == MenuState.buy) {
+        //verify we can buy it
+        
       }
     };
 
@@ -381,6 +405,36 @@ class _icon extends ButtonComponent with HasGameRef<BBallBlast> {
 
     await add(spriteIcon);
     super.onLoad();
+  }
+
+  //add price indicator (coin sprite iwth text indicating sprite)
+  Future<void> addPrice(Sprite coinImg) async {
+    Vector2 coinSpriteSize = size/2.5;
+
+    SpriteComponent coinSprite = SpriteComponent(anchor: Anchor.center, position: Vector2(size.x/5, (size.y * 1.1) + coinSpriteSize.y/2), size: coinSpriteSize, sprite: coinImg);
+
+    TextBoxComponent priceText = TextBoxComponent(
+      anchor: Anchor.center, 
+      text: newBallCost.toString(), 
+      textRenderer: textPaintWhiteSmall,
+      boxConfig: const TextBoxConfig(growingBox: true)
+    ) 
+    //need this after because boxConfig override initial pos/sizing
+    ..size = Vector2(coinSpriteSize.x*2,coinSpriteSize.y)
+    ..position = Vector2(coinSprite.x + (coinSpriteSize.x*1.2), coinSprite.y);
+
+    await addAll({coinSprite, priceText});
+  }
+
+  //add check mark to equipped icon
+  Future<void> addCheckMark(Sprite checkMarkImg) async {
+    Vector2 checkMarkSize = size;
+
+    SpriteComponent checkMarkSprite = SpriteComponent(anchor: Anchor.center, position: position *2, size: checkMarkSize, sprite: checkMarkImg);
+    checkMarkSprite.priority = 1;
+    (button as SpriteComponent).opacity = 0.8;
+
+    await add(checkMarkSprite);
   }
 }
 

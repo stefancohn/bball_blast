@@ -10,6 +10,8 @@ List<Map<String, Object?>> allBalls = List.empty();
 //every item bought increments cost in that category by 25
 int newBallCost = 0; 
 
+int coinAmt = 0;
+
 class Backend {
   static Database db = BBallBlast.db;
 
@@ -21,11 +23,50 @@ class Backend {
     }
   }
 
+
   static Future<void> loadBallsForMenu() async {
     List<Map<String, Object?>> dbList = await db.query('balls');
     allBalls = dbList;
 
     //calculated cost to get new ball
     newBallCost = 25 * dbList.where((ball) => ball['acquired'] == 1).length;
+  }
+
+
+  static Future<void> buyBall() async {
+    
+  }
+
+
+  //set amount of coins var
+  static Future<void> initializeCoinAmt() async {
+    var dbList = await db.query('coins',);
+
+    //set coinAmt correctly
+    if (dbList.isEmpty) {
+      coinAmt = 0;
+    } else {
+      coinAmt = dbList[0]['coin'] as int;
+    }
+  }
+
+
+  //add one to coin count in player DB 
+  static Future<void> iteratePlayerCoins() async {
+    //grab current score
+    var dbList = await db.query('coins',);
+
+    //if there isn't a score, must add
+    if(dbList.isEmpty) {
+      await db.insert(
+        'coins',
+        {"coin" : 1},
+        conflictAlgorithm: ConflictAlgorithm.ignore
+      );
+    }
+    //else just iterate by one
+    else {
+      await db.rawUpdate('UPDATE coins SET coin = coin +1');
+    }
   }
 }
