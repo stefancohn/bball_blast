@@ -20,8 +20,9 @@ class Backend {
     //set ballImgPath
     var dbList = await db.query('balls', where: 'equipped=?', whereArgs:[1]);
     if (dbList.isNotEmpty) {
-      ballImgPath = dbList.first['filepath'] as String;
+      ballImgPath = dbList.first['ball_name'] as String;
     }
+    ballImgPath = "$ballImgPath.png";
   }
 
 

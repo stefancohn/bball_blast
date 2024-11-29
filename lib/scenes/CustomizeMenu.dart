@@ -42,18 +42,6 @@ class CustomizeMenu extends Component with HasGameRef<BBallBlast>{
 
   @override
   FutureOr<void> onLoad() async {
-    MyTextBox headerBox = MyTextBox(
-      text: "CUSTOMIZE", 
-      renderer: textPaintWhite, 
-      bgPaint: orangeBg, borderPaint: outline, 
-      align: Anchor.center,
-      size: Vector2(game.camera.viewport.size.x*.5, game.camera.visibleWorldRect.height/10),
-    )
-      ..size = Vector2(game.camera.viewport.size.x*.5, game.camera.viewport.size.y/10)
-      ..position = game.worldToScreen(Vector2(0,-45))
-      ..anchor = Anchor.center;
-    await add(headerBox);
-
 
     //container to wrap our icons
     _customizationIconContainer iconContainer = _customizationIconContainer(
@@ -64,14 +52,26 @@ class CustomizeMenu extends Component with HasGameRef<BBallBlast>{
     );
     await add(iconContainer);
 
+    MyTextBox headerBox = MyTextBox(
+      text: "CUSTOMIZE", 
+      renderer: textPaintWhite, 
+      bgPaint: orangeBg, borderPaint: outline, 
+      align: Anchor.center,
+      size: Vector2(game.camera.viewport.size.x*.5, game.camera.visibleWorldRect.height/10),
+    )
+      ..size = Vector2(game.camera.viewport.size.x*.5, game.camera.viewport.size.y/10)
+      ..position = game.worldToScreen(Vector2(-4.5,-42))
+      ..anchor = Anchor.center;
+    await add(headerBox);
+
     //play button at bottom
-    PlayButton playButton = PlayButton(position: game.worldToScreen(Vector2(0, 43)), size: Vector2(game.camera.viewport.size.x/ 3, game.camera.viewport.size.y/8));
+    PlayButton playButton = PlayButton(position: game.worldToScreen(Vector2(0, 43)), size: Vector2(game.camera.viewport.size.x/ 3.5, game.camera.viewport.size.y/8));
     await add(playButton);
 
     //add coin amt display
-    Vector2 coinAmtSize = Vector2(game.camera.viewport.size.x * .20, game.camera.viewport.size.y/10);
-    CoinAmtDisplay coinAmtDisplay = CoinAmtDisplay(coinImg: iconContainer.coinImg, position: Vector2(game.camera.viewport.position.x + game.camera.viewport.size.x - coinAmtSize.x/2, headerBox.position.y), size: coinAmtSize);
-    coinAmtDisplay.anchor = Anchor.center;
+    Vector2 coinAmtSize = Vector2(game.camera.viewport.size.x * .25, game.camera.viewport.size.y/12);
+    CoinAmtDisplay coinAmtDisplay = CoinAmtDisplay(coinImg: iconContainer.coinImg, position: game.worldToScreen(Vector2(8,-46)), size: coinAmtSize);
+    coinAmtDisplay.anchor = Anchor.topLeft;
     await add(coinAmtDisplay);
 
     addParalaxBg();
@@ -243,8 +243,7 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
       _icon ball;
 
       //get filepath to get name, create icon
-      String name = curBall['filepath'] as String;
-      name = name.substring(0, name.length-4);
+      String name = curBall['ball_name'] as String;
       name = name.trim();
 
       //show proper sprite if unlcoked

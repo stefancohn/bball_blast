@@ -28,9 +28,9 @@ Future<void> main() async {
       await db.execute(
         '''
         CREATE TABLE balls(
-          ball_name VAR_CHAR(50) PRIMARY KEY NOT NULL, 
+          ball_name VARCHAR(50) PRIMARY KEY NOT NULL, 
           acquired BOOLEAN NOT NULL DEFAULT FALSE, 
-          equipped BOOLEAN, filepath VAR_CHAR(50)
+          equipped BOOLEAN 
         )
         '''
       );
@@ -70,21 +70,18 @@ Future<void> insertRows(Database db) async {
       'ball_name': 'whiteBall',
       'acquired' : true,
       'equipped' : true,
-      'filepath' : 'whiteBall.png'
     });
 
     await txn.insert('balls', {
       'ball_name': 'basketball',
       'acquired' : false,
       'equipped' : false,
-      'filepath' : 'basketball.png'
     });
 
     await txn.insert('balls', {
       'ball_name' : 'smileyBall',
       'acquired' : false,
       'equipped' : false,
-      'filepath' : 'smileyBall.png'
     });
   });
 }

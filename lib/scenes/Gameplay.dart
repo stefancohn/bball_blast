@@ -77,7 +77,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
   @override
   FutureOr<void> onLoad() async {
     priority = 0;
-    
+
     //set startPos of ball
     startPos = _randomBallPos();
 
@@ -193,8 +193,12 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     await game.world.add(ball);
     hoop = Hoop(spawnRight, hoopLowerImg, hoopUpperImg, backboardImg);
     await game.world.add(hoop);
-    coin = Coin(sprite: coinImg, hoop: hoop, ball: ball);
-    await game.world.add(coin);
+
+    //30% chance of coin
+    if (rand.nextDouble() < .31) {
+      coin = Coin(sprite: coinImg, hoop: hoop, ball: ball);
+      await game.world.add(coin);
+    }
 
     //change background
     bg.spawnRectMask();
@@ -332,7 +336,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
 
     //coin indicator and necessary vars
     Vector2 coinAmtDisplayPos = game.worldToScreen(game.camera.visibleWorldRect.topRight.toVector2());
-    Vector2 coinAmtDisplaySize = Vector2(65,10);
+    Vector2 coinAmtDisplaySize = Vector2(game.camera.viewport.size.x/4,game.camera.viewport.size.y/12);
     coinAmtDisplayPos.x -= coinAmtDisplaySize.x + 10;
     coinAmtDisplayPos.y += 20;
 
