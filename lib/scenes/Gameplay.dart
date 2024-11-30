@@ -213,7 +213,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
 
   //random ball spawn
   Vector2 _randomBallPos() {
-    double randomY = (rand.nextDouble() * 73) - 30;
+    double randomY = (rand.nextDouble() * 73) - 28;
     if (spawnRight) {
       double randomX = -16 + rand.nextDouble() * -3;
       return Vector2(randomX,randomY);

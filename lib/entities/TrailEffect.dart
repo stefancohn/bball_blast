@@ -3,8 +3,10 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:bball_blast/BBallBlast.dart';
+import 'package:bball_blast/Backend.dart';
 import 'package:bball_blast/entities/Ball.dart';
 import 'package:flame/components.dart';
+import 'package:flutter/material.dart';
 
 class TrailEffect extends Component with HasPaint, HasGameRef<BBallBlast>{
   final trail = <Offset>[];
@@ -15,10 +17,27 @@ class TrailEffect extends Component with HasPaint, HasGameRef<BBallBlast>{
 
   TrailEffect({required this.ball});
 
+  //properly set trail based on argument from trailPath!
+  void setTrail() {
+    if (trailPath == "blue") {
+      paint.color = Colors.blue;
+    } else if (trailPath == "white") {
+      paint.color = Colors.white;
+    } else if (trailPath == "orange") {
+      paint.color = Colors.orange;
+    } else if (trailPath == "pink") {
+      paint.color = Colors.pink;
+    } else if (trailPath == "green") {
+      paint.color = Colors.green;
+    }
+  }
+
   @override
   FutureOr<void> onLoad() {
     paint.color = (const Color.fromARGB(255, 255, 255, 255));
     paint.strokeWidth = 4.0;
+
+    setTrail();
       
     super.onLoad();
   }

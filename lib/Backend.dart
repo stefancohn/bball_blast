@@ -2,20 +2,23 @@ import 'package:bball_blast/BBallBlast.dart';
 import 'package:sqflite/sqflite.dart';
 
 String ballImgPath = "";
+String trailPath = "";
 
-//get all balls
+//get all balls, trails
 List<Map<String, Object?>> allBalls = List.empty(); 
+List<Map<String,Object?>> allTrails = List.empty();
 
 //for calculating cost; start at 25 coins.
 //every item bought increments cost in that category by 25
 int newBallCost = 0; 
+int newTrailCost=0;
 
 int coinAmt = 0;
 
 class Backend {
   static Database db = BBallBlast.db;
 
-
+  //so equipped ball gets shown
   static Future<void> acquireBallPath() async {
     //set ballImgPath
     var dbList = await db.query('balls', where: 'equipped=?', whereArgs:[1]);
@@ -23,6 +26,15 @@ class Backend {
       ballImgPath = dbList.first['ball_name'] as String;
     }
     ballImgPath = "$ballImgPath.png";
+  }
+
+  //show equpped trail gets shown
+  static Future<void> acquireTrail() async {
+    //set ballImgPath
+    var dbList = await db.query('trails', where: 'equipped=?', whereArgs:[1]);
+    if (dbList.isNotEmpty) {
+      trailPath = dbList.first['trail_name'] as String;
+    }
   }
 
 
@@ -34,20 +46,35 @@ class Backend {
     newBallCost = 25 * dbList.where((ball) => ball['acquired'] == 1).length;
   }
 
+  static Future<void> loadTrailsForMenu() async {
+    List<Map<String, Object?>> dbList = await db.query('trails');
+    allTrails = dbList;
+
+    //calculated cost to get new ball
+    newTrailCost = 25 * dbList.where((ball) => ball['acquired'] == 1).length;
+  }
+
 
   //update DB, reload allBalls and coins
-  static Future<void> buyBall(String ballName) async {
+  static Future<void> buyItem(String tableName, String itemName) async {
+    String rowName = tableName.substring(0, tableName.length-1);
     //transaction - all queries either happen or all don't happen
     await db.transaction((txn) async {
       //update coins
       await txn.rawUpdate("UPDATE coins SET coin = ?", [coinAmt-newBallCost]);
 
       //update balls
-      await txn.rawUpdate("UPDATE balls SET acquired = 1 WHERE ball_name = ?", [ballName]);
+      await txn.rawUpdate("UPDATE $tableName SET acquired = 1 WHERE ${rowName}_name = ?", [itemName]);
     },);
 
-    //reload ball menu and coins since they were updated
-    await loadBallsForMenu();
+    //reload appropriate menu and coins since they were updated
+    if (tableName == 'balls'){
+      await loadBallsForMenu();
+    }
+    else if (tableName == 'trails') {
+      await loadTrailsForMenu();
+    }
+
     await initializeCoinAmt();
   }
 
@@ -64,6 +91,21 @@ class Backend {
     //re-update balls list, set new ballimgpath
     await loadBallsForMenu();
     await acquireBallPath();
+  }
+
+
+  static Future<void> equipTrail(String trailName) async {
+    await db.transaction((txn) async {
+      //remove current equpped ball
+      await txn.rawUpdate("UPDATE trails SET equipped = 0 WHERE equipped = 1");
+
+      //set desired ball to equpped
+      await txn.rawUpdate("UPDATE trails SET equipped = 1 WHERE trail_name = ?", [trailName]);
+    });
+
+    //re-update balls list, set new ballimgpath
+    await loadTrailsForMenu();
+    await acquireTrail();
   }
 
 
@@ -109,6 +151,9 @@ class Backend {
 
 
 
+
+
+
   //create our tables on creation
   static Future<void> createTables(Database db) async {
     //hs
@@ -144,9 +189,6 @@ class Backend {
     );
     
   }
-
-
-
 
   //insert our rows on creation
   static Future<void> insertRows(Database db) async {

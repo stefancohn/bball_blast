@@ -183,8 +183,10 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
 
     //load sprites, icons
     await _loadAllSprites();
-    await _loadBallIcons();
+    await _loadItemIcons(itemList: allBalls, spriteList: ballSprites, itemName: 'ball_name'); //load balls
+    await _loadItemIcons(itemList: allTrails, spriteList: colorSprites, itemName: 'trail_name'); //load trails
     await _loadNecessaryIcons();
+
 
     //render icons
     await renderIcons();
@@ -239,28 +241,36 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
   }
 
 
-  //helper to load ballIcons
-  Future<void> _loadBallIcons() async {
+  //helper to load itemIcons
+  Future<void> _loadItemIcons({required List<Map<String, Object?>> itemList, required Map<String, Sprite> spriteList, required String itemName}) async {
+    //set "stateWhenRendered" properly with this var and if statement
+    MenuState whenRender = MenuState.ball; 
+    if (itemName == "ball_name") {
+      whenRender = MenuState.ball;
+    }
+    else if (itemName == "trail_name") {
+      whenRender = MenuState.trails;
+    }
 
-    for (int i = 0 ; i < allBalls.length; i++ ) {
-      var curBall = allBalls[i];
-      _icon ball;
 
-      //get filepath to get name, create icon
-      String name = curBall['ball_name'] as String;
+    for (int i = 0 ; i < itemList.length; i++ ) {
+      var curItem = itemList[i];
+      _icon newIcon;
+
+      //get name, create icon
+      String name = curItem[itemName] as String;
       name = name.trim();
 
       //show proper sprite if unlcoked
-      if (curBall['acquired'] == 1){
-        ball = _icon(sprite: ballSprites[name]!, stateWhenRendered: MenuState.ball, stateToLeadTo: (curBall['equipped'] == 1 ? MenuState.equipped : MenuState.equip), name: name);
-
+      if (curItem['acquired'] == 1){
+        newIcon = _icon(sprite: spriteList[name]!, stateWhenRendered: whenRender, stateToLeadTo: (curItem['equipped'] == 1 ? MenuState.equipped : MenuState.equip), name: name);
       } 
       //else show mystery, get proper price
       else {
-        ball = _icon(sprite: lockedIconCircleImg, stateWhenRendered: MenuState.ball, stateToLeadTo: MenuState.buy, name: name);
+        newIcon = _icon(sprite: lockedIconCircleImg, stateWhenRendered: whenRender, stateToLeadTo: MenuState.buy, name: name);
       }
 
-      icons.add(ball);
+      icons.add(newIcon);
     }
   }
 
@@ -280,7 +290,7 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
     }
 
     //ball icon setup
-    else if (icon.stateWhenRendered == MenuState.ball) {
+    else if (icon.stateWhenRendered == MenuState.ball || icon.stateWhenRendered == MenuState.trails) {
       //get row and col of icon
       int row = ((iconNum / iconsColBall).floor()); 
       int col = (iconNum % iconsColBall);
@@ -316,13 +326,13 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
   }
 
 
-  Future<void> refreshBallIcons() async {
+  Future<void> refreshIcons(MenuState state) async {
     //list to store icons to remove
     List<_icon> iconsToRemove = [];
 
     //add to removal list for proper removal from icons list
     for (int i = 0; i < icons.length; i++) {
-      if (icons[i].stateWhenRendered == MenuState.ball) {
+      if (icons[i].stateWhenRendered == state) {
         iconsToRemove.add(icons[i]);
       }
     }
@@ -333,8 +343,13 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
       icons.remove(icon);
     }
 
-    //reload ball icons and re-render them
-    _loadBallIcons();
+    //reload icons and re-render them
+    if (state == MenuState.ball){
+      _loadItemIcons(itemList: allBalls, spriteList: ballSprites, itemName: 'ball_name');
+    }
+    else if (state == MenuState.trails) {
+      _loadItemIcons(itemList: allTrails, spriteList: colorSprites, itemName: 'trail_name');
+    }
     renderIcons();
   }
 
@@ -381,10 +396,10 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
     Vector2 colorImgSrcSize = Vector2(200,185);
     final colorImg = await Flame.images.load('colorSpriteSheet.png');
     colorSprites["white"] = Sprite(colorImg, srcPosition: Vector2(0,0), srcSize: colorImgSrcSize);
-    colorSprites["orange"] = Sprite(colorImg, srcPosition: (colorImgSrcSize*colorSprites.length.toDouble()) + (Vector2(5,0) * colorImgSrcSize.length.toDouble()), srcSize: colorImgSrcSize);
-    colorSprites["blue"] = Sprite(colorImg, srcPosition: (colorImgSrcSize*colorSprites.length.toDouble()) + (Vector2(5,0) * colorImgSrcSize.length.toDouble()), srcSize: colorImgSrcSize);
-    colorSprites["pink"] = Sprite(colorImg, srcPosition: (colorImgSrcSize*colorSprites.length.toDouble()) + (Vector2(5,0) * colorImgSrcSize.length.toDouble()), srcSize: colorImgSrcSize);
-    colorSprites["green"] = Sprite(colorImg, srcPosition: (colorImgSrcSize*colorSprites.length.toDouble()) + (Vector2(5,0) * colorImgSrcSize.length.toDouble()), srcSize: colorImgSrcSize);
+    colorSprites["orange"] = Sprite(colorImg, srcPosition: Vector2(colorImgSrcSize.x*colorSprites.length + 5*colorSprites.length,0), srcSize: colorImgSrcSize);
+    colorSprites["blue"] = Sprite(colorImg, srcPosition: Vector2(colorImgSrcSize.x*colorSprites.length + 5*colorSprites.length,0), srcSize: colorImgSrcSize);
+    colorSprites["pink"] = Sprite(colorImg, srcPosition: Vector2(612,0), srcSize: colorImgSrcSize);
+    colorSprites["green"] = Sprite(colorImg, srcPosition: Vector2(815,0), srcSize: colorImgSrcSize);
   }
 }
 
@@ -438,19 +453,22 @@ class _icon extends ButtonComponent with HasGameRef<BBallBlast> {
 
       //reduce coins appropriately, set to unlocked
       if (stateToLeadTo == MenuState.buy) {
+        String tableName = "";
+        if (stateWhenRendered == MenuState.ball) {
+          tableName = "balls";
+        }
+        else if (stateWhenRendered == MenuState.trails) {
+          tableName = "trails";
+        }
 
         //verify we can buy it, then call Backend
         if (coinAmt > newBallCost) {
-          await Backend.buyBall(name!);
+          await Backend.buyItem(tableName, name!);
           stateToLeadTo = MenuState.equip;
 
-
-          //(button as SpriteComponent).sprite = (parent as _customizationIconContainer).ballSprites[name!]!;
-          //await (parent as _customizationIconContainer).renderIcons();
-          (parent as _customizationIconContainer).refreshBallIcons();
+          (parent as _customizationIconContainer).refreshIcons(stateWhenRendered);
         }
-
-        //TODO: add animation for invalid purchase
+        //else shakeEffect for invalid action
         else {
           shakeEffect();
         }
@@ -460,11 +478,18 @@ class _icon extends ButtonComponent with HasGameRef<BBallBlast> {
       //change equpped ball when one is pressed
       else if (stateToLeadTo == MenuState.equip) {
         //modify DB
-        await Backend.equipBall(name!);
+        if (stateWhenRendered == MenuState.ball) {
+          await Backend.equipBall(name!);
+        } 
+        else if (stateWhenRendered == MenuState.trails) {
+          await Backend.equipTrail(name!);
+        }
+
+
         stateToLeadTo = MenuState.equipped;
 
         //refresh icons
-        (parent as _customizationIconContainer).refreshBallIcons();
+        (parent as _customizationIconContainer).refreshIcons(stateWhenRendered);
       }
     };
 
@@ -477,13 +502,23 @@ class _icon extends ButtonComponent with HasGameRef<BBallBlast> {
 
   //add price indicator (coin sprite iwth text indicating sprite)
   Future<void> addPrice(Sprite coinImg) async {
+    //grab proper cost of item
+    String text ="";
+    if (stateWhenRendered == MenuState.ball) {
+      text = newBallCost.toString();
+    }
+    else if (stateWhenRendered == MenuState.trails) {
+      text = newTrailCost.toString();
+    }
+
+
     Vector2 coinSpriteSize = size/2.5;
 
     SpriteComponent coinSprite = SpriteComponent(anchor: Anchor.center, position: Vector2(size.x/5, (size.y * 1.1) + coinSpriteSize.y/2), size: coinSpriteSize, sprite: coinImg);
 
     TextBoxComponent priceText = TextBoxComponent(
       anchor: Anchor.center, 
-      text: newBallCost.toString(), 
+      text: text, 
       textRenderer: textPaintWhiteSmall,
       boxConfig: const TextBoxConfig(growingBox: true)
     ) 
