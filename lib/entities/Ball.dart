@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:bball_blast/BBallBlast.dart';
 import 'package:bball_blast/Backend.dart';
 import 'package:bball_blast/config.dart';
+import 'package:bball_blast/entities/BumpAnimation.dart';
 import 'package:bball_blast/entities/TrailEffect.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
@@ -26,6 +27,8 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame>, ContactCallbacks 
 
   //points to draw for trajectory
   late List<Vector2> points;
+
+  late BumpAnimation bumpAni;
 
   //FOR GENERATE TRAJ METHODS
   static double velocityRatio = 1/5.026548245743669;
@@ -83,6 +86,11 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame>, ContactCallbacks 
     );
     await add(ballSprite!);
 
+    //add bump animation to ball
+    bumpAni = BumpAnimation(ball: this);
+    game.world.add(bumpAni);
+
+    //add trail to ball
     TrailEffect trail = TrailEffect(ball: this);
     game.world.add(trail);
 
@@ -206,9 +214,9 @@ class Ball extends BodyComponent with HasGameRef<Forge2DGame>, ContactCallbacks 
   @override
   void beginContact(Object other, Contact contact) {
     if (other == BBallBlast.gameplay.wallRight) {
-      BBallBlast.gameplay.wallBumpAnimation(isLeft: false);
+      bumpAni.wallBumpAnimation(isLeft: false);
     } else if (other == BBallBlast.gameplay.wallLeft) {
-      BBallBlast.gameplay.wallBumpAnimation(isLeft: true);
+      bumpAni.wallBumpAnimation(isLeft: true);
     }
 
     //play sound on any collision

@@ -3,15 +3,18 @@ import 'package:sqflite/sqflite.dart';
 
 String ballImgPath = "";
 String trailPath = "";
+String bumpPath="";
 
 //get all balls, trails
 List<Map<String, Object?>> allBalls = List.empty(); 
 List<Map<String,Object?>> allTrails = List.empty();
+List<Map<String,Object?>> allBumps = List.empty();
 
 //for calculating cost; start at 25 coins.
 //every item bought increments cost in that category by 25
 int newBallCost = 0; 
 int newTrailCost=0;
+int newBumpCost =0;
 
 int coinAmt = 0;
 
@@ -28,16 +31,27 @@ class Backend {
     ballImgPath = "$ballImgPath.png";
   }
 
-  //show equpped trail gets shown
+  //so equpped trail gets shown
   static Future<void> acquireTrail() async {
-    //set ballImgPath
+    //set trailPath
     var dbList = await db.query('trails', where: 'equipped=?', whereArgs:[1]);
     if (dbList.isNotEmpty) {
       trailPath = dbList.first['trail_name'] as String;
     }
   }
 
+  //so equipped bump gets shown
+  static Future<void> acquireBump() async {
+    //set bumpPath
+    var dbList = await db.query('bumps', where: 'equipped=?', whereArgs:[1]);
+    if (dbList.isNotEmpty) {
+      bumpPath = dbList.first['bump_name'] as String;
+    }
+  }
 
+
+
+  //GRAB ALL ROWS FOR DESIRED ITEM
   static Future<void> loadBallsForMenu() async {
     List<Map<String, Object?>> dbList = await db.query('balls');
     allBalls = dbList;
@@ -51,8 +65,18 @@ class Backend {
     allTrails = dbList;
 
     //calculated cost to get new ball
-    newTrailCost = 25 * dbList.where((ball) => ball['acquired'] == 1).length;
+    newTrailCost = 25 * dbList.where((trail) => trail['acquired'] == 1).length;
   }
+
+  static Future<void> loadBumpsForMenu() async {
+    List<Map<String, Object?>> dbList = await db.query('bumps');
+    allBumps = dbList;
+
+    //calculated cost to get new ball
+    newBumpCost = 25 * dbList.where((bump) => bump['acquired'] == 1).length;
+  }
+
+
 
 
   //update DB, reload allBalls and coins
@@ -74,9 +98,14 @@ class Backend {
     else if (tableName == 'trails') {
       await loadTrailsForMenu();
     }
+    else if (tableName == 'bumps') {
+      await loadBumpsForMenu();
+    }
 
     await initializeCoinAmt();
   }
+
+
 
 
   static Future<void> equipBall(String ballName) async {
@@ -93,7 +122,6 @@ class Backend {
     await acquireBallPath();
   }
 
-
   static Future<void> equipTrail(String trailName) async {
     await db.transaction((txn) async {
       //remove current equpped ball
@@ -103,10 +131,26 @@ class Backend {
       await txn.rawUpdate("UPDATE trails SET equipped = 1 WHERE trail_name = ?", [trailName]);
     });
 
-    //re-update balls list, set new ballimgpath
+    //re-update balls list, set new path
     await loadTrailsForMenu();
     await acquireTrail();
   }
+
+  static Future<void> equipBump(String bumpName) async {
+    await db.transaction((txn) async {
+      //remove current equipped ball
+      await txn.rawUpdate("UPDATE bumps SET equipped = 0 WHERE equipped = 1");
+
+      //set desired bump to equipped
+      await txn.rawUpdate("UPDATE bumps SET equipped = 1 WHERE bump_name=?", [bumpName]);
+    });
+
+    //re-update list, set new path
+    await loadBumpsForMenu();
+    await acquireBump();
+  }
+
+
 
 
   //set amount of coins var
@@ -187,7 +231,28 @@ class Backend {
       )
       '''
     );
-    
+
+    //bumps
+    await db.execute(
+      '''
+      CREATE TABLE bumps(
+        bump_name VARCHAR(50) PRIMARY KEY NOT NULL,
+        acquired BOOLEAN NOT NULL DEFAULT FALSE,
+        equipped BOOLEAN NOT NULL DEFAULT FALSE
+      )
+      '''
+    );
+
+    //backgrounds
+    await db.execute(
+      '''
+      CREATE TABLE bgs(
+        bg_name VARCHAR(50) PRIMARY KEY NOT NULL,
+        acquired BOOLEAN NOT NULL DEFAULT FALSE,
+        equipped BOOLEAN NOT NULL DEFAULT FALSE
+      )
+      '''
+    );
   }
 
   //insert our rows on creation
@@ -241,6 +306,57 @@ class Backend {
       });
       await txn.insert('trails', {
         'trail_name': 'green',
+        'acquired' : false,
+        'equipped' : false,
+      });
+
+
+      //Insert bumps rows
+      await txn.insert('bumps', {
+        'bump_name': 'white',
+        'acquired' : true,
+        'equipped' : true,
+      });
+      await txn.insert('bumps', {
+        'bump_name': 'orange',
+        'acquired' : false,
+        'equipped' : false,
+      });
+      await txn.insert('bumps', {
+        'bump_name': 'blue',
+        'acquired' : false,
+        'equipped' : false,
+      });
+      await txn.insert('bumps', {
+        'bump_name': 'pink',
+        'acquired' : false,
+        'equipped' : false,
+      });
+      await txn.insert('bumps', {
+        'bump_name': 'green',
+        'acquired' : false,
+        'equipped' : false,
+      });
+
+
+      //Insert bg rows
+      await txn.insert('bgs', {
+        'bg_name': 'sky',
+        'acquired' : true,
+        'equipped' : true,
+      });
+      await txn.insert('bgs', {
+        'bg_name': 'bricks',
+        'acquired' : false,
+        'equipped' : false,
+      });
+      await txn.insert('bgs', {
+        'bg_name': 'space',
+        'acquired' : false,
+        'equipped' : false,
+      });
+      await txn.insert('bgs', {
+        'bg_name': 'ocean',
         'acquired' : false,
         'equipped' : false,
       });

@@ -14,7 +14,6 @@ import 'package:flame/effects.dart';
 import 'package:flame/extensions.dart';
 import 'package:bball_blast/config.dart';
 import 'package:flame/input.dart';
-import 'package:flame_noise/flame_noise.dart';
 import 'package:flame/sprite.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/particles.dart';
@@ -261,61 +260,6 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     else {
       stuckTimer = 0;
     }
-  }
-
-  //make camera shake, add falling orange particles
-  Future<void> wallBumpAnimation({required bool isLeft}) async {
-    //MAKE SCREEN SHAKE
-    game.camera.viewfinder.add(
-      MoveEffect.by(
-        Vector2(5, 5),
-        NoiseEffectController(duration: 0.2, noise: PerlinNoise(frequency: 400)),
-      ),
-    );
-
-
-    //PARTICLE
-    //vars for particle
-    int particleCount = 10;
-    double xPosForParticle;
-    List<Vector2> accelForParticle = List.filled(10, Vector2.all(0)); 
-    for(int i =0; i < particleCount; i++) {accelForParticle[i] = Vector2.random()..scale(100);} //set 10 diff vals
-
-    //Set vars correctly depending on which wall
-    if (isLeft) {
-      xPosForParticle = wallLeft.body.position.x;
-    } else {
-      xPosForParticle = wallRight.body.position.x;
-      for (int i=0;i<particleCount;i++) {accelForParticle[i].x*=-1;}//change x direction if on right
-    }
-
-    //our particle 
-    final particle = ParticleSystemComponent(
-      particle: Particle.generate(
-        count: particleCount,  // Number of particles
-        lifespan: 2,  // How long the particles last
-        generator: (i) => AcceleratedParticle(
-          acceleration: accelForParticle.elementAt(i),
-          position: Vector2(xPosForParticle, ball.body.position.y ),  // Where the impact happened
-          child: ComputedParticle(
-            renderer: (canvas, particle) {
-              //so the color slowly fades away
-              Paint paint = Paint()..color = Colors.white;
-              paint.color = paint.color.withOpacity(1-particle.progress);
-
-              //our circle for particle
-              canvas.drawCircle(
-                Offset.zero,
-                1,
-                paint
-              );
-            }
-          ),
-        ),
-      ),
-    );
-
-    game.world.add(particle);
   }
 
   //initialize all objects add add them to world/game

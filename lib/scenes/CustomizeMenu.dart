@@ -185,6 +185,7 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
     await _loadAllSprites();
     await _loadItemIcons(itemList: allBalls, spriteList: ballSprites, itemName: 'ball_name'); //load balls
     await _loadItemIcons(itemList: allTrails, spriteList: colorSprites, itemName: 'trail_name'); //load trails
+    await _loadItemIcons(itemList: allBumps, spriteList: colorSprites, itemName: 'bump_name'); //load bumps 
     await _loadNecessaryIcons();
 
 
@@ -251,6 +252,9 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
     else if (itemName == "trail_name") {
       whenRender = MenuState.trails;
     }
+    else if (itemName == "bump_name") {
+      whenRender = MenuState.bump;
+    }
 
 
     for (int i = 0 ; i < itemList.length; i++ ) {
@@ -290,7 +294,7 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
     }
 
     //ball icon setup
-    else if (icon.stateWhenRendered == MenuState.ball || icon.stateWhenRendered == MenuState.trails) {
+    else if (icon.stateWhenRendered == MenuState.ball || icon.stateWhenRendered == MenuState.trails || icon.stateWhenRendered == MenuState.bump) {
       //get row and col of icon
       int row = ((iconNum / iconsColBall).floor()); 
       int col = (iconNum % iconsColBall);
@@ -350,6 +354,10 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
     else if (state == MenuState.trails) {
       _loadItemIcons(itemList: allTrails, spriteList: colorSprites, itemName: 'trail_name');
     }
+    else if (state == MenuState.bump) {
+      _loadItemIcons(itemList: allBumps, spriteList: colorSprites, itemName: 'bump_name');
+    }
+
     renderIcons();
   }
 
@@ -460,6 +468,9 @@ class _icon extends ButtonComponent with HasGameRef<BBallBlast> {
         else if (stateWhenRendered == MenuState.trails) {
           tableName = "trails";
         }
+        else if (stateWhenRendered == MenuState.bump) {
+          tableName = "bumps";
+        }
 
         //verify we can buy it, then call Backend
         if (coinAmt > newBallCost) {
@@ -483,6 +494,9 @@ class _icon extends ButtonComponent with HasGameRef<BBallBlast> {
         } 
         else if (stateWhenRendered == MenuState.trails) {
           await Backend.equipTrail(name!);
+        }
+        else if (stateWhenRendered == MenuState.bump) {
+          await Backend.equipBump(name!);
         }
 
 
@@ -509,6 +523,9 @@ class _icon extends ButtonComponent with HasGameRef<BBallBlast> {
     }
     else if (stateWhenRendered == MenuState.trails) {
       text = newTrailCost.toString();
+    } 
+    else if (stateWhenRendered == MenuState.bump) {
+      text= newBumpCost.toString();
     }
 
 

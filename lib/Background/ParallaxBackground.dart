@@ -120,7 +120,7 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
     );
 
     ParallaxBackgroundConfig bricksConfig = ParallaxBackgroundConfig(
-      imageLayers: {'brickBackground.png' : Vector2(10,0)},
+      imageLayers: {'bricksBg.png' : Vector2(10,0)},
       baseVelocity: Vector2(2,0),
     );
 
