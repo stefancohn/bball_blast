@@ -300,7 +300,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
           child: ComputedParticle(
             renderer: (canvas, particle) {
               //so the color slowly fades away
-              Paint paint = Paint()..color = Colors.orange;
+              Paint paint = Paint()..color = Colors.white;
               paint.color = paint.color.withOpacity(1-particle.progress);
 
               //our circle for particle
@@ -336,7 +336,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
 
     //coin indicator and necessary vars
     Vector2 coinAmtDisplayPos = game.worldToScreen(game.camera.visibleWorldRect.topRight.toVector2());
-    Vector2 coinAmtDisplaySize = Vector2(game.camera.viewport.size.x/4,game.camera.viewport.size.y/12);
+    Vector2 coinAmtDisplaySize = Vector2(game.camera.viewport.size.x/4,game.camera.viewport.size.y/14);
     coinAmtDisplayPos.x -= coinAmtDisplaySize.x + 10;
     coinAmtDisplayPos.y += 20;
 

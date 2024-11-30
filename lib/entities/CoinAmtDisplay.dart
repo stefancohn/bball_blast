@@ -22,21 +22,29 @@ class CoinAmtDisplay extends PositionComponent with HasGameRef<BBallBlast> {
       
     ),
   );
+  final TextPaint _textPaintSmall = TextPaint(
+    style: const TextStyle(
+      fontSize: 18.0,
+      fontFamily: 'Score',
+      color: Color.fromARGB(255, 255, 255, 255),
+      
+    ),
+  );
 
   @override
   FutureOr<void> onLoad() async {
-    coinSize = Vector2(size.x/2, size.y);
+    coinSize = Vector2(size.x/1.8, size.y);
     //Add coin 
     coin = SpriteComponent(sprite: coinImg, size: coinSize,);
     await add(coin!);
 
     coinText = TextComponent(
       text: coinAmt.toString(),
-      textRenderer: _textPaint,
-      anchor: Anchor.topLeft,
+      textRenderer: (coinAmt < 99 ? _textPaint : _textPaintSmall),
     )
+      ..anchor = Anchor.centerLeft
       ..size = Vector2(size.x*3/4, size.y)
-      ..position = Vector2(coinSize.x*1.1, size.y/3);
+      ..position = Vector2(coinSize.x*1.15, size.y/1.5);
     await add(coinText!);
 
     return super.onLoad();
@@ -44,7 +52,8 @@ class CoinAmtDisplay extends PositionComponent with HasGameRef<BBallBlast> {
 
   @override
   void update(double dt) {
-    if (coinText != null ) {
+    //dynamically update text
+    if (coinText != null && int.parse(coinText!.text) != coinAmt) {
       coinText!.text = coinAmt.toString();
     }
     super.update(dt);

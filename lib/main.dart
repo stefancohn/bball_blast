@@ -1,4 +1,5 @@
 import 'package:bball_blast/BBallBlast.dart';
+import 'package:bball_blast/Backend.dart';
 import 'package:bball_blast/config.dart';
 import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
@@ -19,23 +20,8 @@ Future<void> main() async {
   final db = await openDatabase(
     join(await getDatabasesPath(), 'bball_blast.db'),
     onCreate: (db, version) async {
-      await db.execute(
-        'CREATE TABLE highscores(score INTEGER)',
-      );
-      await db.execute(
-        'CREATE TABLE coins(coin INTEGER)',
-      );
-      await db.execute(
-        '''
-        CREATE TABLE balls(
-          ball_name VARCHAR(50) PRIMARY KEY NOT NULL, 
-          acquired BOOLEAN NOT NULL DEFAULT FALSE, 
-          equipped BOOLEAN 
-        )
-        '''
-      );
-
-      await insertRows(db);
+      await Backend.createTables(db);
+      await Backend.insertRows(db);
     },
     version: 1,
     /*
@@ -57,33 +43,6 @@ Future<void> main() async {
   runApp(
     MyApp(db: db)
   );
-}
-
-Future<void> insertRows(Database db) async {
-  await db.transaction((txn) async {
-    //Insert coin
-    await txn.insert('coins', {
-      'coin' : 0
-    });
-    //Insert ball rows
-    await txn.insert('balls', {
-      'ball_name': 'whiteBall',
-      'acquired' : true,
-      'equipped' : true,
-    });
-
-    await txn.insert('balls', {
-      'ball_name': 'basketball',
-      'acquired' : false,
-      'equipped' : false,
-    });
-
-    await txn.insert('balls', {
-      'ball_name' : 'smileyBall',
-      'acquired' : false,
-      'equipped' : false,
-    });
-  });
 }
 
 class MyApp extends StatelessWidget {

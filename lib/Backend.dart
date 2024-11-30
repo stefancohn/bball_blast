@@ -105,4 +105,103 @@ class Backend {
     await db.rawUpdate("UPDATE coins set coin = 9999");
     await initializeCoinAmt();
   } 
+
+
+
+
+  //create our tables on creation
+  static Future<void> createTables(Database db) async {
+    //hs
+    await db.execute(
+      'CREATE TABLE highscores(score INTEGER)',
+    );
+
+    //coins
+    await db.execute(
+      'CREATE TABLE coins(coin INTEGER)',
+    );
+
+    //balls
+    await db.execute(
+      '''
+      CREATE TABLE balls(
+        ball_name VARCHAR(50) PRIMARY KEY NOT NULL, 
+        acquired BOOLEAN NOT NULL DEFAULT FALSE, 
+        equipped BOOLEAN NOT NULL DEFAULT FALSE
+      )
+      '''
+    );
+
+    //trails
+    await db.execute(
+      '''
+      CREATE TABLE trails(
+        trail_name VARCHAR(50) PRIMARY KEY NOT NULL,
+        acquired BOOLEAN NOT NULL DEFAULT FALSE,
+        equipped BOOLEAN NOT NULL DEFAULT FALSE
+      )
+      '''
+    );
+    
+  }
+
+
+
+
+  //insert our rows on creation
+  static Future<void> insertRows(Database db) async {
+    await db.transaction((txn) async {
+      //Insert coin
+      await txn.insert('coins', {
+        'coin' : 0
+      });
+
+
+      //Insert ball rows
+      await txn.insert('balls', {
+        'ball_name': 'whiteBall',
+        'acquired' : true,
+        'equipped' : true,
+      });
+      await txn.insert('balls', {
+        'ball_name': 'basketball',
+        'acquired' : false,
+        'equipped' : false,
+      });
+      await 
+      txn.insert('balls', {
+        'ball_name' : 'smileyBall',
+        'acquired' : false,
+        'equipped' : false,
+      });
+
+
+      //Insert trails rows
+      await txn.insert('trails', {
+        'trail_name': 'white',
+        'acquired' : true,
+        'equipped' : true,
+      });
+      await txn.insert('trails', {
+        'trail_name': 'orange',
+        'acquired' : false,
+        'equipped' : false,
+      });
+      await txn.insert('trails', {
+        'trail_name': 'blue',
+        'acquired' : false,
+        'equipped' : false,
+      });
+      await txn.insert('trails', {
+        'trail_name': 'pink',
+        'acquired' : false,
+        'equipped' : false,
+      });
+      await txn.insert('trails', {
+        'trail_name': 'green',
+        'acquired' : false,
+        'equipped' : false,
+      });
+    });
+  }
 }

@@ -8,9 +8,12 @@ import 'package:bball_blast/config.dart';
 import 'package:bball_blast/entities/CoinAmtDisplay.dart';
 import 'package:bball_blast/entities/PlayButton.dart';
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flame/extensions.dart';
+import 'package:flame/flame.dart';
 import 'package:flame/input.dart';
 import 'package:flame/text.dart';
+import 'package:flame_noise/flame_noise.dart';
 import 'package:flutter/material.dart';
 
 TextPaint textPaintWhite = TextPaint(
@@ -105,7 +108,7 @@ class CustomizeMenu extends Component with HasGameRef<BBallBlast>{
   void addParalaxBg() async{
     ParallaxBackground parallax = ParallaxBackground();
     await add(parallax);
-    RectangleComponent rect = RectangleComponent(priority: -2, anchor: Anchor.center, position: game.worldToScreen(Vector2(0,0)), size: game.camera.viewport.size, paint: Paint() ..color = Color.fromARGB(107, 255, 255, 255));
+    RectangleComponent rect = RectangleComponent(priority: -2, anchor: Anchor.center, position: game.worldToScreen(Vector2(0,0)), size: game.camera.viewport.size, paint: Paint() ..color = const Color.fromARGB(107, 255, 255, 255));
     await game.add(rect);
   }
 }
@@ -140,6 +143,7 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
   late Sprite checkMarkImg;
 
   Map<String, Sprite> ballSprites = {};
+  Map<String, Sprite> colorSprites ={};
 
   double? defMargin; 
   double? customIconMargin;
@@ -372,6 +376,15 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
     ballSprites["smileyBall"] = await game.loadSprite("smileyBall.png");
     ballSprites["whiteBall"] = await game.loadSprite("whiteBall.png");
     ballSprites["basketball"] = await game.loadSprite("basketball.png");
+
+    //colors
+    Vector2 colorImgSrcSize = Vector2(200,185);
+    final colorImg = await Flame.images.load('colorSpriteSheet.png');
+    colorSprites["white"] = Sprite(colorImg, srcPosition: Vector2(0,0), srcSize: colorImgSrcSize);
+    colorSprites["orange"] = Sprite(colorImg, srcPosition: (colorImgSrcSize*colorSprites.length.toDouble()) + (Vector2(5,0) * colorImgSrcSize.length.toDouble()), srcSize: colorImgSrcSize);
+    colorSprites["blue"] = Sprite(colorImg, srcPosition: (colorImgSrcSize*colorSprites.length.toDouble()) + (Vector2(5,0) * colorImgSrcSize.length.toDouble()), srcSize: colorImgSrcSize);
+    colorSprites["pink"] = Sprite(colorImg, srcPosition: (colorImgSrcSize*colorSprites.length.toDouble()) + (Vector2(5,0) * colorImgSrcSize.length.toDouble()), srcSize: colorImgSrcSize);
+    colorSprites["green"] = Sprite(colorImg, srcPosition: (colorImgSrcSize*colorSprites.length.toDouble()) + (Vector2(5,0) * colorImgSrcSize.length.toDouble()), srcSize: colorImgSrcSize);
   }
 }
 
@@ -379,6 +392,7 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
 
 
 //icon
+// ignore: camel_case_types
 class _icon extends ButtonComponent with HasGameRef<BBallBlast> {
   late Rect bgRect;
   Sprite sprite;
@@ -424,6 +438,7 @@ class _icon extends ButtonComponent with HasGameRef<BBallBlast> {
 
       //reduce coins appropriately, set to unlocked
       if (stateToLeadTo == MenuState.buy) {
+
         //verify we can buy it, then call Backend
         if (coinAmt > newBallCost) {
           await Backend.buyBall(name!);
@@ -434,9 +449,10 @@ class _icon extends ButtonComponent with HasGameRef<BBallBlast> {
           //await (parent as _customizationIconContainer).renderIcons();
           (parent as _customizationIconContainer).refreshBallIcons();
         }
+
         //TODO: add animation for invalid purchase
         else {
-
+          shakeEffect();
         }
       }
 
@@ -488,6 +504,16 @@ class _icon extends ButtonComponent with HasGameRef<BBallBlast> {
     (button as SpriteComponent).opacity = 0.8;
 
     await add(checkMarkSprite);
+  }
+
+  
+  //shake effect when invlaid purchase attempted
+  Future<void> shakeEffect() async {
+    (button as SpriteComponent).add(MoveEffect.by(
+        Vector2(8, 8),
+        NoiseEffectController(duration: 0.5, noise: PerlinNoise(frequency: 400)),
+      ),
+    );
   }
 }
 

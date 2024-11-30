@@ -134,8 +134,8 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
     );
 
     ParallaxBackgroundConfig spaceConfig = ParallaxBackgroundConfig(
-      imageLayers: {"spaceBg/l6.png" : Vector2(2,0), "spaceBg/l5.png" : Vector2(6,0), "spaceBg/l4.png" : Vector2(9,0), 
-      "spaceBg/l3.png" : Vector2(7,0), "spaceBg/l2.png" : Vector2(1,0), "spaceBg/l1.png" : Vector2(0,0)},
+      imageLayers: {"spaceBg/l6.png" : Vector2(0,0), "spaceBg/l5.png" : Vector2(6,0), "spaceBg/l4.png" : Vector2(9,0), 
+      "spaceBg/l3.png" : Vector2(7,0), "spaceBg/l2.png" : Vector2(1,0), "spaceBg/l1.png" : Vector2(2,0)},
 
       baseVelocity: Vector2(1,0),
     );

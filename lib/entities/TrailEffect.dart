@@ -9,6 +9,7 @@ import 'package:flame/components.dart';
 class TrailEffect extends Component with HasPaint, HasGameRef<BBallBlast>{
   final trail = <Offset>[];
   final _trailLength = 20; 
+  final _minSpeed = 15;
 
   Ball ball;
 
@@ -16,7 +17,7 @@ class TrailEffect extends Component with HasPaint, HasGameRef<BBallBlast>{
 
   @override
   FutureOr<void> onLoad() {
-    paint.color = (Color.fromARGB(255, 255, 255, 255));
+    paint.color = (const Color.fromARGB(255, 255, 255, 255));
     paint.strokeWidth = 4.0;
       
     super.onLoad();
@@ -25,14 +26,14 @@ class TrailEffect extends Component with HasPaint, HasGameRef<BBallBlast>{
   @override
   void update(double dt) {
     //make sure the ball is going fast enough to add a point to the trail
-    bool goingFastEnough = (ball.body.linearVelocity.x.abs() > 10 || ball.body.linearVelocity.y.abs() > 10);
-    if (goingFastEnough) {
+    bool goingFastEnough = (ball.body.linearVelocity.x.abs() > _minSpeed || ball.body.linearVelocity.y.abs() > _minSpeed);
+    if (goingFastEnough && !BBallBlast.gameplay.ballScored) {
       final trailPoint = (ball.body.position).toOffset();
       trail.add(trailPoint);
     } 
 
     //remove pieces of trail if ball is not fast enough or enough points in path
-    if (trail.isNotEmpty && (trail.length > _trailLength || !goingFastEnough)) {
+    if (trail.isNotEmpty && (trail.length > _trailLength || !goingFastEnough || BBallBlast.gameplay.ballScored)) {
       trail.removeAt(0);
     }
 
@@ -44,7 +45,7 @@ class TrailEffect extends Component with HasPaint, HasGameRef<BBallBlast>{
     //render our trail with a fading effect 
     for (int i = 0; i < trail.length; i++) {
       final point = trail[i];
-      paint.color = paint.color.withAlpha(((i / trail.length) * 255).toInt());
+      paint.color = paint.color.withAlpha(((i / (trail.length+10)) * 255).toInt());
       canvas.drawCircle(point, 2.0, paint);
     }
   }
