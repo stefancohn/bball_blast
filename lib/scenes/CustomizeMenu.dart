@@ -1,11 +1,11 @@
 // ignore: file_names
 import 'dart:async';
-
 import 'package:bball_blast/BBallBlast.dart';
 import 'package:bball_blast/Backend.dart';
 import 'package:bball_blast/Background/ParallaxBackground.dart';
 import 'package:bball_blast/config.dart';
-import 'package:bball_blast/entities/CoinAmtDisplay.dart';
+import 'package:bball_blast/ui/CoinAmtDisplay.dart';
+import 'package:bball_blast/ui/MyTextBox.dart';
 import 'package:bball_blast/ui/PlayButton.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
@@ -591,69 +591,5 @@ class _icon extends ButtonComponent with HasGameRef<BBallBlast> {
         NoiseEffectController(duration: 0.5, noise: PerlinNoise(frequency: 400)),
       ),
     );
-  }
-}
-
-
-
-//nice lil textbox
-class MyTextBox extends TextBoxComponent {
-  Paint? bgPaint;
-  Paint? borderPaint;
-  late Rect bgRect;
-
-  MyTextBox({
-    required String text, 
-    required TextRenderer renderer, 
-    this.bgPaint,
-    this.borderPaint,
-    super.align,
-    super.size,
-    double? timePerChar,
-  }) : 
-  super(
-    text: text,
-    textRenderer: renderer,
-
-    boxConfig: TextBoxConfig(
-      maxWidth: 400,
-      timePerChar: timePerChar ?? 0.05,
-      growingBox: false,
-    ),
-    
-  );
-
-  @override
-  Future<void> onLoad() {
-    //super.boxConfig.growingBox = false;
-
-    bgRect = Rect.fromLTWH(0, 0, width, height);
-    size.addListener(() {
-      bgRect = Rect.fromLTWH(0, 0, width, height);
-    });
-
-    return super.onLoad();
-  }
-
-  @override
-  void render(Canvas canvas) {
-    if (bgPaint != null) { 
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          bgRect, Radius.circular(boxRadius)
-        ),
-        bgPaint!
-      );
-    }
-    if (borderPaint != null) {
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          bgRect, Radius.circular(boxRadius)
-        ),
-        borderPaint!
-      );
-    }
-    
-    super.render(canvas);
   }
 }

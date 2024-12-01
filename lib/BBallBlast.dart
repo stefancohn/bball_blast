@@ -117,9 +117,11 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
 
   //load main menu 
   loadMainMenuScene() async {
+    //if back to home after game started, use transition
     if (fader != null) {
       gameplay.hoop.fadeOutAllComponents(.75); //fade hoop and coin
       gameplay.coin.fadeOut(.75);
+      gameplay.ball.fadeOutAllComponentsTo(transparency: 0, duration: .75);
       fader!.add(OpacityEffect.fadeIn(EffectController(duration:.75), onComplete: () async {
         fader!.add(OpacityEffect.fadeOut(EffectController(duration: .75)));
         removeScene();
@@ -128,7 +130,9 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
         currentScene = mainMenu;
         await add(mainMenu);
       }));
-    } else {
+    } 
+    //on load of game
+    else {
       removeScene();
       resetWorld();
       mainMenu = MainMenu();

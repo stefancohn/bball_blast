@@ -4,7 +4,7 @@ import 'dart:ui';
 
 import 'package:bball_blast/BBallBlast.dart';
 import 'package:bball_blast/Background/ParallaxBackground.dart';
-import 'package:bball_blast/entities/CustomizeButton.dart';
+import 'package:bball_blast/ui/CustomizeButton.dart';
 import 'package:bball_blast/ui/PlayButton.dart';
 import 'package:flame/components.dart';
 import 'package:flame/input.dart';

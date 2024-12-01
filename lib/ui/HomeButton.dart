@@ -1,5 +1,5 @@
 import 'package:bball_blast/BBallBlast.dart';
-import 'package:bball_blast/scenes/PauseOverlay.dart';
+import 'package:bball_blast/ui/PauseOverlay.dart';
 import 'package:flame/components.dart';
 import 'package:flame/input.dart';
 
@@ -24,22 +24,22 @@ class HomeButton extends ButtonComponent with HasGameRef<BBallBlast> {
       scale = Vector2.all(1.05);
     };
 
-    onReleased = () {
+    onReleased = () async {
       game.loadMainMenuScene();
       BBallBlast.gameplay;
       scale = Vector2.all(.95);
 
       if (pauseOverlay!=null) {
-        pauseOverlay!.pressedOps();
+        await pauseOverlay!.pressedOps();
       }
     };
 
-    onCancelled = () {
+    onCancelled = () async {
       game.loadMainMenuScene();
       scale=Vector2.all(.95);
 
       if (pauseOverlay!=null) {
-        pauseOverlay!.pressedOps();
+        await pauseOverlay!.pressedOps();
       }
     };
 
