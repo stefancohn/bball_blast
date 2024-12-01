@@ -22,7 +22,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
   static late Gameover gameover;
   static late CustomizeMenu customMenu;
 
-  late RectangleComponent fader;
+  RectangleComponent? fader;
 
 
   //statemanagement
@@ -76,7 +76,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     gamePlayingDelay = Timer(0.3, onTick: ()=> gameplaying = true);
 
     fader = _initializeFader();
-    await add(fader);
+    await add(fader!);
 
     //debugMode = true;
     super.onLoad();
@@ -117,18 +117,30 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
 
   //load main menu 
   loadMainMenuScene() async {
-    removeScene();
-    resetWorld();
-
-    mainMenu = MainMenu();
-    currentScene = mainMenu;
-    await add(mainMenu);
+    if (fader != null) {
+      gameplay.hoop.fadeOutAllComponents(.75); //fade hoop and coin
+      gameplay.coin.fadeOut(.75);
+      fader!.add(OpacityEffect.fadeIn(EffectController(duration:.75), onComplete: () async {
+        fader!.add(OpacityEffect.fadeOut(EffectController(duration: .75)));
+        removeScene();
+        resetWorld();
+        mainMenu = MainMenu();
+        currentScene = mainMenu;
+        await add(mainMenu);
+      }));
+    } else {
+      removeScene();
+      resetWorld();
+      mainMenu = MainMenu();
+      currentScene = mainMenu;
+      await add(mainMenu);
+    }
   }
 
   //load gameplay
   void loadGameScene() async {
-    fader.add(OpacityEffect.fadeIn(EffectController(duration: .75), onComplete: () async {
-      fader.add(OpacityEffect.fadeOut(EffectController(duration: .75)));
+    fader!.add(OpacityEffect.fadeIn(EffectController(duration: .75), onComplete: () async {
+      fader!.add(OpacityEffect.fadeOut(EffectController(duration: .75)));
       removeScene();
       resetWorld();
 
@@ -146,21 +158,21 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     gameplay.coin.fadeOut(.75);
 
     //fade everything else and call appropriate functions once complete
-    fader.add(OpacityEffect.fadeIn(EffectController(duration:.75), onComplete: () async {
+    fader!.add(OpacityEffect.fadeIn(EffectController(duration:.75), onComplete: () async {
       removeScene();
       resetWorld();
       gameover = Gameover();
       await add(gameover);
       gameplaying = false;
       currentScene  = gameover;
-      fader.add(OpacityEffect.fadeOut(EffectController(duration: .75)));
+      fader!.add(OpacityEffect.fadeOut(EffectController(duration: .75)));
 
     },));
   }
 
   void loadCustomizerScene() async {
-    fader.add(OpacityEffect.fadeIn(EffectController(duration: .75), onComplete: () async {
-      fader.add(OpacityEffect.fadeOut(EffectController(duration: .75)));
+    fader!.add(OpacityEffect.fadeIn(EffectController(duration: .75), onComplete: () async {
+      fader!.add(OpacityEffect.fadeOut(EffectController(duration: .75)));
 
       removeScene();
       resetWorld();

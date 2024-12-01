@@ -6,7 +6,7 @@ import 'package:bball_blast/Backend.dart';
 import 'package:bball_blast/Background/ParallaxBackground.dart';
 import 'package:bball_blast/config.dart';
 import 'package:bball_blast/entities/CoinAmtDisplay.dart';
-import 'package:bball_blast/entities/PlayButton.dart';
+import 'package:bball_blast/ui/PlayButton.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/extensions.dart';
@@ -221,8 +221,12 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
       }
 
       //make sure to remove if it's in the component and not in cur state
-      if (children.contains(curIcon) && curIcon.stateWhenRendered != CustomizeMenu.curState.value && curIcon.stateWhenRendered != MenuState.notDef) {
-        curIcon.removeFromParent();
+      if (children.contains(curIcon) && curIcon.stateWhenRendered != CustomizeMenu.curState.value) {
+        if (curIcon.stateWhenRendered == MenuState.notDef && CustomizeMenu.curState.value == MenuState.def) {
+          curIcon.removeFromParent();
+        } else if (curIcon.stateWhenRendered != MenuState.notDef) {
+          curIcon.removeFromParent();
+        }
       }
     }
   }

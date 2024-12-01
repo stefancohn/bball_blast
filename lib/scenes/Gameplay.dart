@@ -222,12 +222,6 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     }
   }
 
-  //need this to remove pause overlay
-  void removePauseOverlay() {
-    remove(pauseOverlay);
-    game.timeScale = 1;
-  }
-
   //this gives a lil intro when ball and hoop get added
   void ballSpawnIntro(double dt) {
     if (ball.body.position.y <= startPos.y && !readyToBeShot) {
@@ -365,7 +359,7 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     hoopUpperImg = await game.loadSprite('hoopUpper.png');
     hoopLowerImg = await game.loadSprite('hoopLower.png');
     backboardImg = await game.loadSprite('backboard.png');
-    resumeImg = await game.loadSprite('playButtonTransparent.png');
+    resumeImg = await game.loadSprite('playButtonWhite.png');
     pauseImg = await game.loadSprite('pauseButton.png');
     coinImg = await game.loadSprite("coin.png");
   }

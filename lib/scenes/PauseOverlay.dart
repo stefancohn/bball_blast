@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:bball_blast/BBallBlast.dart';
-import 'package:bball_blast/Background/GradientBackground.dart';
 import 'package:bball_blast/scenes/Gameplay.dart';
+import 'package:bball_blast/entities/HomeButton.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/input.dart';
@@ -13,11 +13,8 @@ class PauseOverlay extends Component with HasGameRef<BBallBlast> {
   Sprite resumeImg; 
 
   late ButtonComponent resumeButton; 
-
-  CircleComponent? circle;
-
-  List<Color> gradientColors = [const Color.fromARGB(255, 255, 0, 0), const Color.fromARGB(255, 255, 128, 0),const Color.fromARGB(255, 251, 255, 21)];
-  GradientBackground? bg;
+  late HomeButton homeButton;
+  RectangleComponent? bgOverlay;
 
   PauseOverlay(this.gamep, this.resumeImg);
 
@@ -25,52 +22,56 @@ class PauseOverlay extends Component with HasGameRef<BBallBlast> {
   FutureOr<void> onLoad() async {
     //make pause button dissapear
     gamep.pauseButton.button!.add(OpacityEffect.fadeOut(EffectController(duration: 0)));
-    //initialize bg
-    bg = GradientBackground(colors: gradientColors, size: Vector2.all(0), position: Vector2.all(0));
-
-    //CIRCLE w/ GRADIENT COLORING
-    double circleRadius = game.camera.viewport.size.x/3.5;
-    double circlePosX = game.camera.viewport.position.x + game.camera.viewport.size.x/2;
-    double circlePosY = game.camera.viewport.position.y + (game.camera.viewport.size.y - game.camera.viewport.size.y/6);
-    circle = CircleComponent(
-      radius: circleRadius,
-      position: Vector2(circlePosX, circlePosY),
-      anchor: Anchor.center,
-      priority: 1
-    );
     
+    Vector2 resumeButtonSize = Vector2(25,25);
+    Vector2 resumeButtonPos = (Vector2(0, 30));
     //define resume button and add it 
     resumeButton = ButtonComponent(
-      position: circle!.position,
+      position: resumeButtonPos,
       anchor: Anchor.center,
-      size: Vector2.all(circle!.radius * 2),
-      priority: 2,
+      size: resumeButtonSize,
+      priority: 5,
       button: SpriteComponent(
         sprite: resumeImg,
-        size: Vector2.all(circle!.radius * 2),
+        size: resumeButtonSize,
       ),
-      onPressed: () {
-        gamep.removePauseOverlay();
-        gamep.pauseActive = false; 
-        //UNFADE WORLD COMPONENTS AND FADEOUT FADE OVERLAY :O 
-        gamep.pauseButton.button!.add(OpacityEffect.fadeIn(EffectController(duration: 0.75)));
-        gamep.hoop.unfade(duration: .75);
-        gamep.ball.unfade(duration: .75);
-        game.fader.add(OpacityEffect.fadeOut(EffectController(duration:.75)));
+      onReleased: () {
+        pressedOps();
       },
+      onCancelled: () {
+        pressedOps();
+      },
+      onPressed: () {
+        resumeButton.size*1.05;
+      }
     );
-    await addAll([bg!, resumeButton, circle!]);
+
+    homeButton = HomeButton(position: Vector2(0, 0), size: Vector2(20,20), pauseOverlay: this);
+    homeButton.priority=4;
+
+    bgOverlay = RectangleComponent(priority: -1, anchor: Anchor.center, position: Vector2(0,0), size: game.size, paint: Paint() ..color = const Color.fromARGB(130, 0, 0, 0));
+    bgOverlay!.priority = 4;
+
+    game.world.addAll([resumeButton, bgOverlay!, homeButton]);
 
     //we set timescale to 0 to simulate a pause 
     game.timeScale = 0;
   }
 
-  @override
-  void update(double dt) {
-    //get gradienet paint onto circle
-    if (bg != null && circle != null) {
-      circle!.paint = bg!.paint;
-    }
-    super.update(dt);
+  void pressedOps() {
+    //remove components 
+    removeFromParent();
+    homeButton.removeFromParent();
+    resumeButton.removeFromParent();
+    bgOverlay!.removeFromParent();
+
+    //reset time scale and bool
+    game.timeScale = 1;
+    gamep.pauseActive = false; 
+
+    //UNFADE WORLD COMPONENTS AND FADEOUT FADE OVERLAY :O 
+    gamep.pauseButton.button!.add(OpacityEffect.fadeIn(EffectController(duration: 0.75)));
+    gamep.hoop.unfade(duration: .75);
+    gamep.ball.unfade(duration: .75);
   }
 }

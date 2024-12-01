@@ -4,7 +4,8 @@ import 'dart:ui';
 
 import 'package:bball_blast/BBallBlast.dart';
 import 'package:bball_blast/Background/ParallaxBackground.dart';
-import 'package:bball_blast/entities/PlayButton.dart';
+import 'package:bball_blast/entities/CustomizeButton.dart';
+import 'package:bball_blast/ui/PlayButton.dart';
 import 'package:flame/components.dart';
 import 'package:flame/input.dart';
 import 'package:flutter/material.dart' hide Gradient;
@@ -16,23 +17,19 @@ class MainMenu extends Component with HasGameRef<BBallBlast>{
 
   @override
   Future<void> onLoad() async {
-    Sprite customizeButtonImg = await game.loadSprite("customizeButton.png");
 
     logoComponent = LogoComponent();
     await add(logoComponent!);
 
     PlayButton playButton = PlayButton(size: Vector2(game.camera.viewport.size.x/3, game.camera.viewport.size.y/6), 
-      position: Vector2(game.camera.viewport.position.x + game.camera.viewport.size.x/2, game.camera.viewport.position.y + (game.camera.viewport.size.y - game.camera.viewport.size.y/3.2))
+      position: game.worldToScreen(Vector2(0, 15)),
     );
     await add(playButton);
 
     //aspecs for customize button
-    customizeButton = ButtonComponent(
-      onPressed: () { game.loadCustomizerScene(); customizeButton!.scale = Vector2.all(1.05); },
-      onReleased: () { customizeButton!.scale = Vector2.all(.95);},
-      position: Vector2(playButton.position.x, playButton.position.y + playButton.size.y + game.camera.viewport.size.y/16),
-      anchor: Anchor.center,
-      button: SpriteComponent(sprite: customizeButtonImg, size: playButton.playButton.size/1.2)
+    customizeButton = CustomizeButton(
+      position: game.worldToScreen(Vector2(0, 40)),
+      size: playButton.playButton.size/1.2
     );
     await add(customizeButton!);
 
