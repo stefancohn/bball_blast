@@ -4,17 +4,21 @@ import 'package:sqflite/sqflite.dart';
 String ballImgPath = "";
 String trailPath = "";
 String bumpPath="";
+List<Map<String, Object?>> acquiredBgs = List.empty();
+
 
 //get all balls, trails
-List<Map<String, Object?>> allBalls = List.empty(); 
+List<Map<String,Object?>> allBalls = List.empty(); 
 List<Map<String,Object?>> allTrails = List.empty();
 List<Map<String,Object?>> allBumps = List.empty();
+List<Map<String,Object?>> allBgs = List.empty();
 
 //for calculating cost; start at 25 coins.
 //every item bought increments cost in that category by 25
 int newBallCost = 0; 
 int newTrailCost=0;
 int newBumpCost =0;
+int newBgCost=0;
 
 int coinAmt = 0;
 
@@ -49,6 +53,11 @@ class Backend {
     }
   }
 
+  //all acquired BGs get returned
+  static Future<void> getAllAcquiredBgs() async {
+    acquiredBgs = await db.query('bgs',where: 'acquired=?',whereArgs: [1]);
+  }
+
 
 
   //GRAB ALL ROWS FOR DESIRED ITEM
@@ -76,6 +85,14 @@ class Backend {
     newBumpCost = 25 * dbList.where((bump) => bump['acquired'] == 1).length;
   }
 
+  static Future<void> loadBgsForMenu() async {
+    List<Map<String, Object?>> dbList = await db.query('bgs');
+    allBgs = dbList;
+
+    //calculated cost to get new ball
+    newBgCost = 25 * dbList.where((bump) => bump['acquired'] == 1).length;
+  }
+
 
 
 
@@ -100,6 +117,10 @@ class Backend {
     }
     else if (tableName == 'bumps') {
       await loadBumpsForMenu();
+    } 
+    else if (tableName == 'bgs') {
+      await loadBgsForMenu();
+      await getAllAcquiredBgs(); //need to reload this bc new bgs were acquired
     }
 
     await initializeCoinAmt();
@@ -248,8 +269,7 @@ class Backend {
       '''
       CREATE TABLE bgs(
         bg_name VARCHAR(50) PRIMARY KEY NOT NULL,
-        acquired BOOLEAN NOT NULL DEFAULT FALSE,
-        equipped BOOLEAN NOT NULL DEFAULT FALSE
+        acquired BOOLEAN NOT NULL DEFAULT FALSE
       )
       '''
     );
@@ -343,22 +363,18 @@ class Backend {
       await txn.insert('bgs', {
         'bg_name': 'sky',
         'acquired' : true,
-        'equipped' : true,
       });
       await txn.insert('bgs', {
         'bg_name': 'bricks',
-        'acquired' : false,
-        'equipped' : false,
+        'acquired' : true,
       });
       await txn.insert('bgs', {
         'bg_name': 'space',
         'acquired' : false,
-        'equipped' : false,
       });
       await txn.insert('bgs', {
         'bg_name': 'ocean',
         'acquired' : false,
-        'equipped' : false,
       });
     });
   }

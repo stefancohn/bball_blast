@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:bball_blast/BBallBlast.dart';
+import 'package:bball_blast/Backend.dart';
 import 'package:bball_blast/Background/ParallaxBackgroundConfig.dart';
 import 'package:flame/components.dart';
 import 'package:flame/parallax.dart';
@@ -113,103 +114,89 @@ class ParallaxBackground extends Component with HasGameRef<BBallBlast>{
   //LOAD ALL CONFIGS AND PARALLAX COMPONENTs
   Future<List<ParallaxComponent>> _loadParallaxSetup() async {
 
-    //CONFIGS
-    ParallaxBackgroundConfig skyConfig = ParallaxBackgroundConfig(
-      imageLayers: {'skyBackground/sky.png' : Vector2.all(0), 'skyBackground/clouds.png' : Vector2(3,-2),},
-      baseVelocity: Vector2(1,0),
-    );
-
-    ParallaxBackgroundConfig bricksConfig = ParallaxBackgroundConfig(
-      imageLayers: {'bricksBg.png' : Vector2(10,0)},
-      baseVelocity: Vector2(2,0),
-    );
-
-    ParallaxBackgroundConfig oceanConfig = ParallaxBackgroundConfig(
-      imageLayers: {"oceanBg/bgbg.png" : Vector2(0,0), "oceanBg/fr.png" : fishSpeed, "oceanBg/gf.png" : fishSpeed * -1, 
-      "oceanBg/r2.png" : reefSpeed, "oceanBg/r1.png": reefSpeed, "oceanBg/r3.png": reefSpeed, "oceanBg/r4.png" : reefSpeed,
-      "oceanBg/r5.png" : reefSpeed, "oceanBg/r6.png" : reefSpeed, "oceanBg/r7.png" : reefSpeed, "oceanBg/r8.png" : reefSpeed,
-      "oceanBg/r9.png" : reefSpeed},
-
-      baseVelocity: Vector2(1,0),
-    );
-
-    ParallaxBackgroundConfig spaceConfig = ParallaxBackgroundConfig(
-      imageLayers: {"spaceBg/l6.png" : Vector2(0,0), "spaceBg/l5.png" : Vector2(6,0), "spaceBg/l4.png" : Vector2(9,0), 
-      "spaceBg/l3.png" : Vector2(7,0), "spaceBg/l2.png" : Vector2(1,0), "spaceBg/l1.png" : Vector2(2,0)},
-
-      baseVelocity: Vector2(1,0),
-    );
-
-    //GET LAYER FOR PARALLAX COMPONENT BY INPUTTIN CONFIG INTO
-    //LAYER CREATION
-    final skyLayers = _createLayers(skyConfig);
-    final bricksLayers = _createLayers(bricksConfig);
-    final oceanLayers = _createLayers(oceanConfig);
-    final spaceLayers = _createLayers(spaceConfig);
-
-    //BGs/parallaxComponents
-    ParallaxComponent skyBackground = ParallaxComponent(
-      parallax: Parallax(
-        await Future.wait(skyLayers),
-        baseVelocity: skyConfig.baseVelocity,
-        size: game.camera.viewport.size,
+    // Define a map linking background names to their respective configs
+    final Map<String, ParallaxBackgroundConfig> backgroundConfigs = {
+      'sky': ParallaxBackgroundConfig(
+        imageLayers: {'skyBackground/sky.png' : Vector2.all(0), 'skyBackground/clouds.png' : Vector2(3,-2),},
+        baseVelocity: Vector2(1,0),
       ),
-      position: game.camera.viewport.position,
-      priority: -2
-    );
 
-    ParallaxComponent bricksBackground = ParallaxComponent(
-      parallax: Parallax(
-        await Future.wait(bricksLayers),
-        baseVelocity: bricksConfig.baseVelocity,
-        size: game.camera.viewport.size,
+      'bricks': ParallaxBackgroundConfig(
+        imageLayers: {'bricksBg.png' : Vector2(10,0)},
+        baseVelocity: Vector2(2,0),
       ),
-      priority: -2,
-      position: game.camera.viewport.position,
-    );
 
-    ParallaxComponent oceanBackground = ParallaxComponent(
-      parallax: Parallax(
-        await Future.wait(oceanLayers),
-        baseVelocity: oceanConfig.baseVelocity,
-        size: game.camera.viewport.size,
+      'ocean': ParallaxBackgroundConfig(
+        imageLayers: {"oceanBg/bgbg.png" : Vector2(0,0), "oceanBg/fr.png" : fishSpeed, "oceanBg/gf.png" : fishSpeed * -1, 
+        "oceanBg/r2.png" : reefSpeed, "oceanBg/r1.png": reefSpeed, "oceanBg/r3.png": reefSpeed, "oceanBg/r4.png" : reefSpeed,
+        "oceanBg/r5.png" : reefSpeed, "oceanBg/r6.png" : reefSpeed, "oceanBg/r7.png" : reefSpeed, "oceanBg/r8.png" : reefSpeed,
+        "oceanBg/r9.png" : reefSpeed},
+
+        baseVelocity: Vector2(1,0),
       ),
-      priority: -2,
-      position: game.camera.viewport.position,
-    );
 
-    ParallaxComponent spaceBackground = ParallaxComponent(
-      parallax: Parallax(
-        await Future.wait(spaceLayers),
-        baseVelocity: spaceConfig.baseVelocity,
-        size: game.camera.viewport.size,
+      'space': ParallaxBackgroundConfig(
+        imageLayers: {"spaceBg/l6.png" : Vector2(0,0), "spaceBg/l5.png" : Vector2(6,0), "spaceBg/l4.png" : Vector2(9,0), 
+        "spaceBg/l3.png" : Vector2(7,0), "spaceBg/l2.png" : Vector2(1,0), "spaceBg/l1.png" : Vector2(2,0)},
+
+        baseVelocity: Vector2(1,0),
       ),
-      priority: -2,
-      position: game.camera.viewport.position,
-    );
+    };
 
-    List<ParallaxComponent> backgroundList = [skyBackground, bricksBackground, oceanBackground, spaceBackground];
+    List<ParallaxComponent> backgroundList = [];
+
+    //iterate over acquired bgs and create parallaxcomp then add to list to be loaded
+    for (var row in acquiredBgs) {
+      final bgName = row['bg_name'] as String;
+      final config = backgroundConfigs[bgName];
+
+      if (config != null) {
+        //create layers
+        final layers = await Future.wait(_createLayers(config));
+
+        //create paralaxcomponent
+        ParallaxComponent pc = ParallaxComponent(
+          parallax: Parallax(
+            layers,
+            baseVelocity: config.baseVelocity,
+            size: game.camera.viewport.size,
+          ),
+          priority: -2,
+          position: game.camera.viewport.position,
+        );
+
+        backgroundList.add(pc);
+      }
+    }
+
     return backgroundList;
   }
 
   //create layers here
-  _createLayers(ParallaxBackgroundConfig config) {
-    final layers = config.imageLayers.entries.map(
-    (e) => game.loadParallaxLayer(
+  List<Future<ParallaxLayer>> _createLayers(ParallaxBackgroundConfig config) {
+    List<Future<ParallaxLayer>> layers = config.imageLayers.entries.map(
+    (e) async => await game.loadParallaxLayer(
       ParallaxImageData(e.key),
       velocityMultiplier: e.value,
       fill: LayerFill.height),
-    );
+    ).toList();
+
     return layers;
   }
 
   void spawnRectMask() {
     //get random rectMask to set onLoad 
-    int maskBgIdx = rand.nextInt(backgroundList.length-1);
-    if (maskBgIdx == currentBgIdx) {
+    int maskBgIdx = rand.nextInt(backgroundList.length);
+
+    //if next bg is the same as current, get a different one, handle edge case where we get
+    //last bg in list
+    if (maskBgIdx == currentBgIdx && backgroundList.length-1 != maskBgIdx) {
       maskBgIdx++;
+    } else if (maskBgIdx == currentBgIdx){
+      maskBgIdx--;
     }
     currentBgIdx = maskBgIdx;
+
     rectMask = _createRectMask(backgroundList[maskBgIdx], Vector2.all(radius));
     
     game.add(rectMask!);

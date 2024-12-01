@@ -144,6 +144,7 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
 
   Map<String, Sprite> ballSprites = {};
   Map<String, Sprite> colorSprites ={};
+  Map<String, Sprite> bgSprites = {};
 
   double? defMargin; 
   double? customIconMargin;
@@ -183,9 +184,11 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
 
     //load sprites, icons
     await _loadAllSprites();
+
     await _loadItemIcons(itemList: allBalls, spriteList: ballSprites, itemName: 'ball_name'); //load balls
     await _loadItemIcons(itemList: allTrails, spriteList: colorSprites, itemName: 'trail_name'); //load trails
     await _loadItemIcons(itemList: allBumps, spriteList: colorSprites, itemName: 'bump_name'); //load bumps 
+    await _loadItemIcons(itemList: allBgs, spriteList: bgSprites, itemName: 'bg_name'); //load bgs
     await _loadNecessaryIcons();
 
 
@@ -254,6 +257,8 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
     }
     else if (itemName == "bump_name") {
       whenRender = MenuState.bump;
+    } else if (itemName == "bg_name") {
+      whenRender = MenuState.bg;
     }
 
 
@@ -294,7 +299,8 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
     }
 
     //ball icon setup
-    else if (icon.stateWhenRendered == MenuState.ball || icon.stateWhenRendered == MenuState.trails || icon.stateWhenRendered == MenuState.bump) {
+    else if (icon.stateWhenRendered == MenuState.ball || icon.stateWhenRendered == MenuState.trails || icon.stateWhenRendered == MenuState.bump
+    || icon.stateWhenRendered == MenuState.bg ) {
       //get row and col of icon
       int row = ((iconNum / iconsColBall).floor()); 
       int col = (iconNum % iconsColBall);
@@ -318,7 +324,7 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
     await add(icon);
 
     //add check mark to equpped ball
-    if (icon.stateToLeadTo == MenuState.equipped) {
+    if (icon.stateWhenRendered != MenuState.bg && icon.stateToLeadTo == MenuState.equipped) {
       await icon.addCheckMark(checkMarkImg);
     }
 
@@ -356,6 +362,9 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
     }
     else if (state == MenuState.bump) {
       _loadItemIcons(itemList: allBumps, spriteList: colorSprites, itemName: 'bump_name');
+    }
+    else if (state == MenuState.bg) {
+      _loadItemIcons(itemList: allBgs, spriteList: bgSprites, itemName: 'bg_name');
     }
 
     renderIcons();
@@ -408,6 +417,12 @@ class _customizationIconContainer extends PositionComponent with HasGameRef<BBal
     colorSprites["blue"] = Sprite(colorImg, srcPosition: Vector2(colorImgSrcSize.x*colorSprites.length + 5*colorSprites.length,0), srcSize: colorImgSrcSize);
     colorSprites["pink"] = Sprite(colorImg, srcPosition: Vector2(612,0), srcSize: colorImgSrcSize);
     colorSprites["green"] = Sprite(colorImg, srcPosition: Vector2(815,0), srcSize: colorImgSrcSize);
+
+    //bgs
+    bgSprites["sky"] = Sprite(await Flame.images.load('skyBackground/sky.png'));
+    bgSprites["ocean"] = Sprite(await Flame.images.load('oceanBg/bgbg.png'));
+    bgSprites["space"] = Sprite(await Flame.images.load('spaceBg/l6.png'));
+    bgSprites["bricks"] = Sprite(await Flame.images.load('bricksBg.png'));
   }
 }
 
@@ -471,6 +486,9 @@ class _icon extends ButtonComponent with HasGameRef<BBallBlast> {
         else if (stateWhenRendered == MenuState.bump) {
           tableName = "bumps";
         }
+        else if (stateWhenRendered == MenuState.bg) {
+          tableName = "bgs";
+        }
 
         //verify we can buy it, then call Backend
         if (coinAmt > newBallCost) {
@@ -526,6 +544,9 @@ class _icon extends ButtonComponent with HasGameRef<BBallBlast> {
     } 
     else if (stateWhenRendered == MenuState.bump) {
       text= newBumpCost.toString();
+    } 
+    else if (stateWhenRendered == MenuState.bg) {
+      text = newBgCost.toString();
     }
 
 
