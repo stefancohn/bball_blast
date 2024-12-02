@@ -25,7 +25,7 @@ class PauseOverlay extends Component with HasGameRef<BBallBlast> {
     //make pause button dissapear
     gamep.pauseButton.button!.add(OpacityEffect.fadeOut(EffectController(duration: 0)));
     
-    Vector2 resumeButtonSize = Vector2(25,25);
+    Vector2 resumeButtonSize = Vector2(20,20);
     Vector2 resumeButtonPos = (Vector2(0, 0));
 
     //define resume button and add it 
@@ -50,7 +50,7 @@ class PauseOverlay extends Component with HasGameRef<BBallBlast> {
     );
 
     //home button init
-    homeButton = HomeButton(position: Vector2(0, 30), size: Vector2(20,20), pauseOverlay: this)..priority=4;
+    homeButton = HomeButton(position: Vector2(0, 30), size: Vector2(17,17), pauseOverlay: this)..priority=4;
 
     //gray transparent mask for effect
     bgOverlay = RectangleComponent(priority: -1, anchor: Anchor.center, position: Vector2(0,0), size: game.size, paint: Paint() ..color = const Color.fromARGB(130, 0, 0, 0))..priority = 4;  

@@ -14,7 +14,7 @@ Future<void> main() async {
   Flame.device.setPortrait();
 
   // Delete the old database to force onCreate to run
-  await deleteDatabase(join(await getDatabasesPath(), 'bball_blast.db'));
+  //await deleteDatabase(join(await getDatabasesPath(), 'bball_blast.db'));
   
   //open DB at default file loc and create tables
   final db = await openDatabase(

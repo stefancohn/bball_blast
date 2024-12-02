@@ -58,7 +58,7 @@ class CustomizeMenu extends Component with HasGameRef<BBallBlast>{
     MyTextBox headerBox = MyTextBox(
       text: "CUSTOMIZE", 
       renderer: textPaintWhite, 
-      bgPaint: orangeBg, borderPaint: outline, 
+      bgPaint: orangeBg, borderPaint: Paint()..color=Colors.black, 
       align: Anchor.center,
       size: Vector2(game.camera.viewport.size.x*.5, game.camera.visibleWorldRect.height/10),
     )

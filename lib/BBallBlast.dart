@@ -67,7 +67,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     await Backend.loadBgsForMenu();
 
     await Backend.initializeCoinAmt();
-    await Backend.addLotsOfCoins();
+    //await Backend.addLotsOfCoins();
 
     game.camera.viewfinder.position.setAll(0);
 
@@ -78,7 +78,7 @@ class BBallBlast extends Forge2DGame with PanDetector, HasGameRef<BBallBlast>, H
     fader = _initializeFader();
     await add(fader!);
 
-    //debugMode = true;
+    debugMode = true;
     super.onLoad();
   }
 

@@ -15,6 +15,7 @@ List<Map<String,Object?>> allBgs = List.empty();
 
 //for calculating cost; start at 25 coins.
 //every item bought increments cost in that category by 25
+int iterateCost= 10;
 int newBallCost = 0; 
 int newTrailCost=0;
 int newBumpCost =0;
@@ -66,7 +67,7 @@ class Backend {
     allBalls = dbList;
 
     //calculated cost to get new ball
-    newBallCost = 25 * dbList.where((ball) => ball['acquired'] == 1).length;
+    newBallCost = newBallCost < 50 ? iterateCost * dbList.where((ball) => ball['acquired'] == 1).length : 50;
   }
 
   static Future<void> loadTrailsForMenu() async {
@@ -74,7 +75,7 @@ class Backend {
     allTrails = dbList;
 
     //calculated cost to get new ball
-    newTrailCost = 25 * dbList.where((trail) => trail['acquired'] == 1).length;
+    newTrailCost = newTrailCost < 50 ? iterateCost * dbList.where((trail) => trail['acquired'] == 1).length : 50;
   }
 
   static Future<void> loadBumpsForMenu() async {
@@ -82,7 +83,7 @@ class Backend {
     allBumps = dbList;
 
     //calculated cost to get new ball
-    newBumpCost = 25 * dbList.where((bump) => bump['acquired'] == 1).length;
+    newBumpCost = newBumpCost < 50 ? iterateCost * dbList.where((bump) => bump['acquired'] == 1).length : 50;
   }
 
   static Future<void> loadBgsForMenu() async {
@@ -90,7 +91,7 @@ class Backend {
     allBgs = dbList;
 
     //calculated cost to get new ball
-    newBgCost = 25 * dbList.where((bump) => bump['acquired'] == 1).length;
+    newBgCost = (newBgCost < 50 ? iterateCost * (dbList.where((bump) => bump['acquired'] == 1).length) : 50);
   }
 
 

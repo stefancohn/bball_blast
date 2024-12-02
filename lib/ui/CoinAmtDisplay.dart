@@ -55,6 +55,7 @@ class CoinAmtDisplay extends PositionComponent with HasGameRef<BBallBlast> {
     //dynamically update text
     if (coinText != null && int.parse(coinText!.text) != coinAmt) {
       coinText!.text = coinAmt.toString();
+      coinText!.position = Vector2(coinSize.x*1.15, size.y/2);
     }
     super.update(dt);
   }

@@ -47,20 +47,20 @@ class MyTextBox extends TextBoxComponent {
 
   @override
   void render(Canvas canvas) {
+    if (borderPaint != null) {
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          bgRect.inflate(4), Radius.circular(boxRadius)
+        ),
+        borderPaint!
+      );
+    }
     if (bgPaint != null) { 
       canvas.drawRRect(
         RRect.fromRectAndRadius(
           bgRect, Radius.circular(boxRadius)
         ),
         bgPaint!
-      );
-    }
-    if (borderPaint != null) {
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          bgRect, Radius.circular(boxRadius)
-        ),
-        borderPaint!
       );
     }
     

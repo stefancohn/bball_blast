@@ -1,24 +1,43 @@
+// ignore: file_names
 import 'dart:async';
 import 'dart:ui';
 
 import 'package:bball_blast/BBallBlast.dart';
-import 'package:bball_blast/Background/GradientBackground.dart';
+import 'package:bball_blast/Background/ParallaxBackground.dart';
 import 'package:bball_blast/config.dart';
+import 'package:bball_blast/ui/HomeButton.dart';
+import 'package:bball_blast/ui/MyTextBox.dart';
 import 'package:flame/components.dart';
 import 'package:flame/input.dart';
+import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
 
 class Gameover extends PositionComponent with HasGameRef<BBallBlast>{
- late TextComponent gameOverText;
+ late MyTextBox gameOverText;
  late ButtonComponent restartButton;
  
  late Sprite replayImage;
  SpriteComponent? replaySprite;
 
- late Vector2 replaySpriteSize = Vector2(game.camera.viewport.size.x/3, game.camera.viewport.size.x/3);
+ late Vector2 replaySpriteSize = Vector2(game.camera.viewport.size.x/2.5, game.camera.viewport.size.x/2.5);
 
  late List highscoresList;
+
+ final TextPaint _textPaintWhite = TextPaint(
+  style:  const TextStyle(
+    fontSize: 25,
+    fontFamily: 'Score',
+    color: Color.fromARGB(255, 255, 255, 255),
+  )
+);
+final TextPaint _textPaintWhiteSmall = TextPaint(
+  style:  const TextStyle(
+    fontSize: 17,
+    fontFamily: 'Score',
+    color: Color.fromARGB(255, 255, 255, 255),
+  )
+);
 
 
  Gameover() : super();
@@ -28,28 +47,14 @@ class Gameover extends PositionComponent with HasGameRef<BBallBlast>{
   //get DB to start working 
   await _configureHighscore();
 
-  replayImage = await game.loadSprite('replayButton.png');
 
-
-  /*Paint gradientBlend = Paint()
-    ..colorFilter = const ColorFilter.mode(
-      Color.fromARGB(255, 8, 168, 255), // Change this to the desired color
-      BlendMode.modulate,
-    );*/
+  replayImage = await game.loadSprite('playButtonWhite.png');
 
   //replay button spirte
   replaySprite = SpriteComponent(
     sprite: replayImage, 
     size: replaySpriteSize,
-    position: game.worldToScreen(Vector2(0, 28)),
-    anchor: Anchor.center
-  );
-
-  //matching gradient bg
-  GradientBackground gradientBg = GradientBackground(
-    colors: [const Color.fromARGB(255, 255, 0, 0), const Color.fromARGB(255, 255, 128, 0),const Color.fromARGB(255, 251, 255, 21)],
-    size: replaySpriteSize - Vector2(1,1),
-    position: replaySprite!.position,
+    position: game.worldToScreen(Vector2(0, 7.5)),
     anchor: Anchor.center
   );
 
@@ -60,15 +65,16 @@ class Gameover extends PositionComponent with HasGameRef<BBallBlast>{
     highscoreString = "$highscoreString${i+1}) ${highscoresList[i]['score']}\n";
   }
 
-  //text
-   gameOverText = TextBoxComponent(
+  //text)
+   gameOverText = MyTextBox(
      text: highscoreString,
-     textRenderer: textPaintBlack,
-     position: game.worldToScreen(Vector2(0, -15)),
+     renderer: (game.camera.viewport.size.x < 140 ? _textPaintWhite : _textPaintWhiteSmall),
      align: Anchor.center,
-     anchor: Anchor.center,
-     size: game.camera.viewport.size
-   );
+     config: const TextBoxConfig(growingBox: false),
+     bgPaint: orangeBg2,
+     borderPaint: Paint()..color=Colors.black,
+     size: Vector2(game.camera.viewport.size.x*.65, game.camera.viewport.size.y*.33)
+   )..position = game.worldToScreen(Vector2(0, -25)) ..anchor=Anchor.center;
 
   //restart button
    restartButton = ButtonComponent(
@@ -80,12 +86,27 @@ class Gameover extends PositionComponent with HasGameRef<BBallBlast>{
      anchor: Anchor.center
    );
 
-    //add to game
-   await game.add(gameOverText);
-   await game.add(restartButton);
-   await game.add(replaySprite!);
-   await game.add(gradientBg);
+   //home button
+   HomeButton homeButton = HomeButton(
+    position: game.worldToScreen(Vector2(0,30)),
+    size: restartButton.size*.8,
+   );
+
+  //add to game
+  await addParallaxBg();
+  await game.addAll([gameOverText, restartButton, replaySprite!, homeButton]);
  }
+
+ //helper to make parallax bg the bg with a gray overlay
+  Future<void> addParallaxBg() async{
+    ParallaxBackground parallax = ParallaxBackground();
+    await add(parallax);
+    RectangleComponent rect = RectangleComponent(priority: -1, anchor: Anchor.center, position: game.worldToScreen(Vector2(0,0)), size: game.camera.viewport.size, paint: Paint() ..color = const Color.fromARGB(107, 255, 255, 255));
+    await game.add(rect);
+  }
+
+
+
 
  Future<void> _configureHighscore() async {
     bool shouldInsert = false; 
@@ -126,9 +147,4 @@ class Gameover extends PositionComponent with HasGameRef<BBallBlast>{
 
     highscoresList = await db.query('highscores', orderBy: 'score DESC');
  }
-
- @override
-  void update(double dt) {
-    super.update(dt);
-  }
 }

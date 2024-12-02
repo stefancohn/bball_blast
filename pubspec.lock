@@ -141,42 +141,42 @@ packages:
     dependency: transitive
     description:
       name: fixnum
-      sha256: "25517a4deb0c03aa0f32fd12db525856438902d9c16536311e76cdc57b31d7d1"
+      sha256: b6dc7065e46c974bc7c5f143080a6764ec7a4be6da1285ececdc37be96de53be
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.0"
+    version: "1.1.1"
   flame:
     dependency: "direct main"
     description:
       name: flame
-      sha256: baafe5c38075b60577db05e0421c12941695b246547d9aca95166def3f29e57f
+      sha256: c02390443e40a2a9034ac867d0789ab32f215eba4779bff4655a7143eb3d75d0
       url: "https://pub.dev"
     source: hosted
-    version: "1.21.0"
+    version: "1.22.0"
   flame_audio:
     dependency: "direct main"
     description:
       name: flame_audio
-      sha256: c0271a26ff953d0f28706acb0a1547b1a1d658628d7c64741285b8e66367a802
+      sha256: "656433a6a448dd74c1a10ae56fc7fb389d5df89cb6a5038870c2793e1f0ddc99"
       url: "https://pub.dev"
     source: hosted
-    version: "2.10.5"
+    version: "2.10.6"
   flame_forge2d:
     dependency: "direct main"
     description:
       name: flame_forge2d
-      sha256: "1ec1c5b4978b64d2d16ca90f86de469959991ef996970866c3f9de580b3dbe40"
+      sha256: "0dc74f08b972b7db88ad7c4d9d7ffd291220214cd3ad3c0cf1261db385c19da9"
       url: "https://pub.dev"
     source: hosted
-    version: "0.18.1"
+    version: "0.18.2+3"
   flame_noise:
     dependency: "direct main"
     description:
       name: flame_noise
-      sha256: d6a40cf883acdd11c604549c2ab0cafd8966c616ac2087510320b47c4d797079
+      sha256: c922ac8a1a2eb2cd33d39994202533dc8da8babf09e59903e5d41899ccbb627f
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.2+1"
+    version: "0.3.2+3"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -204,10 +204,10 @@ packages:
     dependency: transitive
     description:
       name: forge2d
-      sha256: "40915333b688ddaaa616d9c8ab9ff205faea0adf83dddc1a6e617694ffa9e16e"
+      sha256: "6aac85f1cb9f7e3720bff5d6884ff2e1bcb74402e6fe271599b7b1f65574f5e2"
       url: "https://pub.dev"
     source: hosted
-    version: "0.13.0"
+    version: "0.13.1"
   http:
     dependency: transitive
     description:
@@ -284,10 +284,10 @@ packages:
     dependency: transitive
     description:
       name: ordered_set
-      sha256: "3129515e563a14817adebbdeee2acbb845fc69b6fc99a94349b641d1c829d5cd"
+      sha256: fc861bb51fc863cd3e0718e21768af9586e0d5022b91a0fd4437636456cdb7d0
       url: "https://pub.dev"
     source: hosted
-    version: "6.1.0"
+    version: "6.1.1"
   path:
     dependency: "direct main"
     description:

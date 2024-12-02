@@ -45,6 +45,10 @@ Paint orangeBg = Paint()
     ..color = Color.fromARGB(255, 253, 110, 0)
     ..style = PaintingStyle.fill;
 
+Paint orangeBg2 = Paint()
+  ..color = Color.fromARGB(255, 255, 170, 0)
+  ..style = PaintingStyle.fill;
+
 Paint whiteBg = Paint()
   ..color = Color.fromARGB(255, 255, 255, 255)
   ..style = PaintingStyle.fill;
