@@ -1,16 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "ballBoomLogo.png",
+      "filename" : "officialLogo1024x1024.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "ballBoomLogo.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "LaunchImage@3x.png",
+      "filename" : "officialLogo1024x1024 1.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

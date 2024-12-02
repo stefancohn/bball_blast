@@ -24,7 +24,7 @@ class CoinAmtDisplay extends PositionComponent with HasGameRef<BBallBlast> {
   );
   final TextPaint _textPaintSmall = TextPaint(
     style: const TextStyle(
-      fontSize: 18.0,
+      fontSize: 15.0,
       fontFamily: 'Score',
       color: Color.fromARGB(255, 255, 255, 255),
       
