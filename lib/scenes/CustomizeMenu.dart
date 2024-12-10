@@ -481,21 +481,26 @@ class _icon extends ButtonComponent with HasGameRef<BBallBlast> {
       //reduce coins appropriately, set to unlocked
       if (stateToLeadTo == MenuState.buy) {
         String tableName = "";
+        int itemCost = 0;
         if (stateWhenRendered == MenuState.ball) {
           tableName = "balls";
+          itemCost = newBallCost;
         }
         else if (stateWhenRendered == MenuState.trails) {
           tableName = "trails";
+          itemCost = newTrailCost;
         }
         else if (stateWhenRendered == MenuState.bump) {
           tableName = "bumps";
+          itemCost = newBumpCost;
         }
         else if (stateWhenRendered == MenuState.bg) {
           tableName = "bgs";
+          itemCost = newBgCost;
         }
 
         //verify we can buy it, then call Backend
-        if (coinAmt > newBallCost) {
+        if (coinAmt > itemCost) {
           await Backend.buyItem(tableName, name!);
           stateToLeadTo = MenuState.equip;
 

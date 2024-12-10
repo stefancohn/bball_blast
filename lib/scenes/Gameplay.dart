@@ -5,6 +5,7 @@ import 'package:bball_blast/Backend.dart';
 import 'package:bball_blast/Background/ParallaxBackground.dart';
 import 'package:bball_blast/entities/Ball.dart';
 import 'package:bball_blast/entities/Coin.dart';
+import 'package:bball_blast/entities/Wind.dart';
 import 'package:bball_blast/ui/CoinAmtDisplay.dart';
 import 'package:bball_blast/entities/Hoop.dart';
 import 'package:bball_blast/entities/Wall.dart';
@@ -286,8 +287,10 @@ class Gameplay extends Component with HasGameRef<BBallBlast>{
     //coin 
     coin = Coin(ball: ball, hoop: hoop, sprite: coinImg);
 
+    Wind wind = Wind(ball);
+
     await addAll([pauseButton, bg, coinDisplay]); //add components to world and game
-    await game.world.addAll([ball, wallLeft, wallRight, hoop, coin]);
+    await game.world.addAll([ball, wallLeft, wallRight, hoop, coin, wind]);
 
     //launch method to reset scene after user scores and after user dies !
     scoredOpsTimer = Timer(0.5, onTick: () => spawnNewScene());
